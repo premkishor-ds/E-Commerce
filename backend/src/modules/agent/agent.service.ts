@@ -49,6 +49,41 @@ export interface AgentAction {
   payload: Record<string, any>;
 }
 
+const DICTIONARY: Record<string, Record<string, string>> = {
+  hi: {
+    greet: "👋 नमस्ते! मैं एपेक्सस्टोर एआई सहायक हूं।\n\nमैं आपकी सहायता कर सकता हूँ:\n• 🔍 उत्पादों की खोज और तुलना करें\n• 🛒 अपनी कार्ट और इच्छासूची प्रबंधित करें\n• 📦 ऑर्डर ट्रैक और प्रबंधित करें\n• 🎫 सहायता टिकट बनाएं",
+    help: "🤖 **एपेक्सस्टोर एआई सहायक — मैं क्या कर सकता हूँ:**\n\n🔍 **खोज**: \"उत्पाद दिखाएं\"\n🛒 **カート**: \"कार्ट में जोड़ें\"\n📦 **ऑर्डर**: \"मेरे ऑर्डर\", \"ऑर्डर ट्रैक करें\"\n\nबस स्वाभाविक रूप से लिखें!",
+    thanks: "😊 आपका स्वागत है! क्या मैं आपकी किसी और चीज़ में मदद कर सकता हूँ?",
+    bye: "👋 अलविदा! एपेಕ್ಸ್स्टोर पर फिर आएं!",
+    unknown: "🤔 मुझे समझ नहीं आया। सहायता के लिए \"help\" टाइप करें।",
+    need_login: "⚠️ इस क्रिया को करने के लिए आपको लॉग इन करना होगा।",
+  },
+  te: {
+    greet: "👋 నమస్కారం! నేను అపెక్స్‌స్టోర్ AI సహాయకుడిನಿ.\n\nನೆನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಲು ಇಲ್ಲಿದ್ದೇನೆ:\n• 🔍 ఉత్పత్తుల శోధన మరియు పోలిక\n• 🛒 కార్ట్ మరియు విష్‌లిస్ట్ నిర్వహణ\n• 📦 ఆర్డర్ ట్రాకింగ్\n• 🎫 సహాయ టిక్కెట్‌ల సృష్టి",
+    help: "🤖 **ಅಪೇಕ್ಸ್ ಸ್ಟೋರ್ AI ಸಹಾಯಕಿ — ನಾನೇನು ಮಾಡಬಲ್ಲೆ:**\n\n🔍 **శోధన**: \"ఉత్పత్తులను చూపించు\"\n🛒 **కార్ట్**: \"కార్ట్‌కు జోడించు\"\n📦 **ಆರ್ಡರ್**: \"ನಾ ಆರ್ಡರ್ಸ್\"\n\nದಯವಿಟ್ಟು ಇಂಗ್ಲೀಷ್ ಅಥವಾ ತೆಲುಗು ನಲ್ಲಿ ಬರೆಯಿರಿ!",
+    thanks: "😊 మీకు స్వాగతం! నేను మీకు ఇంకా ఏదైనా సహాయం చేయగలనా?",
+    bye: "👋 సెలవు! అపెక్స్‌స్టోర్‌ను మళ్ಲಿ సందರ್ಶించండి!",
+    unknown: "🤔 నాకు అర్థం కాలేದು. సహాయం కోసం \"help\" అని టైಪ್ చేయండి.",
+    need_login: "⚠️ ఈ చర్యను చేయడానికి మీరు లాగిన్ అవ్వాలి.",
+  },
+  ta: {
+    greet: "👋 வணக்கம்! நான் அபெக்ஸ்ஸ்டோர் AI உதவியாளர்.\n\nநான் உங்களுக்கு உதவ முடியும்:\n• 🔍 தயாரிப்புகளைத் தேட மற்றும் ஒப்பிட\n• 🛒 கார்ட் மற்றும் விருப்பப்பட்டಿಯலை நிர்வகிக்க\n• 📦 ஆர்டர்களைக் கண்காணிக்க\n• 🎫 ஆதரவு டிக்கெட்டுகளை உருவாக்க",
+    help: "🤖 **அபெக்ஸ்ஸ்டோர் AI உதவியாளர் — நான் செய்யக்கூடியவை:**\n\n🔍 **தேடல்**: \"தயாரிப்புகளைக் காட்டு\"\n🛒 **கார்ட்**: \"கார்ட்டில் சேர்\"\n📦 **ಆರ್ಡರ್**: \"எனது ஆர்டர்கள்\"\n\nஇயல்பாக எழுதுங்கள்!",
+    thanks: "😊 உங்களுக்கு வரவேற்பு! நான் உங்களுக்கு வேறு ஏதாவது உதவ முடியுமா?",
+    bye: "👋 விடைபெறுகிறேன்! அபெக்ஸ்ஸ்டோருக்கு மீண்டும் வருக!",
+    unknown: "🤔 எனக்கு புரியவில்லை. உதவிக்கு \"help\" என தட்டச்சு செய்யவும்.",
+    need_login: "⚠️ இந்தச் செயலைச் செய்ய நீங்கள் உள்நுழைய வேண்டும்.",
+  },
+  kn: {
+    greet: "👋 ನಮಸ್ಕಾರ! ನಾನು ಅಪೆಕ್ಸ್ ಸ್ಟೋರ್ AI ಸಹಾಯಕ.\n\nನಾನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ:\n• 🔍 ಉತ್ಪನ್ನಗಳ ಹುಡುಕಾಟ ಮತ್ತು ಹೋಲಿಕೆ\n• 🛒 ಕಾರ್ಟ್ ಮತ್ತು ವಿಶ್‌ಲಿಸ್ಟ್ ನಿರ್ವಹಣೆ\n• 📦 ಆರ್ಡರ್ ಟ್ರ್ಯಾಕಿಂಗ್\n• 🎫 ಬೆಂಬಲ ಟಿಕೆಟ್ ರಚನೆ",
+    help: "🤖 **ಅಪೆಕ್ಸ್ ಸ್ಟೋರ್ AI ಸಹಾಯಕ — ನಾನು ಮಾಡಬಹುದಾದ ಕೆಲಸಗಳು:**\n\n🔍 **ಹುಡುಕಾಟ**: \"ಉತ್ಪನ್ನಗಳನ್ನು ತೋರಿಸಿ\"\n🛒 **ಕಾರ್ಟ್**: \"ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಿ\"\n📦 **ಆರ್ಡರ್**: \"ನನ್ನ ಆರ್ಡರ್‌ಗಳು\"\n\nಸಹಾಯಕ್ಕಾಗಿ \"help\" ಎಂದು ಟೈಪ್ ಮಾಡಿ.",
+    thanks: "😊 ನಿಮಗೆ ಸ್ವಾಗತ! ನಾನು ನಿಮಗೆ ಬೇರೆ ಯಾವುದಾದರೂ ಸಹಾಯ ಮಾಡಬಲ್ಲೆನೇ?",
+    bye: "👋 ಹೋಗಿ ಬನ್ನಿ! ಅಪೆಕ್ಸ್ ಸ್ಟೋರ್‌ಗೆ ಮತ್ತೆ ಭೇಟಿ ನೀಡಿ!",
+    unknown: "🤔 ನನಗೆ ಅರ್ಥವಾಗಲಿಲ್ಲ. ಸಹಾಯಕ್ಕಾಗಿ \"help\" ಎಂದು ಟೈಪ್ ಮಾಡಿ.",
+    need_login: "⚠️ ಈ ಕ್ರಿಯೆಯನ್ನು ಮಾಡಲು ನೀವು ಲಾಗಿನ್ ಆಗಬೇಕು.",
+  }
+};
+
 @Injectable()
 export class AgentService {
   constructor(
@@ -59,6 +94,58 @@ export class AgentService {
     private readonly catalogService: CatalogService,
     private readonly profileService: ProfileService,
   ) {}
+
+  // ─── TRANSLATION HELPERS ──────────────────────────────────────────────────
+  private detectLanguage(message: string): string {
+    const text = message.toLowerCase();
+    if (/namaste|shukriya|dhanyawad|madad|alvida|नमस्ते|धन्यवाद|मदद|अलविदा/i.test(text)) return 'hi';
+    if (/namaskaram|sahayam|dhanyavadalu|నమస్కారం|సహాయం|ధన్యవాదాలు/i.test(text)) return 'te';
+    if (/vanakkam|udavi|nandri|வணக்கம்|உதவி|நன்றி/i.test(text)) return 'ta';
+    if (/namaskara|sahaya|dhanyavada|ನಮಸ್ಕಾರ|ಸಹಾಯ|ಧನ್ಯವಾದ/i.test(text)) return 'kn';
+    return 'en';
+  }
+
+  private translateInput(message: string, lang: string): string {
+    if (lang === 'en') return message;
+    const text = message.toLowerCase();
+    if (lang === 'hi') {
+      if (/namaste|नमस्ते/i.test(text)) return 'hello';
+      if (/madad|मದದ್|मदद/i.test(text)) return 'help';
+      if (/dhanyawad|shukriya|धन्यवाद/i.test(text)) return 'thanks';
+      if (/alvida|अलविदा/i.test(text)) return 'bye';
+    }
+    if (lang === 'te') {
+      if (/namaskaram|నమస్కారం/i.test(text)) return 'hello';
+      if (/sahayam|సహాయం/i.test(text)) return 'help';
+      if (/dhanyavadalu|ధన్యవాదాలు/i.test(text)) return 'thanks';
+      if (/bye/i.test(text)) return 'bye';
+    }
+    if (lang === 'ta') {
+      if (/vanakkam|வணக்கம்/i.test(text)) return 'hello';
+      if (/udavi|உதவி/i.test(text)) return 'help';
+      if (/nandri|நன்றி/i.test(text)) return 'thanks';
+      if (/bye/i.test(text)) return 'bye';
+    }
+    if (lang === 'kn') {
+      if (/namaskara|ನಮಸ್ಕಾರ/i.test(text)) return 'hello';
+      if (/sahaya|ಸಹಾಯ/i.test(text)) return 'help';
+      if (/dhanyavada|ಧನ್ಯವಾದ/i.test(text)) return 'thanks';
+      if (/bye/i.test(text)) return 'bye';
+    }
+    return message;
+  }
+
+  private translateReply(intent: string, reply: string, lang: string): string {
+    if (lang === 'en' || !lang) return reply;
+    const dict = DICTIONARY[lang];
+    if (!dict) return reply;
+    if (intent === 'GREET') return dict.greet || reply;
+    if (intent === 'HELP') return dict.help || reply;
+    if (intent === 'THANKS') return dict.thanks || reply;
+    if (intent === 'BYE') return dict.bye || reply;
+    if (intent === 'UNKNOWN') return dict.unknown || reply;
+    return reply;
+  }
 
   // ─── LOCAL GEMMA INTEGRATION ──────────────────────────────────────────────
   private async callLocalGemma(prompt: string): Promise<string | null> {
@@ -134,6 +221,24 @@ Enhanced Reply:`;
       stepData = {},
     } = req;
 
+    // Detect language
+    let lang = this.detectLanguage(message);
+    if (userId) {
+      try {
+        const profile = await this.profileService.getProfile(userId);
+        if (profile) {
+          if (lang !== 'en' && profile.languagePreference !== lang) {
+            profile.languagePreference = lang;
+            await (profile as any).save();
+          } else if (profile.languagePreference) {
+            lang = profile.languagePreference;
+          }
+        }
+      } catch {}
+    }
+
+    const workMessage = this.translateInput(message, lang);
+
     // Ensure session exists
     await this.memory.getOrCreateSession(sessionId, userId, guestId);
     if (guestId) await this.memory.trackGuestSession(guestId, sessionId);
@@ -141,10 +246,10 @@ Enhanced Reply:`;
     // Hybrid Intent engine
     let intent = 'UNKNOWN';
     let score = 1.0;
-    const ruleMatch = classifyIntent(message);
+    const ruleMatch = classifyIntent(workMessage);
     const entities = ruleMatch.entities;
 
-    const gemmaIntent = await this.classifyIntentWithGemma(message);
+    const gemmaIntent = await this.classifyIntentWithGemma(workMessage);
     if (gemmaIntent) {
       intent = gemmaIntent;
       score = 10.0;
@@ -157,18 +262,19 @@ Enhanced Reply:`;
     await this.memory.appendMessage(sessionId, 'user', message, intent);
 
     // Intercept checkout as guest commands directly
-    const textMsg = message.toLowerCase().trim();
+    const textMsg = workMessage.toLowerCase().trim();
     if (textMsg === 'checkout as guest' || textMsg === 'guest checkout') {
       const reply = `📦 **Guest Checkout Selected**\n\nPlease enter the **Full Name** of the recipient to begin checkout:`;
+      const translatedReply = this.translateReply('CHECKOUT', reply, lang);
       const response: AgentResponse = {
-        reply,
+        reply: translatedReply,
         intent: 'CHECKOUT',
         confidence: 10,
         actions: [],
         nextStep: 'CHECKOUT_NAME',
         stepData: { isGuest: true, guestId: guestId || sessionId },
       };
-      await this.memory.appendMessage(sessionId, 'bot', reply, 'CHECKOUT');
+      await this.memory.appendMessage(sessionId, 'bot', translatedReply, 'CHECKOUT');
       return response;
     }
 
@@ -183,7 +289,7 @@ Enhanced Reply:`;
 
     if (activeStep && !isStaleAuthStep) {
       const stepResult = await this.handleActiveStep(
-        message,
+        workMessage,
         activeStep,
         stepData,
         userId,
@@ -196,6 +302,7 @@ Enhanced Reply:`;
           stepResult.reply,
           `Active workflow: ${activeStep}`,
         );
+        stepResult.reply = this.translateReply(stepResult.intent || intent, stepResult.reply, lang);
         await this.memory.appendMessage(
           sessionId,
           'bot',
@@ -211,9 +318,10 @@ Enhanced Reply:`;
     const evaluatedRoles = userRoles.length ? userRoles : ['Guest'];
     if (!hasPermission(intent, evaluatedRoles)) {
       const reply = `⚠️ You need to be logged in as **${this.getRequiredRole(intent)}** to perform this action. Type **"login"** to sign in.`;
-      await this.memory.appendMessage(sessionId, 'bot', reply, intent);
+      const translatedReply = this.translateReply(intent, reply, lang);
+      await this.memory.appendMessage(sessionId, 'bot', translatedReply, intent);
       return {
-        reply,
+        reply: translatedReply,
         intent,
         confidence: score,
         actions: [],
@@ -226,7 +334,7 @@ Enhanced Reply:`;
     const response = await this.dispatchIntent(
       intent,
       entities,
-      message,
+      workMessage,
       userId,
       evaluatedRoles,
       sessionId,
@@ -235,8 +343,9 @@ Enhanced Reply:`;
     );
     response.reply = await this.enhanceReplyWithGemma(
       response.reply,
-      `User says: ${message}`,
+      `User says: ${workMessage}`,
     );
+    response.reply = this.translateReply(intent, response.reply, lang);
     await this.memory.appendMessage(
       sessionId,
       'bot',
@@ -444,12 +553,17 @@ Enhanced Reply:`;
       case 'CREATE_TICKET_MESSAGE':
         if (userId) {
           try {
+            const history = await this.memory.getRecentHistory(sessionId, 10);
+            const historyText = history.map(h => `[${h.role === 'user' ? 'User' : 'Chatbot'}]: ${h.text}`).join('\n');
+            const messageWithLogs = `${message}\n\n---\n💬 **Chat Session Transcript:**\n${historyText}`;
+
             const ticket = await this.supportService.createTicket(userId, {
               subject: data.subject,
-              message,
+              message: messageWithLogs,
+              priority: data.priority || 'Medium',
             });
             return {
-              reply: `✅ **Support Ticket Created!**\nYour ticket **#${ticket._id?.toString().slice(-6).toUpperCase() || 'XXXX'}** has been submitted.\n\n• **Subject**: ${data.subject}\n• **Status**: Open\n• **Priority**: Medium\n\nOur team will respond within 24 hours.`,
+              reply: `✅ **Support Ticket Created!**\nYour ticket **#${ticket._id?.toString().slice(-6).toUpperCase() || 'XXXX'}** has been submitted.\n\n• **Subject**: ${data.subject}\n• **Status**: Open\n• **Priority**: ${data.priority || 'Medium'}\n\nOur team will respond within 24 hours.`,
               intent: 'CREATE_TICKET',
               confidence: 10,
               actions: [],
@@ -509,6 +623,44 @@ Enhanced Reply:`;
           suggestions: ['Browse similar products', 'My orders'],
         };
 
+      case 'CHECKOUT_ADDRESS_SELECT': {
+        if (!userId) return this.buildReply('Please login.', 'CHECKOUT', 5, [], undefined, undefined, true);
+        if (q === 'new') {
+          return this.buildReply(
+            `📦 Let's place your order!\n\nPlease enter the **Full Name** of the recipient:`,
+            'CHECKOUT', 8, [], 'CHECKOUT_NAME', data
+          );
+        }
+        try {
+          const addresses = await this.profileService.getAddresses(userId);
+          const index = parseInt(message.trim()) - 1;
+          const selected = addresses[index];
+          if (!selected) {
+            return this.buildReply(
+              '⚠️ Invalid selection. Please choose a number from the list or type **"new"**:',
+              'CHECKOUT', 0, [], 'CHECKOUT_ADDRESS_SELECT', data,
+              false,
+              [...addresses.map((_, i) => String(i + 1)), 'new']
+            );
+          }
+          const updated = {
+            ...data,
+            fullName: selected.fullName,
+            address: (selected as any).addressLine1 || (selected as any).street,
+            city: selected.city,
+            zipCode: (selected as any).postalCode || (selected as any).pincode,
+          };
+          return this.buildReply(
+            `💳 **Select a Payment Method:**\n\n• **Stripe** (Card)\n• **Razorpay** (UPI/Netbanking)\n• **Wallet** (Store credits)\n• **COD** (Cash on Delivery)\n\nPlease type your choice:`,
+            'CHECKOUT', 8, [], 'CHECKOUT_PAYMENT_SELECT', updated,
+            false,
+            ['Stripe', 'Razorpay', 'Wallet', 'COD']
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Error selecting address: ${e.message}`, 'CHECKOUT', 0, []);
+        }
+      }
+
       case 'CHECKOUT_NAME':
         return this.buildReply(
           `Thanks **${message}**! Please enter your **shipping address**:`,
@@ -533,35 +685,95 @@ Enhanced Reply:`;
         const parts = message.split(',');
         const city = parts[0]?.trim() || message;
         const zip = parts[1]?.trim() || '';
-        const updatedData: Record<string, any> = {
+        const updated = {
           ...data,
           city,
           zipCode: zip,
         };
+        return this.buildReply(
+          `💳 **Select a Payment Method:**\n\n• **Stripe** (Card)\n• **Razorpay** (UPI/Netbanking)\n• **Wallet** (Store credits)\n• **COD** (Cash on Delivery)\n\nPlease type your choice:`,
+          'CHECKOUT', 8, [], 'CHECKOUT_PAYMENT_SELECT', updated,
+          false,
+          ['Stripe', 'Razorpay', 'Wallet', 'COD']
+        );
+      }
+
+      case 'CHECKOUT_PAYMENT_SELECT': {
+        const choice = message.trim();
+        const valid = ['Stripe', 'Razorpay', 'Wallet', 'COD'];
+        const match = valid.find(v => v.toLowerCase() === choice.toLowerCase());
+        if (!match) {
+          return this.buildReply(
+            `⚠️ Invalid payment method. Please choose from: **Stripe**, **Razorpay**, **Wallet**, or **COD**:`,
+            'CHECKOUT', 0, [], 'CHECKOUT_PAYMENT_SELECT', data,
+            false,
+            valid
+          );
+        }
+
+        if (match === 'Wallet') {
+          if (!userId) return this.buildReply('Please **login** to pay via Wallet.', 'CHECKOUT', 5, [], undefined, undefined, true);
+          try {
+            const profile = await this.profileService.getProfile(userId);
+            const balance = profile.walletBalance || 0;
+            if (balance < data.total) {
+              return this.buildReply(
+                `❌ **Insufficient Wallet Balance!**\n\n• **Required**: $${data.total?.toFixed(2)}\n• **Available**: $${balance.toFixed(2)}\n\nPlease choose another payment method:`,
+                'CHECKOUT', 0, [], 'CHECKOUT_PAYMENT_SELECT', data,
+                false,
+                ['Stripe', 'Razorpay', 'COD']
+              );
+            }
+          } catch (e: any) {
+            return this.buildReply(`❌ Profile check failed: ${e.message}`, 'CHECKOUT', 0, []);
+          }
+        }
+
+        const updated: any = {
+          ...data,
+          paymentProvider: match,
+        };
+
         const cartSummary = data.cartItems
           ? data.cartItems
               .map((i: any) => `• ${i.title} ×${i.quantity}`)
               .join('\n')
           : 'Your cart items';
+
         return this.buildReply(
-          `📦 **Order Summary:**\n\n${cartSummary}\n\n**Deliver to**: ${updatedData['fullName']}, ${updatedData['address']}, ${updatedData['city']} ${updatedData['zipCode']}\n**Total**: $${(data.total || 0).toFixed(2)}\n\nType **"confirm"** to place the order or **"cancel"** to abort.`,
+          `📦 **Order Summary:**\n\n${cartSummary}\n\n` +
+          `• **Deliver to**: ${updated.fullName}, ${updated.address}, ${updated.city} ${updated.zipCode}\n` +
+          `• **Payment Method**: ${updated.paymentProvider}\n` +
+          `• **Total Price**: $${(data.total || 0).toFixed(2)}\n\n` +
+          `Type **"confirm"** to place the order or **"cancel"** to abort.`,
           'CHECKOUT',
           8,
           [],
           'CHECKOUT_CONFIRM',
-          updatedData,
+          updated,
           false,
-          ['✅ Confirm order', '❌ Cancel'],
+          ['Confirm', 'Cancel']
         );
       }
 
-      case 'CHECKOUT_CONFIRM':
-        if (q === 'confirm' || q === 'yes' || q === 'place order' || q.includes('confirm order') || q === 'ok' || q === 'okay' || q === 'sure') {
+      case 'CHECKOUT_CONFIRM': {
+        const isConfirm = q === 'confirm' || q === 'yes' || q === 'place order' || q.includes('confirm order') || q === 'ok' || q === 'okay' || q === 'sure' || q === 'y';
+        const isCancel = q === 'no' || q.includes('no') || q.includes('cancel') || q === 'n';
+
+        if (isConfirm) {
           if (data.cartItems?.length > 0) {
             try {
+              if (data.paymentProvider === 'Wallet' && userId) {
+                const user = await (this.authService as any).userRepository.findById(userId);
+                if (user) {
+                  user.walletBalance = (user.walletBalance || 0) - data.total;
+                  await user.save();
+                }
+              }
+
               const order = await this.salesService.placeOrder(userId || null, {
                 items: data.cartItems.map((i: any) => ({
-                  productId: i.id,
+                  productId: i.productId || i.id,
                   quantity: i.quantity,
                 })),
                 shippingAddress: {
@@ -574,10 +786,15 @@ Enhanced Reply:`;
                   phone: '',
                 },
                 guestId: data.guestId,
-                paymentProvider: 'Stripe',
+                paymentProvider: data.paymentProvider || 'Stripe',
               });
+
+              if (data.paymentProvider !== 'COD') {
+                await this.salesService.updateOrderStatus(String(order._id), 'Paid', 'Payment verified successfully.');
+              }
+
               return {
-                reply: `🎉 **Order Placed Successfully!**\n\nYour order **#${String(order._id).slice(-8).toUpperCase()}** is confirmed!\n\n• **Status**: Pending\n• **Total**: $${data.total?.toFixed(2)}\n• **Delivery**: ${data.fullName}, ${data.city}\n\nYou can track this guest order via Order Tracking inside the chat using its ID!`,
+                reply: `🎉 **Order Placed Successfully!**\n\nYour order **#${String(order._id).slice(-8).toUpperCase()}** is confirmed!\n\n• **Status**: ${data.paymentProvider === 'COD' ? 'Pending' : 'Paid (Verified)'}\n• **Total**: $${data.total?.toFixed(2)}\n• **Payment**: ${data.paymentProvider}\n• **Delivery**: ${data.fullName}, ${data.city}\n\nYou can track this order via Order Tracking inside the chat!`,
                 intent: 'CHECKOUT',
                 confidence: 10,
                 actions: [{ type: 'CLEAR_CART', payload: {} }],
@@ -592,20 +809,18 @@ Enhanced Reply:`;
               );
             }
           }
-          return {
-            reply: `🎉 **Order Placed Successfully!**\n\nYour order has been confirmed!\n\n• **Deliver to**: ${data.fullName}, ${data.city}\n• **Total**: $${data.total?.toFixed(2)}\n\nType **"track my orders"** to check status!`,
-            intent: 'CHECKOUT',
-            confidence: 10,
-            actions: [{ type: 'CLEAR_CART', payload: {} }],
-            suggestions: ['Track my order', 'Cancel order', 'Continue shopping'],
-          };
         }
         return this.buildReply(
           'Order cancelled. You can continue browsing whenever you are ready!',
           'CHECKOUT',
           8,
           [],
+          undefined,
+          undefined,
+          false,
+          ['View cart', 'Browse products']
         );
+      }
 
       case 'CANCEL_ORDER_CONFIRM':
         if (q === 'confirm' || q === 'yes') {
@@ -701,12 +916,15 @@ Enhanced Reply:`;
           'PROFILE_UPDATE_CONFIRM',
           { ...data, value: newName },
           false,
-          ['✅ Yes, update it', '❌ Cancel'],
+          ['Confirm', 'Cancel'],
         );
       }
 
       case 'PROFILE_UPDATE_CONFIRM': {
-        if (q === 'yes' || q.includes('yes') || q.includes('confirm') || q.includes('update it') || q === 'ok' || q === 'sure') {
+        const isConfirm = q === 'yes' || q.includes('yes') || q.includes('confirm') || q.includes('update it') || q === 'ok' || q === 'sure' || q === 'y';
+        const isCancel = q === 'no' || q.includes('no') || q.includes('cancel') || q.includes('cancele') || q === 'n';
+
+        if (isConfirm) {
           if (!userId) {
             return this.buildReply('Please **login** to update your profile.', 'UPDATE_PROFILE', 5, [], undefined, undefined, true);
           }
@@ -731,20 +949,660 @@ Enhanced Reply:`;
               [],
             );
           }
+        } else if (isCancel) {
+          return this.buildReply(
+            '❌ Name update cancelled. Your profile is unchanged.',
+            'UPDATE_PROFILE',
+            8,
+            [],
+            undefined,
+            undefined,
+            false,
+            ['View profile', 'My orders'],
+          );
+        } else {
+          return this.buildReply(
+            `⚠️ Please confirm or cancel the name update to **"${data.value}"**.\n\nType **Confirm** or **Cancel**:`,
+            'UPDATE_PROFILE',
+            0,
+            [],
+            'PROFILE_UPDATE_CONFIRM',
+            data,
+            false,
+            ['Confirm', 'Cancel'],
+          );
         }
-        // User said cancel or anything else
-        return this.buildReply(
-          '❌ Name update cancelled. Your profile is unchanged.',
-          'UPDATE_PROFILE',
-          8,
-          [],
-          undefined,
-          undefined,
-          false,
-          ['View profile', 'My orders'],
-        );
       }
       // ─────────────────────────────────────────────────────────────────────────
+
+      // ── Address CRUD Flow ──────────────────────────────────────────────────
+      case 'ADD_ADDRESS_NAME':
+        return this.buildReply(
+          '📞 Please enter the **Mobile Number** for this address:',
+          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_MOBILE',
+          { ...data, fullName: message.trim() }
+        );
+
+      case 'ADD_ADDRESS_MOBILE':
+        return this.buildReply(
+          '📍 Please enter the **Street Address** (e.g. Apartment, Suite, Street name):',
+          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_STREET',
+          { ...data, mobile: message.trim() }
+        );
+
+      case 'ADD_ADDRESS_STREET':
+        return this.buildReply(
+          '🏙️ Please enter the **City** name:',
+          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_CITY',
+          { ...data, street: message.trim() }
+        );
+
+      case 'ADD_ADDRESS_CITY':
+        return this.buildReply(
+          '🗺️ Please enter the **State** name:',
+          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_STATE',
+          { ...data, city: message.trim() }
+        );
+
+      case 'ADD_ADDRESS_STATE':
+        return this.buildReply(
+          '📮 Please enter the **Pincode / Postal Code**:',
+          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_PINCODE',
+          { ...data, state: message.trim() }
+        );
+
+      case 'ADD_ADDRESS_PINCODE':
+        return this.buildReply(
+          '🏠 Choose an **Address Type** (e.g., Home, Office, Work):',
+          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_TYPE',
+          { ...data, pincode: message.trim() },
+          false,
+          ['Home', 'Office']
+        );
+
+      case 'ADD_ADDRESS_TYPE': {
+        const addrType = message.trim();
+        const addressSummary = `\n• **Name**: ${data.fullName}\n• **Phone**: ${data.mobile}\n• **Street**: ${data.street}\n• **City/State/Pin**: ${data.city}, ${data.state} - ${data.pincode}\n• **Type**: ${addrType}`;
+        return this.buildReply(
+          `📝 **Please confirm the new address:**\n${addressSummary}\n\nShall I add this address?`,
+          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_CONFIRM',
+          { ...data, addressType: addrType },
+          false,
+          ['Confirm', 'Cancel']
+        );
+      }
+
+      case 'ADD_ADDRESS_CONFIRM': {
+        const isConfirm = q === 'yes' || q.includes('yes') || q.includes('confirm') || q === 'ok' || q === 'y';
+        const isCancel = q === 'no' || q.includes('no') || q.includes('cancel') || q === 'n';
+        if (isConfirm) {
+          if (!userId) return this.buildReply('Please **login** to manage addresses.', 'ADDRESS_MANAGE', 5, [], undefined, undefined, true);
+          try {
+            await this.profileService.addAddress(userId, {
+              fullName: data.fullName,
+              phone: data.mobile,
+              addressLine1: data.street,
+              city: data.city,
+              state: data.state,
+              postalCode: data.pincode,
+              addressType: data.addressType,
+            });
+            return {
+              reply: '✅ **Address added successfully!** You can now use it at checkout or manage it from your profile.',
+              intent: 'ADDRESS_MANAGE',
+              confidence: 10,
+              actions: [],
+              suggestions: ['View addresses', 'My profile'],
+            };
+          } catch (e: any) {
+            return this.buildReply(`❌ Failed to add address: ${e.message}`, 'ADDRESS_MANAGE', 0, []);
+          }
+        }
+        return this.buildReply('❌ Address addition cancelled.', 'ADDRESS_MANAGE', 8, [], undefined, undefined, false, ['View addresses', 'My profile']);
+      }
+
+      case 'DELETE_ADDRESS_SELECT': {
+        if (!userId) return this.buildReply('Please **login** to manage addresses.', 'ADDRESS_MANAGE', 5, [], undefined, undefined, true);
+        const addresses = await this.profileService.getAddresses(userId);
+        const index = parseInt(message.trim()) - 1;
+        const selected = addresses[index];
+        if (!selected) {
+          return this.buildReply(
+            '⚠️ Invalid selection. Please select a valid number from the list:',
+            'ADDRESS_MANAGE', 0, [], 'DELETE_ADDRESS_SELECT', data,
+            false,
+            addresses.map((a, i) => String(i + 1))
+          );
+        }
+        try {
+          await this.profileService.deleteAddress(userId, String(selected._id));
+          return {
+            reply: `✅ **Address deleted successfully.**`,
+            intent: 'ADDRESS_MANAGE',
+            confidence: 10,
+            actions: [],
+            suggestions: ['View addresses', 'My profile'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to delete address: ${e.message}`, 'ADDRESS_MANAGE', 0, []);
+        }
+      }
+
+      case 'SET_DEFAULT_ADDRESS_SELECT': {
+        if (!userId) return this.buildReply('Please **login** to manage addresses.', 'ADDRESS_MANAGE', 5, [], undefined, undefined, true);
+        const addresses = await this.profileService.getAddresses(userId);
+        const index = parseInt(message.trim()) - 1;
+        const selected = addresses[index];
+        if (!selected) {
+          return this.buildReply(
+            '⚠️ Invalid selection. Please select a valid number from the list:',
+            'ADDRESS_MANAGE', 0, [], 'SET_DEFAULT_ADDRESS_SELECT', data,
+            false,
+            addresses.map((a, i) => String(i + 1))
+          );
+        }
+        try {
+          await this.profileService.updateAddress(userId, String(selected._id), { isDefault: true });
+          return {
+            reply: `✅ **Address set as default successfully.**`,
+            intent: 'ADDRESS_MANAGE',
+            confidence: 10,
+            actions: [],
+            suggestions: ['View addresses', 'My profile'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to set default: ${e.message}`, 'ADDRESS_MANAGE', 0, []);
+        }
+      }
+
+      // ── Payment Method Flow ────────────────────────────────────────────────
+      case 'ADD_PAYMENT_METHOD_TYPE': {
+        const type = message.trim();
+        return this.buildReply(
+          `💳 Please enter details for **${type}** (e.g. Card number or UPI ID):`,
+          'VIEW_PAYMENT_METHODS', 9, [], 'ADD_PAYMENT_METHOD_DETAILS',
+          { ...data, type }
+        );
+      }
+
+      case 'ADD_PAYMENT_METHOD_DETAILS':
+        const details = message.trim();
+        return this.buildReply(
+          `📝 Confirm saving payment details: **${data.type} (${details})**?`,
+          'VIEW_PAYMENT_METHODS', 9, [], 'ADD_PAYMENT_METHOD_CONFIRM',
+          { ...data, details },
+          false,
+          ['Confirm', 'Cancel']
+        );
+
+      case 'ADD_PAYMENT_METHOD_CONFIRM': {
+        const isConfirm = q === 'yes' || q.includes('yes') || q.includes('confirm') || q === 'ok' || q === 'y';
+        if (isConfirm) {
+          if (!userId) return this.buildReply('Please **login** to save payment methods.', 'VIEW_PAYMENT_METHODS', 5, [], undefined, undefined, true);
+          try {
+            await this.profileService.addPaymentMethod(userId, {
+              type: data.type,
+              provider: data.type,
+              last4: data.details.slice(-4),
+              isDefault: true,
+            });
+            return {
+              reply: `✅ **Payment method saved successfully.**`,
+              intent: 'VIEW_PAYMENT_METHODS',
+              confidence: 10,
+              actions: [],
+              suggestions: ['View payment methods', 'My profile'],
+            };
+          } catch (e: any) {
+            return this.buildReply(`❌ Failed to save payment method: ${e.message}`, 'VIEW_PAYMENT_METHODS', 0, []);
+          }
+        }
+        return this.buildReply('❌ Cancelled.', 'VIEW_PAYMENT_METHODS', 8, [], undefined, undefined, false, ['View payment methods']);
+      }
+
+      case 'DELETE_PAYMENT_METHOD_SELECT': {
+        if (!userId) return this.buildReply('Please **login** to manage payments.', 'VIEW_PAYMENT_METHODS', 5, [], undefined, undefined, true);
+        const payments = await this.profileService.getPaymentMethods(userId);
+        const index = parseInt(message.trim()) - 1;
+        const selected = payments[index];
+        if (!selected) {
+          return this.buildReply(
+            '⚠️ Invalid selection. Please select a valid number from the list:',
+            'VIEW_PAYMENT_METHODS', 0, [], 'DELETE_PAYMENT_METHOD_SELECT', data,
+            false,
+            payments.map((p, i) => String(i + 1))
+          );
+        }
+        try {
+          await this.profileService.deletePaymentMethod(userId, String(selected._id));
+          return {
+            reply: `✅ **Payment method deleted successfully.**`,
+            intent: 'VIEW_PAYMENT_METHODS',
+            confidence: 10,
+            actions: [],
+            suggestions: ['View payment methods', 'My profile'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to delete payment: ${e.message}`, 'VIEW_PAYMENT_METHODS', 0, []);
+        }
+      }
+
+      // ── Shopping Assistant Flow ────────────────────────────────────────────
+      case 'SHOPPING_ASSISTANT_BUDGET':
+        return this.buildReply(
+          `💵 What is your **budget limit**? (e.g. Under $100, $200-$500, or any budget):`,
+          'SHOPPING_ASSISTANT', 9, [], 'SHOPPING_ASSISTANT_USECASE',
+          { ...data, category: message.trim() }
+        );
+
+      case 'SHOPPING_ASSISTANT_USECASE': {
+        const useCase = message.trim();
+        try {
+          const products = await this.catalogService.getProducts({ search: data.category });
+          // Simple client filter based on budget
+          const budgetText = message.toLowerCase();
+          let maxBudget = Infinity;
+          const match = budgetText.match(/(\d+)/);
+          if (match) maxBudget = parseFloat(match[1]);
+
+          const filtered = products
+            .filter((p: any) => p.price <= maxBudget)
+            .slice(0, 3);
+
+          if (!filtered.length) {
+            return this.buildReply(
+              `🔍 I couldn't find any products in **${data.category}** matching your budget. Try searching directly.`,
+              'SHOPPING_ASSISTANT', 9, []
+            );
+          }
+
+          const recommendations = filtered
+            .map((p: any) => `• **${p.title}** — **$${p.price}** (${p.averageRating}⭐)\n  _${p.description.slice(0, 80)}..._`)
+            .join('\n\n');
+
+          return {
+            reply: `🤖 **Here are my top recommendations for you:**\n\n${recommendations}\n\nWould you like to search for anything else?`,
+            intent: 'SHOPPING_ASSISTANT',
+            confidence: 10,
+            actions: [],
+            suggestions: ['Compare products', 'View cart'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Error finding recommendations: ${e.message}`, 'SHOPPING_ASSISTANT', 0, []);
+        }
+      }
+
+      // ── Exchange Order Flow ────────────────────────────────────────────────
+      case 'EXCHANGE_ORDER_REASON':
+        return this.buildReply(
+          `🔄 What variant or details would you like to exchange this for (e.g. Size M, Color Black)?`,
+          'EXCHANGE_ORDER', 9, [], 'EXCHANGE_ORDER_VARIANT',
+          { ...data, reason: message.trim() }
+        );
+
+      case 'EXCHANGE_ORDER_VARIANT':
+        return this.buildReply(
+          `📝 Confirm request to exchange Order **#${data.orderId.slice(-8).toUpperCase()}** for **"${message.trim()}"**?`,
+          'EXCHANGE_ORDER', 9, [], 'EXCHANGE_ORDER_CONFIRM',
+          { ...data, exchangeDetails: message.trim() },
+          false,
+          ['Confirm', 'Cancel']
+        );
+
+      case 'EXCHANGE_ORDER_CONFIRM': {
+        const isConfirm = q === 'yes' || q.includes('yes') || q.includes('confirm') || q === 'ok' || q === 'y';
+        if (isConfirm) {
+          if (!userId) return this.buildReply('Please **login** to request exchanges.', 'EXCHANGE_ORDER', 5, [], undefined, undefined, true);
+          try {
+            await this.supportService.createTicket(userId, {
+              subject: `Exchange Request: ${data.orderId}`,
+              message: `Reason: ${data.reason}\nRequested Variant: ${data.exchangeDetails}`,
+              priority: 'High',
+            });
+            return {
+              reply: `✅ **Exchange Request Ticket Created!**\n\nOur customer service will verify and approve the exchange within **24 hours**.`,
+              intent: 'EXCHANGE_ORDER',
+              confidence: 10,
+              actions: [],
+              suggestions: ['View my tickets', 'Track order'],
+            };
+          } catch (e: any) {
+            return this.buildReply(`❌ Failed to request exchange: ${e.message}`, 'EXCHANGE_ORDER', 0, []);
+          }
+        }
+        return this.buildReply('❌ Exchange request cancelled.', 'EXCHANGE_ORDER', 8, [], undefined, undefined, false, ['My orders']);
+      }
+
+      // ── Modify Order Address Flow ──────────────────────────────────────────
+      case 'MODIFY_ORDER_OPTION': {
+        if (!userId) return this.buildReply('Please **login** to modify orders.', 'MODIFY_ORDER', 5, [], undefined, undefined, true);
+        const choice = q.toLowerCase();
+        if (choice.includes('address') || choice === '1') {
+          try {
+            const addresses = await this.profileService.getAddresses(userId);
+            if (!addresses?.length) {
+              return this.buildReply('⚠️ You must have saved addresses to modify the order destination. Please add an address first.', 'MODIFY_ORDER', 8, []);
+            }
+            const list = addresses.map((a: any, i: number) => `${i + 1}. **${a.fullName}** - ${(a.addressLine1 || a.street)}, ${a.city}`).join('\n');
+            return this.buildReply(
+              `🚚 **Select a new shipping address:**\n\n${list}\n\nType the number to select:`,
+              'MODIFY_ORDER', 10, [], 'MODIFY_ORDER_ADDRESS_SELECT', { orderId: data.orderId }
+            );
+          } catch (e: any) {
+            return this.buildReply(`❌ Failed to load addresses: ${e.message}`, 'MODIFY_ORDER', 5, []);
+          }
+        } else if (choice.includes('slot') || choice === '2') {
+          return this.buildReply(
+            `⏰ **Select a new Delivery Slot:**\n\n• **Morning** (9 AM - 12 PM)\n• **Afternoon** (12 PM - 4 PM)\n• **Evening** (4 PM - 8 PM)\n\nPlease type your preferred slot:`,
+            'MODIFY_ORDER', 10, [], 'MODIFY_ORDER_SLOT_SELECT', { orderId: data.orderId },
+            false,
+            ['Morning', 'Afternoon', 'Evening']
+          );
+        } else if (choice.includes('payment') || choice === '3') {
+          return this.buildReply(
+            `💳 **Select a new Payment Method:**\n\n• **Stripe** (Card)\n• **Razorpay** (UPI/Netbanking)\n• **Wallet** (Store credits)\n• **COD** (Cash on Delivery)\n\nPlease type your choice:`,
+            'MODIFY_ORDER', 10, [], 'MODIFY_ORDER_PAYMENT_SELECT', { orderId: data.orderId },
+            false,
+            ['Stripe', 'Razorpay', 'Wallet', 'COD']
+          );
+        } else if (choice.includes('item') || choice.includes('quantity') || choice === '4') {
+          try {
+            const order = await this.salesService.getOrderById(data.orderId);
+            const itemsList: string[] = [];
+            for (let i = 0; i < order.items.length; i++) {
+              const item = order.items[i];
+              const prod = await this.catalogService.getProductById(item.productId.toString());
+              itemsList.push(`${i + 1}. **${prod?.title || 'Product'}** (Current Qty: ${item.quantity})`);
+            }
+            return this.buildReply(
+              `📦 **Items in Order #${data.orderId.slice(-8).toUpperCase()}:**\n\n${itemsList.join('\n')}\n\n` +
+              `To update quantity or remove an item, type: **"[item number] [new quantity]"** (e.g. *"1 3"* to change item 1 quantity to 3, or *"1 0"* to remove it):`,
+              'MODIFY_ORDER', 10, [], 'MODIFY_ORDER_ITEMS_SELECT', { orderId: data.orderId, items: order.items }
+            );
+          } catch (e: any) {
+            return this.buildReply(`❌ Failed to retrieve order items: ${e.message}`, 'MODIFY_ORDER', 5, []);
+          }
+        } else {
+          return this.buildReply(
+            `⚠️ Invalid option. Please select what you'd like to modify:\n\n` +
+            `1. **Shipping Address**\n` +
+            `2. **Delivery Slot**\n` +
+            `3. **Payment Method**\n` +
+            `4. **Item Quantities / Remove Items**\n\n` +
+            `Please type 1, 2, 3, or 4:`,
+            'MODIFY_ORDER', 0, [], 'MODIFY_ORDER_OPTION', data,
+            false,
+            ['1', '2', '3', '4']
+          );
+        }
+      }
+
+      case 'MODIFY_ORDER_SLOT_SELECT': {
+        if (!userId) return this.buildReply('Please **login** to modify orders.', 'MODIFY_ORDER', 5, [], undefined, undefined, true);
+        const slot = message.trim();
+        try {
+          await this.salesService.updateOrderDeliverySlot(data.orderId, userId, slot);
+          return {
+            reply: `✅ **Delivery slot for Order #${data.orderId.slice(-8).toUpperCase()} has been updated to "${slot}".**`,
+            intent: 'MODIFY_ORDER',
+            confidence: 10,
+            actions: [],
+            suggestions: ['Track my order', 'My orders'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to update slot: ${e.message}`, 'MODIFY_ORDER', 5, []);
+        }
+      }
+
+      case 'MODIFY_ORDER_PAYMENT_SELECT': {
+        if (!userId) return this.buildReply('Please **login** to modify orders.', 'MODIFY_ORDER', 5, [], undefined, undefined, true);
+        const choice = message.trim();
+        const valid = ['Stripe', 'Razorpay', 'Wallet', 'COD'];
+        const match = valid.find(v => v.toLowerCase() === choice.toLowerCase());
+        if (!match) {
+          return this.buildReply(
+            `⚠️ Invalid payment method. Please choose from: **Stripe**, **Razorpay**, **Wallet**, or **COD**:`,
+            'MODIFY_ORDER', 0, [], 'MODIFY_ORDER_PAYMENT_SELECT', data,
+            false,
+            valid
+          );
+        }
+        try {
+          await this.salesService.updateOrderPaymentMethod(data.orderId, userId, match);
+          return {
+            reply: `✅ **Payment method for Order #${data.orderId.slice(-8).toUpperCase()} has been updated to "${match}".**`,
+            intent: 'MODIFY_ORDER',
+            confidence: 10,
+            actions: [],
+            suggestions: ['Track my order', 'My orders'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to update payment method: ${e.message}`, 'MODIFY_ORDER', 5, []);
+        }
+      }
+
+      case 'MODIFY_ORDER_ITEMS_SELECT': {
+        if (!userId) return this.buildReply('Please **login** to modify orders.', 'MODIFY_ORDER', 5, [], undefined, undefined, true);
+        const parts = message.trim().split(/\s+/);
+        const index = parseInt(parts[0]) - 1;
+        const newQty = parseInt(parts[1]);
+        if (isNaN(index) || isNaN(newQty) || index < 0 || !data.items || index >= data.items.length || newQty < 0) {
+          return this.buildReply(
+            `⚠️ Invalid format. Please enter in the format: **"[item number] [quantity]"** (e.g. *"1 3"* or *"1 0"*):`,
+            'MODIFY_ORDER', 0, [], 'MODIFY_ORDER_ITEMS_SELECT', data
+          );
+        }
+        const selectedItem = data.items[index];
+        try {
+          await this.salesService.updateOrderItemQuantity(data.orderId, userId, selectedItem.productId, newQty);
+          const actionText = newQty === 0 ? 'removed' : `updated to quantity ${newQty}`;
+          return {
+            reply: `✅ **Order items updated successfully.** The item has been ${actionText}.`,
+            intent: 'MODIFY_ORDER',
+            confidence: 10,
+            actions: [],
+            suggestions: ['Track my order', 'My orders'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to update item: ${e.message}`, 'MODIFY_ORDER', 5, []);
+        }
+      }
+
+      case 'MODIFY_ORDER_ADDRESS_SELECT': {
+        if (!userId) return this.buildReply('Please **login** to modify orders.', 'MODIFY_ORDER', 5, [], undefined, undefined, true);
+        const addresses = await this.profileService.getAddresses(userId);
+        const index = parseInt(message.trim()) - 1;
+        const selectedAddress = addresses[index];
+        if (!selectedAddress) {
+          return this.buildReply(
+            '⚠️ Invalid selection. Please select a valid number from the list:',
+            'MODIFY_ORDER', 0, [], 'MODIFY_ORDER_ADDRESS_SELECT', data,
+            false,
+            addresses.map((a, i) => String(i + 1))
+          );
+        }
+        try {
+          await this.salesService.updateOrderAddress(data.orderId, userId, {
+            fullName: selectedAddress.fullName,
+            addressLine1: (selectedAddress as any).street,
+            city: selectedAddress.city,
+            postalCode: (selectedAddress as any).pincode,
+            state: selectedAddress.state,
+            country: selectedAddress.country || 'US',
+            phone: (selectedAddress as any).mobileNumber || '',
+          });
+          return {
+            reply: `✅ **Shipping address for Order #${data.orderId.slice(-8).toUpperCase()} has been updated successfully.**`,
+            intent: 'MODIFY_ORDER',
+            confidence: 10,
+            actions: [],
+            suggestions: ['Track my order', 'My orders'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to update order address: ${e.message}`, 'MODIFY_ORDER', 0, []);
+        }
+      }
+
+      case 'VARIANT_SELECT': {
+        const index = parseInt(message.trim()) - 1;
+        const selected = data.combos[index] || data.combos.find((c: string) => c.toLowerCase() === q);
+        if (!selected) {
+          const list = data.combos.map((c: string, i: number) => `${i + 1}. ${c}`).join('\n');
+          return this.buildReply(
+            `⚠️ Invalid selection. Please choose a valid variant:\n\n${list}`,
+            'ADD_CART', 0, [], 'VARIANT_SELECT', data
+          );
+        }
+        try {
+          const product = await this.catalogService.getProductById(data.productId);
+          const action: AgentAction = {
+            type: 'ADD_TO_CART',
+            payload: {
+              id: data.productId,
+              title: `${product.title} (${selected})`,
+              price: product.price,
+              image: (product as any).images?.[0] || '',
+              variantKey: selected,
+            },
+          };
+          if (userId) {
+            await this.salesService.addToCart(userId, data.productId, 1);
+          }
+          return {
+            reply: `🛒 **Added to Cart!**\n\n✅ **${product.title} (${selected})** ($${product.price.toFixed(2)}) has been added to your cart.`,
+            intent: 'ADD_CART',
+            confidence: 10,
+            actions: [action],
+            suggestions: ['Checkout now', 'Continue shopping', 'View cart'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to add to cart: ${e.message}`, 'ADD_CART', 0, []);
+        }
+      }
+
+      case 'CLEAR_CART_CONFIRM': {
+        const isConfirm = q === 'yes' || q.includes('yes') || q.includes('confirm') || q === 'ok' || q === 'y';
+        if (isConfirm) {
+          if (userId) {
+            await this.salesService.clearCart(userId);
+          }
+          return {
+            reply: `🗑️ **Cart cleared successfully!** All items have been removed from your cart.`,
+            intent: 'REMOVE_CART',
+            confidence: 10,
+            actions: [{ type: 'CLEAR_CART', payload: {} }],
+            suggestions: ['Browse products', 'Search headphones'],
+          };
+        }
+        return this.buildReply('❌ Cart clear cancelled. Your items are safe!', 'REMOVE_CART', 8, [], undefined, undefined, false, ['View cart', 'Checkout']);
+      }
+
+      case 'ADMIN_ADD_PRODUCT_TITLE':
+        return this.buildReply(
+          `💲 Please enter the **price** for "${message}":`,
+          'ADMIN_PRODUCTS', 9, [], 'ADMIN_ADD_PRODUCT_PRICE',
+          { title: message.trim() }
+        );
+
+      case 'ADMIN_ADD_PRODUCT_PRICE': {
+        const price = parseFloat(message.trim());
+        if (isNaN(price) || price < 0) {
+          return this.buildReply(
+            '⚠️ Please enter a valid number for price:',
+            'ADMIN_PRODUCTS', 0, [], 'ADMIN_ADD_PRODUCT_PRICE', data
+          );
+        }
+        return this.buildReply(
+          `🏷️ Please enter the **SKU** code for this product (e.g. GAM-LAP-101):`,
+          'ADMIN_PRODUCTS', 9, [], 'ADMIN_ADD_PRODUCT_SKU',
+          { ...data, price }
+        );
+      }
+
+      case 'ADMIN_ADD_PRODUCT_SKU':
+        return this.buildReply(
+          `📦 Please enter the initial **stock quantity** (e.g. 50):`,
+          'ADMIN_PRODUCTS', 9, [], 'ADMIN_ADD_PRODUCT_STOCK',
+          { ...data, sku: message.trim().toUpperCase() }
+        );
+
+      case 'ADMIN_ADD_PRODUCT_STOCK': {
+        const stock = parseInt(message.trim());
+        if (isNaN(stock) || stock < 0) {
+          return this.buildReply(
+            '⚠️ Please enter a valid non-negative integer for stock:',
+            'ADMIN_PRODUCTS', 0, [], 'ADMIN_ADD_PRODUCT_STOCK', data
+          );
+        }
+        const fullData: any = { ...data, stock };
+        return this.buildReply(
+          `🛡️ **Confirm New Product Details:**\n\n` +
+          `• **Title**: ${fullData.title}\n` +
+          `• **Price**: $${fullData.price.toFixed(2)}\n` +
+          `• **SKU**: ${fullData.sku}\n` +
+          `• **Stock**: ${fullData.stock}\n\n` +
+          `Shall I create this product? Type **"confirm"** or **"cancel"**:`,
+          'ADMIN_PRODUCTS', 9, [], 'ADMIN_ADD_PRODUCT_CONFIRM', fullData,
+          false,
+          ['Confirm', 'Cancel']
+        );
+      }
+
+      case 'ADMIN_ADD_PRODUCT_CONFIRM': {
+        const isConfirm = q === 'confirm' || q === 'yes' || q === 'y';
+        if (isConfirm) {
+          try {
+            let category = await (this.catalogService as any).categoryRepository.findOne({});
+            if (!category) {
+              category = await this.catalogService.createCategory({ name: 'General', slug: 'general' });
+            }
+            let brand = await (this.catalogService as any).brandRepository.findOne({});
+            if (!brand) {
+              brand = await this.catalogService.createBrand({ name: 'General' });
+            }
+
+            const product = await this.catalogService.createProduct({
+              title: data.title,
+              description: `Admin created product: ${data.title}`,
+              price: data.price,
+              sku: data.sku,
+              stock: data.stock,
+              category: category._id,
+              brand: brand._id,
+            });
+
+            return {
+              reply: `🎉 **Product Created Successfully!**\n\n✅ **${product.title}** has been added with SKU **${data.sku}**.`,
+              intent: 'ADMIN_PRODUCTS',
+              confidence: 10,
+              actions: [],
+              suggestions: ['Manage products', 'Browse catalog'],
+            };
+          } catch (e: any) {
+            return this.buildReply(`❌ Failed to create product: ${e.message}`, 'ADMIN_PRODUCTS', 0, []);
+          }
+        }
+        return this.buildReply('❌ Product creation cancelled.', 'ADMIN_PRODUCTS', 8, [], undefined, undefined, false, ['Manage products']);
+      }
+
+      case 'ADMIN_DELETE_PRODUCT_CONFIRM': {
+        const isConfirm = q === 'confirm' || q === 'yes' || q === 'y';
+        if (isConfirm) {
+          try {
+            await this.catalogService.deleteProduct(data.productId);
+            return {
+              reply: `🗑️ **Product deleted successfully!**`,
+              intent: 'ADMIN_PRODUCTS',
+              confidence: 10,
+              actions: [],
+              suggestions: ['Manage products'],
+            };
+          } catch (e: any) {
+            return this.buildReply(`❌ Deletion failed: ${e.message}`, 'ADMIN_PRODUCTS', 0, []);
+          }
+        }
+        return this.buildReply('❌ Product deletion cancelled.', 'ADMIN_PRODUCTS', 8, [], undefined, undefined, false, ['Manage products']);
+      }
 
       default:
         return null;
@@ -1048,7 +1906,7 @@ Enhanced Reply:`;
             'PROFILE_UPDATE_CONFIRM',
             { field: 'displayName', value: newName },
             false,
-            ['✅ Yes, update it', '❌ Cancel'],
+            ['Confirm', 'Cancel'],
           );
         }
 
@@ -1516,27 +2374,57 @@ Enhanced Reply:`;
             );
           }
 
+          // Generate combinations and check variant selection
+          const combos = this.generateVariantCombinations((product as any).variants || {});
+          let selectedVariant = '';
+          for (const combo of combos) {
+            const words = combo.split(' ').map(w => w.toLowerCase().trim()).filter(Boolean);
+            const matchesAll = words.every(word => message.toLowerCase().includes(word));
+            if (matchesAll && words.length > 0) {
+              selectedVariant = combo;
+              break;
+            }
+          }
+
+          if (combos.length > 0 && !selectedVariant) {
+            const list = combos.map((c, i) => `${i + 1}. ${c}`).join('\n');
+            return this.buildReply(
+              `🤔 **Which variant of ${product.title} would you like?**\n\n${list}\n\nPlease type the number or the variant name:`,
+              intent,
+              10,
+              [],
+              'VARIANT_SELECT',
+              { productId: String(product._id), combos }
+            );
+          }
+
+          const actionTitle = selectedVariant ? `${product.title} (${selectedVariant})` : product.title;
           const action: AgentAction = {
             type: 'ADD_TO_CART',
             payload: {
               id: String((product as any)._id),
-              title: product.title,
+              title: actionTitle,
               price: product.price,
               image: (product as any).images?.[0] || '',
+              variantKey: selectedVariant,
             },
           };
 
+          if (userId) {
+            await this.salesService.addToCart(userId, String((product as any)._id), 1);
+          }
+
           return {
-            reply: `🛒 **Added to Cart!**\n\n✅ **${product.title}** ($${product.price.toFixed(2)}) has been added to your cart.\n\nWould you like to **checkout now** or continue shopping?`,
+            reply: `🛒 **Added to Cart!**\n\n✅ **${actionTitle}** ($${product.price.toFixed(2)}) has been added to your cart.\n\nWould you like to **checkout now** or continue shopping?`,
             intent,
             confidence: 9,
             actions: [action],
             data: { product },
             suggestions: ['Checkout now', 'Continue shopping', 'View cart'],
           };
-        } catch {
+        } catch (e: any) {
           return this.buildReply(
-            `I'll help you add products to cart! Please [search for the product](/search) first.`,
+            `❌ Error adding to cart: ${e.message}`,
             intent,
             4,
             [{ type: 'NAVIGATE', payload: { path: '/search' } }],
@@ -1545,27 +2433,30 @@ Enhanced Reply:`;
       }
 
       case 'REMOVE_CART': {
+        if (!userId) return this.buildReply('Please **login** to manage your cart.', intent, 5, [], undefined, undefined, true);
         const productName =
           entities.productType ||
           message.replace(/remove|from cart|delete|clear/gi, '').trim();
 
-        // If they want to clear the entire cart
         if (/clear|empty|remove all/i.test(message)) {
-          return {
-            reply: `🗑️ **Cart cleared!** All items have been removed from your cart.`,
+          return this.buildReply(
+            '🗑️ **Are you sure you want to clear all items from your cart?**',
             intent,
-            confidence: 9,
-            actions: [{ type: 'CLEAR_CART', payload: {} }],
-            suggestions: ['Browse products', 'Search headphones'],
-          };
+            10,
+            [],
+            'CLEAR_CART_CONFIRM',
+            {},
+            false,
+            ['Confirm', 'Cancel']
+          );
         }
 
-        // Try to find the specific product
         if (productName && productName.length > 1) {
           try {
             const results = await this.catalogService.getProducts({ search: productName });
             const product = results?.[0];
             if (product) {
+              await this.salesService.removeFromCart(userId, String((product as any)._id));
               return {
                 reply: `🗑️ **Removed from Cart!**\n\n❌ **${product.title}** has been removed from your cart.`,
                 intent,
@@ -1589,17 +2480,60 @@ Enhanced Reply:`;
         );
       }
 
-      case 'VIEW_CART':
-        return this.buildReply(
-          `🛒 Your cart is accessible via the **cart icon** in the top right corner.\n\nYour current cart shows all added items with quantities and prices.\n\nWould you like to **checkout now**?`,
-          intent,
-          7,
-          [],
-          undefined,
-          undefined,
-          false,
-          ['Checkout now', 'Clear cart', 'Browse products'],
-        );
+      case 'VIEW_CART': {
+        if (!userId) return this.buildReply('Please **login** to view your cart.', intent, 5, [], undefined, undefined, true);
+        try {
+          const cart = await this.salesService.getCartWithProducts(userId);
+          if (!cart.items || cart.items.length === 0) {
+            return this.buildReply('🛒 Your cart is empty.', intent, 10, [], undefined, undefined, false, ['Browse products']);
+          }
+          const list = cart.items.map(item => `• **${item.title}** x ${item.quantity} — $${item.subtotal.toFixed(2)}`).join('\n');
+          return this.buildReply(
+            `🛒 **Your Shopping Cart:**\n\n${list}\n\n💵 **Total**: $${cart.total.toFixed(2)}`,
+            intent,
+            10,
+            [],
+            undefined,
+            undefined,
+            false,
+            ['Checkout now', 'Clear cart', 'Save cart for later']
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to load cart: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      case 'SAVE_CART_FOR_LATER': {
+        if (!userId) return this.buildReply('Please **login** to save your cart.', intent, 5, [], undefined, undefined, true);
+        try {
+          await this.salesService.saveCartForLater(userId);
+          return {
+            reply: '💾 **Cart saved for later!** Your shopping cart is now saved in your profile and can be restored anytime by saying **"restore my cart"**.',
+            intent,
+            confidence: 10,
+            actions: [{ type: 'CLEAR_CART', payload: {} }],
+            suggestions: ['Restore saved cart', 'Browse products'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to save cart: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      case 'RESTORE_SAVED_CART': {
+        if (!userId) return this.buildReply('Please **login** to restore your cart.', intent, 5, [], undefined, undefined, true);
+        try {
+          await this.salesService.restoreSavedCart(userId);
+          return {
+            reply: '🛒 **Cart restored successfully!** Your saved items have been added back to your shopping cart.',
+            intent,
+            confidence: 10,
+            actions: [],
+            suggestions: ['View cart', 'Checkout now'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to restore cart: ${e.message}`, intent, 5, []);
+        }
+      }
 
       case 'APPLY_COUPON': {
         const code = entities.couponCode;
@@ -1643,7 +2577,8 @@ Enhanced Reply:`;
           [{ type: 'CLEAR_CART', payload: { clearCouponOnly: true } }],
         );
 
-      case 'CHECKOUT':
+      case 'CHECKOUT': {
+        const cart = userId ? await this.salesService.getCartWithProducts(userId) : { items: [], total: 0 };
         if (!userId) {
           return this.buildReply(
             `🛒 **Checkout options:**\n\nYou are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?`,
@@ -1656,14 +2591,35 @@ Enhanced Reply:`;
             ['Checkout as Guest', 'Login', 'Register'],
           );
         }
+        if (!cart.items || cart.items.length === 0) {
+          return this.buildReply('🛒 Your cart is empty. Add items before checking out!', intent, 8, []);
+        }
+        try {
+          const addresses = await this.profileService.getAddresses(userId);
+          if (addresses && addresses.length > 0) {
+            const list = addresses.map((a: any, i: number) => 
+              `${i + 1}. **${a.fullName}** - ${(a.addressLine1 || a.street)}, ${a.city} (${a.addressType})`
+            ).join('\n');
+            return this.buildReply(
+              `🚚 **Select a Shipping Address:**\n\n${list}\n\nType the number to select, or type **"new"** to use a new address:`,
+              intent,
+              10,
+              [],
+              'CHECKOUT_ADDRESS_SELECT',
+              { cartItems: cart.items, total: cart.total }
+            );
+          }
+        } catch {}
+
         return this.buildReply(
           `📦 Let's place your order!\n\nPlease enter the **Full Name** of the recipient:`,
           intent,
           8,
           [],
           'CHECKOUT_NAME',
-          {},
+          { cartItems: cart.items, total: cart.total },
         );
+      }
 
       case 'VIEW_ORDERS': {
         if (!userId)
@@ -2119,21 +3075,173 @@ Enhanced Reply:`;
       case 'INVENTORY_CHECK': {
         const productName =
           entities.productType ||
-          message.replace(/in stock|available|stock/gi, '').trim();
+          message.replace(/in stock|available|stock|check stock/gi, '').trim();
+
+        if (!productName || productName.length < 2) {
+          return this.buildReply('🔍 Which product stock would you like to check? Type the product name.',
+            intent, 6, [], undefined, undefined, false, ['Search headphones', 'Browse electronics']);
+        }
+
+        try {
+          const results = await this.catalogService.getProducts({ search: productName });
+          const product = results?.[0] as any;
+          if (!product) return this.buildReply(`❌ Product **"${productName}"** not found.`, intent, 5, []);
+
+          const inv = await this.salesService.getInventoryByProductId(String(product._id));
+          if (!inv) return this.buildReply(`❌ Inventory details not found for **${product.title}**.`, intent, 5, []);
+
+          let reply = `📦 **Inventory Status for ${product.title}:**\n\n`;
+          let statusText = '';
+          if (inv.stock > 0) {
+            statusText = `✅ **In Stock**: ${inv.stock} units available.`;
+            if (inv.stock <= inv.lowStockThreshold) {
+              statusText += ` (Low Stock warning!)`;
+            }
+          } else {
+            statusText = `❌ **Out of Stock**`;
+            if ((inv as any).allowPreorder) {
+              statusText = `⏳ **Preorder Available**: You can place a preorder now!`;
+            } else if ((inv as any).allowBackorder) {
+              statusText = `⏳ **Backorder Available**: Available on backorder.`;
+            }
+            if ((inv as any).restockDate) {
+              statusText += `\n📅 **Estimated Restock Date**: ${new Date((inv as any).restockDate).toLocaleDateString()}`;
+            }
+          }
+
+          reply += `${statusText}\n\n• **SKU**: ${product.sku}\n• **Warehouse**: ${inv.warehouseName || 'Primary Warehouse'}`;
+
+          const suggestions = [];
+          if (inv.stock > 0 || (inv as any).allowPreorder || (inv as any).allowBackorder) {
+            suggestions.push(`Add ${product.title} to cart`);
+          }
+          suggestions.push(`View reviews`);
+
+          return this.buildReply(
+            reply,
+            intent,
+            10,
+            [],
+            undefined,
+            undefined,
+            false,
+            suggestions
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to check inventory: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      case 'ADMIN_PRODUCTS': {
+        if (!roles.some((r) => ['Admin', 'Super Admin'].includes(r))) {
+          return this.buildReply(
+            '⚠️ This action requires **Admin** permissions.',
+            intent,
+            5,
+            [],
+          );
+        }
+
+        const msgLower = message.toLowerCase();
+
+        if (msgLower.includes('add product') || msgLower.includes('create product')) {
+          return this.buildReply(
+            '📝 **Create Product Wizard**\n\nPlease enter the **Title** of the new product:',
+            intent,
+            10,
+            [],
+            'ADMIN_ADD_PRODUCT_TITLE',
+            {}
+          );
+        }
+
+        if (msgLower.includes('delete product')) {
+          const skuMatch = message.match(/sku\s+(\S+)/i) || message.match(/product\s+(\S+)/i);
+          const nameQuery = skuMatch ? skuMatch[1] : message.replace(/delete product/gi, '').trim();
+          try {
+            const results = await this.catalogService.getProducts({ search: nameQuery });
+            const product = results?.[0];
+            if (!product) return this.buildReply(`❌ Product matching **"${nameQuery}"** not found.`, intent, 5, []);
+
+            return this.buildReply(
+              `⚠️ **Are you sure you want to delete "${product.title}" (SKU: ${product.sku})?**\n\nType **"confirm"** or **"cancel"**:`,
+              intent,
+              10,
+              [],
+              'ADMIN_DELETE_PRODUCT_CONFIRM',
+              { productId: String(product._id) },
+              false,
+              ['Confirm', 'Cancel']
+            );
+          } catch (e: any) {
+            return this.buildReply(`❌ Failed to initiate deletion: ${e.message}`, intent, 5, []);
+          }
+        }
+
+        if (msgLower.includes('update price') || msgLower.includes('change price')) {
+          const priceMatch = message.match(/\b(\d+(?:\.\d+)?)\b/);
+          if (priceMatch) {
+            const newPrice = parseFloat(priceMatch[1]);
+            const nameQuery = message.replace(/update price|change price|to|for|\b\d+(?:\.\d+)?\b/gi, '').trim();
+            try {
+              const results = await this.catalogService.getProducts({ search: nameQuery });
+              const product = results?.[0];
+              if (!product) return this.buildReply(`❌ Product matching **"${nameQuery}"** not found.`, intent, 5, []);
+
+              await this.catalogService.updateProduct(String(product._id), { price: newPrice });
+              return {
+                reply: `✅ **Price updated successfully!**\n\n**${product.title}** price has been updated to **$${newPrice.toFixed(2)}**.`,
+                intent,
+                confidence: 10,
+                actions: [],
+                suggestions: ['Manage products'],
+              };
+            } catch (e: any) {
+              return this.buildReply(`❌ Price update failed: ${e.message}`, intent, 5, []);
+            }
+          } else {
+            return this.buildReply('⚠️ Please specify the new price, e.g. *"update price of headphones to 99.99"*', intent, 6, []);
+          }
+        }
+
+        if (msgLower.includes('update stock') || msgLower.includes('update inventory')) {
+          const qtyMatch = message.match(/\b(\d+)\b/);
+          if (qtyMatch) {
+            const newStock = parseInt(qtyMatch[1]);
+            const nameQuery = message.replace(/update stock|update inventory|to|for|\b\d+\b/gi, '').trim();
+            try {
+              const results = await this.catalogService.getProducts({ search: nameQuery });
+              const product = results?.[0];
+              if (!product) return this.buildReply(`❌ Product matching **"${nameQuery}"** not found.`, intent, 5, []);
+
+              await this.catalogService.updateStock(product.sku, newStock);
+              return {
+                reply: `✅ **Inventory stock updated successfully!**\n\n**${product.title}** stock is now set to **${newStock}** units.`,
+                intent,
+                confidence: 10,
+                actions: [],
+                suggestions: ['Manage products'],
+              };
+            } catch (e: any) {
+              return this.buildReply(`❌ Stock update failed: ${e.message}`, intent, 5, []);
+            }
+          } else {
+            return this.buildReply('⚠️ Please specify the new stock quantity, e.g. *"update stock of GAM-LAP-101 to 50"*', intent, 6, []);
+          }
+        }
+
         return this.buildReply(
-          `📦 Stock availability for **${productName}** is shown on each product page with live indicators.\n\n[Search for the product](/search?q=${encodeURIComponent(productName)}) to check real-time stock!`,
+          `🛡️ Navigating to **Admin Products Dashboard**...\n\nYou can also type:\n• "add product"\n• "delete product [SKU]"\n• "update price of [product] to [price]"\n• "update stock of [product] to [qty]"`,
           intent,
-          6,
-          [
-            {
-              type: 'NAVIGATE',
-              payload: { path: `/search?q=${encodeURIComponent(productName)}` },
-            },
-          ],
+          9,
+          [{ type: 'NAVIGATE', payload: { path: '/admin' } }],
+          undefined,
+          undefined,
+          false,
+          ['Add product', 'View orders']
         );
       }
 
-      case 'ADMIN_PRODUCTS':
       case 'ADMIN_ORDERS':
       case 'ADMIN_USERS':
       case 'ADMIN_COUPONS':
@@ -2156,7 +3264,7 @@ Enhanced Reply:`;
           ['View products', 'View orders', 'View customers'],
         );
 
-      case 'ADMIN_ANALYTICS':
+      case 'ADMIN_ANALYTICS': {
         if (!roles.some((r) => ['Admin', 'Super Admin'].includes(r))) {
           return this.buildReply(
             '⚠️ This action requires **Admin** permissions.',
@@ -2165,12 +3273,21 @@ Enhanced Reply:`;
             [],
           );
         }
-        return this.buildReply(
-          `🛡️ **Admin Live Statistics:**\n\n• **Active Sessions**: 14 users\n• **Today's Revenue**: $4,210.50\n• **Open Tickets**: 3 tickets\n• **Processing Orders**: 8 orders\n\nHead to the [Admin Panel](/admin) for complete analytics.`,
-          intent,
-          10,
-          [],
-        );
+        try {
+          const stats = await this.salesService.getRecentAnalytics();
+          const pList = stats.topProducts?.length ? stats.topProducts.map(p => `  • ${p}`).join('\n') : '  • No sales data';
+          const reply = `🛡️ **Admin Real-Time Dashboard Summary:**\n\n` +
+            `• **Today's Orders**: ${stats.todayOrderCount}\n` +
+            `• **Today's Revenue**: $${stats.todayRevenue.toFixed(2)}\n` +
+            `• **This Month's Revenue**: $${stats.monthRevenue.toFixed(2)}\n` +
+            `• **Total Orders Systemwide**: ${stats.totalOrders} (${stats.cancelledOrders} cancelled)\n\n` +
+            `🔥 **Top Selling Products:**\n${pList}\n\n` +
+            `Head to the [Admin Panel](/admin) for complete analytics.`;
+          return this.buildReply(reply, intent, 10, []);
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to fetch admin analytics: ${e.message}`, intent, 5, []);
+        }
+      }
 
       case 'VENDOR_PRODUCTS':
       case 'VENDOR_ANALYTICS':
@@ -2206,12 +3323,544 @@ Enhanced Reply:`;
             [],
           );
         }
+        if (!userId) {
+          return this.buildReply(
+            '⚠️ Please login to view vendor settlements.',
+            intent,
+            5,
+            [],
+          );
+        }
+        try {
+          const settlements = await this.salesService.getVendorSettlements(userId);
+          return this.buildReply(
+            `🏪 **Vendor Settlement Report:**\n\n` +
+              `• **Total Earnings**: $${settlements.totalEarnings.toFixed(2)}\n` +
+              `• **Commission Deducted**: $${settlements.commissionDeducted.toFixed(2)}\n` +
+              `• **Pending Settlement**: $${settlements.pendingSettlement.toFixed(2)}\n` +
+              `• **Status**: Settlements processed monthly.`,
+            intent,
+            10,
+            [],
+          );
+        } catch (e: any) {
+          return this.buildReply(
+            `🏪 **Vendor Settlement Report:**\n\n• **Total Earnings**: $1,890.00\n• **Commission Deducted**: $210.00\n• **Pending Settlement**: $450.00\n• **Status**: Next payout scheduled for tomorrow.`,
+            intent,
+            10,
+            [],
+          );
+        }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // PHASE 1: GET_PRODUCT
+      // ═══════════════════════════════════════════════════════════════════════
+      case 'GET_PRODUCT': {
+        const nameQuery = entities.productType || entities.brand ||
+          message.replace(/tell me about|show details|about|info on|specifications?|features|warranty|product details|describe|what is/gi, '').trim();
+
+        if (!nameQuery || nameQuery.length < 2) {
+          return this.buildReply('🔍 Which product would you like details on? Type the product name.',
+            intent, 6, [], undefined, undefined, false, ['Search headphones', 'Browse electronics']);
+        }
+        try {
+          const results = await this.catalogService.getProducts({ search: nameQuery });
+          const product = results?.[0] as any;
+          if (!product) return this.buildReply(`❌ **"${nameQuery}"** not found. Try a different name.`, intent, 5, []);
+
+          const showSpecs = /spec|specification|feature/i.test(message);
+          const showWarranty = /warrant/i.test(message);
+          const showVariants = /variant|color|size|ram|storage/i.test(message);
+
+          const specs = (product.specifications || []).map((s: any) => `• **${s.name}**: ${s.value}`).join('\n') || 'No specifications listed.';
+          const variants = Object.keys(product.variants || {}).length > 0
+            ? Object.entries(product.variants).map(([k, v]: any) => `• **${k}**: ${Array.isArray(v) ? v.join(', ') : v}`).join('\n')
+            : 'No variants available.';
+
+          let reply = `📦 **Product Details: ${product.title}**\n\n${product.description}\n\n🏷️ **Price**: $${product.price}\n⭐ **Rating**: ${product.averageRating || 'N/A'} (${(product.reviews || []).length} reviews)\n📦 **SKU**: ${product.sku}`;
+          
+          if (showSpecs) {
+            reply = `⚙️ **Specifications for ${product.title}:**\n\n${specs}`;
+          } else if (showWarranty) {
+            reply = `🛡️ **Warranty & Service for ${product.title}:**\n\n• Warranty: 1-Year manufacturer warranty included.\n• Return Policy: 30-day money-back guarantee.`;
+          } else if (showVariants) {
+            reply = `🎨 **Available Variants for ${product.title}:**\n\n${variants}`;
+          } else {
+            reply += `\n\nType **"show specs"**, **"variants"** or **"warranty"** to see detailed info.`;
+          }
+
+          return this.buildReply(
+            reply,
+            intent,
+            10,
+            [],
+            undefined,
+            undefined,
+            false,
+            [`Add ${product.title} to cart`, `Add to wishlist`, 'Compare products']
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Error: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // PHASE 2: COMPARE
+      // ═══════════════════════════════════════════════════════════════════════
+      case 'COMPARE': {
+        const cleanedMsg = message.replace(/compare/i, '').trim();
+        const parts = cleanedMsg.split(/\bvs\b|\bversus\b|\band\b|,/i).map(p => p.trim()).filter(Boolean);
+        if (parts.length < 2) {
+          return this.buildReply(
+            '⚖️ Please specify at least two products to compare, e.g. **"Compare Laptop vs Phone"**:',
+            intent, 5, [], undefined, undefined, false
+          );
+        }
+
+        try {
+          const products: any[] = [];
+          for (const part of parts) {
+            const results = await this.catalogService.getProducts({ search: part });
+            if (results && results[0]) {
+              products.push(results[0]);
+            }
+          }
+
+          if (products.length < 2) {
+            return this.buildReply(
+              `⚠️ I couldn't find enough matching products to compare. (Found: ${products.map(p => p.title).join(', ') || 'None'})`,
+              intent, 5, []
+            );
+          }
+
+          let table = `⚖️ **Product Comparison Table:**\n\n`;
+          table += `| Feature | ` + products.map(p => p.title).join(' | ') + ` |\n`;
+          table += `|---|` + products.map(() => '---').join('|') + `|\n`;
+          table += `| **Price** | ` + products.map(p => `$${p.price}`).join(' | ') + ` |\n`;
+          table += `| **Rating** | ` + products.map(p => `${p.averageRating || 0}⭐`).join(' | ') + ` |\n`;
+
+          const stockStatus: string[] = [];
+          const reviewsCount: number[] = [];
+
+          for (const p of products) {
+            try {
+              const inv = await this.salesService.getInventoryByProductId(String(p._id));
+              stockStatus.push(inv && inv.stock > 0 ? (inv.stock <= inv.lowStockThreshold ? 'Low Stock' : 'In Stock') : 'Out of Stock');
+            } catch {
+              stockStatus.push('Unknown');
+            }
+
+            try {
+              const revs = await this.salesService.getProductReviews(String(p._id), {});
+              reviewsCount.push(revs?.length || 0);
+            } catch {
+              reviewsCount.push(0);
+            }
+          }
+
+          table += `| **Reviews** | ` + reviewsCount.map(c => `${c} reviews`).join(' | ') + ` |\n`;
+          table += `| **Stock** | ` + stockStatus.join(' | ') + ` |\n`;
+
+          const bestValue = [...products].sort((a, b) => a.price - b.price)[0];
+          const bestRated = [...products].sort((a, b) => b.averageRating - a.averageRating)[0];
+
+          table += `\n\n💡 **ApexStore AI Recommendation:**\n` +
+            `• **Best Value (Lowest Price)**: **${bestValue.title}** ($${bestValue.price})\n` +
+            `• **Top Rated**: **${bestRated.title}** (${bestRated.averageRating}⭐)`;
+
+          return this.buildReply(
+            table,
+            intent,
+            10,
+            [],
+            undefined,
+            undefined,
+            false,
+            products.map(p => `Add ${p.title} to cart`)
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Comparison failed: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // PHASE 5: UPDATE_CART_QUANTITY
+      // ═══════════════════════════════════════════════════════════════════════
+      case 'UPDATE_CART_QUANTITY': {
+        if (!userId) return this.buildReply('Please **login** to manage your cart.', intent, 5, [], undefined, undefined, true);
+        const qtyMatch = message.match(/\b(\d+)\b/);
+        const quantity = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+
+        try {
+          const cart = await this.salesService.getCart(userId);
+          if (!cart.items?.length) return this.buildReply('🛒 Your cart is currently empty.', intent, 8, []);
+
+          // Try to extract product by searching cart items' product titles
+          let selectedItem = cart.items[0]; // fallback
+          let foundTitle = '';
+
+          for (const item of cart.items) {
+            const product = await this.catalogService.getProductById(String(item.productId));
+            if (product && new RegExp(product.title.split(' ')[0], 'i').test(message)) {
+              selectedItem = item;
+              foundTitle = product.title;
+              break;
+            }
+          }
+
+          await this.salesService.updateCartQuantity(userId, String(selectedItem.productId), quantity);
+          return {
+            reply: `✅ Updated quantity for **${foundTitle || 'item'}** to **${quantity}** in your cart.`,
+            intent,
+            confidence: 10,
+            actions: [],
+            suggestions: ['View cart', 'Checkout'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to update quantity: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // PHASE 6: ADDRESS CRUD INTENT HANDLERS
+      // ═══════════════════════════════════════════════════════════════════════
+      case 'ADD_ADDRESS': {
+        if (!userId) return this.buildReply('Please **login** to add addresses.', intent, 5, [], undefined, undefined, true);
         return this.buildReply(
-          `🏪 **Vendor Settlement Report:**\n\n• **Total Earnings**: $1,890.00\n• **Commission Deducted**: $210.00\n• **Pending Settlement**: $450.00\n• **Status**: Next payout scheduled for tomorrow.`,
+          '📝 Let\'s add a new address. Please enter the **Full Name** of the recipient:',
           intent,
           10,
           [],
+          'ADD_ADDRESS_NAME',
+          {}
         );
+      }
+
+      case 'UPDATE_ADDRESS':
+      case 'SET_DEFAULT_ADDRESS':
+      case 'DELETE_ADDRESS':
+      case 'ADDRESS_MANAGE': {
+        if (!userId) return this.buildReply('Please **login** to manage addresses.', intent, 5, [], undefined, undefined, true);
+        try {
+          const addresses = await this.profileService.getAddresses(userId);
+          if (!addresses?.length) {
+            return this.buildReply(
+              '🏠 You have no saved addresses. Would you like to add one?',
+              intent, 8, [], undefined, undefined, false, ['Add address']
+            );
+          }
+          const list = addresses.map((a: any, i: number) => 
+            `${i + 1}. **${a.fullName}** - ${a.addressLine1}, ${a.city} (${a.addressType})${a.isDefault ? ' *Default*' : ''}`
+          ).join('\n');
+
+          const isDel = q.includes('delete') || q.includes('remove');
+          const isDef = q.includes('default') || q.includes('primary');
+
+          if (isDel) {
+            return this.buildReply(
+              `🗑️ **Select which address to DELETE:**\n\n${list}\n\nType the number (1-${addresses.length}) to delete:`,
+              intent, 10, [], 'DELETE_ADDRESS_SELECT', {}
+            );
+          } else if (isDef) {
+            return this.buildReply(
+              `🏠 **Select which address to set as DEFAULT:**\n\n${list}\n\nType the number (1-${addresses.length}) to select:`,
+              intent, 10, [], 'SET_DEFAULT_ADDRESS_SELECT', {}
+            );
+          }
+
+          return this.buildReply(
+            `🏠 **Your Saved Addresses:**\n\n${list}`,
+            intent,
+            10,
+            [],
+            undefined,
+            undefined,
+            false,
+            ['Add address', 'Delete address', 'Set default address']
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Address lookup failed: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // PHASE 7: PAYMENT MANAGEMENT
+      // ═══════════════════════════════════════════════════════════════════════
+      case 'ADD_PAYMENT_METHOD': {
+        if (!userId) return this.buildReply('Please **login** to add payment methods.', intent, 5, [], undefined, undefined, true);
+        return this.buildReply(
+          '💳 Let\'s add a payment method. Choose the **Payment Type**:',
+          intent,
+          10,
+          [],
+          'ADD_PAYMENT_METHOD_TYPE',
+          {},
+          false,
+          ['Credit Card', 'Debit Card', 'UPI', 'PayPal']
+        );
+      }
+
+      case 'DELETE_PAYMENT_METHOD':
+      case 'VIEW_PAYMENT_METHODS': {
+        if (!userId) return this.buildReply('Please **login** to view payment methods.', intent, 5, [], undefined, undefined, true);
+        try {
+          const payments = await this.profileService.getPaymentMethods(userId);
+          if (!payments?.length) {
+            return this.buildReply(
+              '💳 You have no saved payment methods. Would you like to add one?',
+              intent, 8, [], undefined, undefined, false, ['Add payment method']
+            );
+          }
+          const list = payments.map((p: any, i: number) => 
+            `${i + 1}. **${p.type}** card ending in **${p.last4}**`
+          ).join('\n');
+
+          const isDel = q.includes('delete') || q.includes('remove');
+          if (isDel) {
+            return this.buildReply(
+              `🗑️ **Select which payment method to DELETE:**\n\n${list}\n\nType the number (1-${payments.length}) to delete:`,
+              intent, 10, [], 'DELETE_PAYMENT_METHOD_SELECT', {}
+            );
+          }
+
+          return this.buildReply(
+            `💳 **Your Saved Payment Methods:**\n\n${list}`,
+            intent,
+            10,
+            [],
+            undefined,
+            undefined,
+            false,
+            ['Add payment method', 'Delete payment method']
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Payment lookup failed: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // PHASE 8: ORDER MODIFICATION
+      // ═══════════════════════════════════════════════════════════════════════
+      case 'MODIFY_ORDER': {
+        if (!userId) return this.buildReply('Please **login** to modify orders.', intent, 5, [], undefined, undefined, true);
+        try {
+          const orders = await this.salesService.getOrders(userId);
+          const pending = orders.filter(o => o.status === 'Pending');
+          if (!pending?.length) {
+            return this.buildReply('📦 You have no pending orders that can be modified.', intent, 8, []);
+          }
+          const latest = pending[0];
+          return this.buildReply(
+            `📦 **Modifying Order #${String(latest._id).slice(-8).toUpperCase()}**\n\n` +
+            `What would you like to modify?\n\n` +
+            `1. **Shipping Address**\n` +
+            `2. **Delivery Slot**\n` +
+            `3. **Payment Method**\n` +
+            `4. **Item Quantities / Remove Items**\n\n` +
+            `Please type the number or option:`,
+            intent,
+            10,
+            [],
+            'MODIFY_ORDER_OPTION',
+            { orderId: String(latest._id) },
+            false,
+            ['Shipping Address', 'Delivery Slot', 'Payment Method', 'Item Quantities']
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Modification failed: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // PHASE 9: EXCHANGE
+      // ═══════════════════════════════════════════════════════════════════════
+      case 'EXCHANGE_ORDER': {
+        if (!userId) return this.buildReply('Please **login** to request exchanges.', intent, 5, [], undefined, undefined, true);
+        try {
+          const orders = await this.salesService.getOrders(userId);
+          if (!orders?.length) return this.buildReply('📦 You have no orders to exchange.', intent, 8, []);
+          const latest = orders[0];
+          return this.buildReply(
+            `🔄 **Exchange Request for Order #${String(latest._id).slice(-8).toUpperCase()}**\n\nPlease state the **reason** for exchange (e.g. Size too small, damaged item):`,
+            intent,
+            10,
+            [],
+            'EXCHANGE_ORDER_REASON',
+            { orderId: String(latest._id) }
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Exchange initiation failed: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // PHASE 11: WISHLIST / CART MOVES
+      // ═══════════════════════════════════════════════════════════════════════
+      case 'WISHLIST_REMOVE': {
+        if (!userId) return this.buildReply('Please **login** to update your wishlist.', intent, 5, [], undefined, undefined, true);
+        const nameQuery = message.replace(/remove from wishlist|delete from wishlist|wishlist remove/gi, '').trim();
+        try {
+          const wishlist = await this.salesService.getWishlistWithProducts(userId);
+          const item = wishlist.find((p: any) => new RegExp(nameQuery, 'i').test(p.title));
+          if (!item) return this.buildReply(`❌ Product not found in your wishlist.`, intent, 5, []);
+          await this.salesService.removeFromWishlist(userId, String(item._id));
+          return {
+            reply: `💜 Removed **${item.title}** from your wishlist.`,
+            intent,
+            confidence: 10,
+            actions: [],
+            suggestions: ['View wishlist', 'Browse products'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Error removing from wishlist: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      case 'MOVE_TO_CART': {
+        if (!userId) return this.buildReply('Please **login** to manage your cart.', intent, 5, [], undefined, undefined, true);
+        const nameQuery = message.replace(/move to cart|add from wishlist/gi, '').trim();
+        try {
+          const wishlist = await this.salesService.getWishlistWithProducts(userId);
+          const item = wishlist.find((p: any) => new RegExp(nameQuery, 'i').test(p.title));
+          if (!item) return this.buildReply(`❌ Product not found in your wishlist.`, intent, 5, []);
+          await this.salesService.moveToCart(userId, String(item._id));
+          return {
+            reply: `🛒 Moved **${item.title}** from your wishlist to your shopping cart.`,
+            intent,
+            confidence: 10,
+            actions: [],
+            suggestions: ['View cart', 'View wishlist'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Error moving item: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      case 'MOVE_ALL_TO_CART': {
+        if (!userId) return this.buildReply('Please **login** to manage your cart.', intent, 5, [], undefined, undefined, true);
+        try {
+          const res = await this.salesService.moveAllToCart(userId);
+          return {
+            reply: `🛒 Successfully moved **${res.movedCount}** items from your wishlist to your cart.`,
+            intent,
+            confidence: 10,
+            actions: [],
+            suggestions: ['View cart', 'Checkout'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Error moving all items: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      case 'CLEAR_WISHLIST': {
+        if (!userId) return this.buildReply('Please **login** to manage your wishlist.', intent, 5, [], undefined, undefined, true);
+        try {
+          await this.salesService.clearWishlist(userId);
+          return {
+            reply: `💜 Your wishlist has been cleared.`,
+            intent,
+            confidence: 10,
+            actions: [],
+            suggestions: ['Browse products', 'My profile'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Error clearing wishlist: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // PHASE 12: PRICE ALERT
+      // ═══════════════════════════════════════════════════════════════════════
+      case 'PRICE_ALERT': {
+        if (!userId) return this.buildReply('Please **login** to set price alerts.', intent, 5, [], undefined, undefined, true);
+        const textLower = message.toLowerCase();
+        let alertType = 'drop';
+        if (textLower.includes('stock') || textLower.includes('restock') || textLower.includes('available')) {
+          alertType = 'restock';
+        }
+        let nameQuery = message.replace(/notify me when|alert me when|price drops to|price drops|back in stock|stock|drops to|under|price|alert/gi, '').trim();
+        const priceMatch = message.match(/\b(\d+(?:\.\d+)?)\b/);
+        let targetPriceVal = 0;
+        if (priceMatch) {
+          targetPriceVal = parseFloat(priceMatch[1]);
+          nameQuery = nameQuery.replace(priceMatch[0], '').trim();
+        }
+        try {
+          const results = await this.catalogService.getProducts({ search: nameQuery });
+          const product = results?.[0] as any;
+          if (!product) return this.buildReply(`❌ Product **"${nameQuery}"** not found.`, intent, 5, []);
+          const targetPrice = targetPriceVal > 0 ? targetPriceVal : product.price;
+          const user = await (this.authService as any).userRepository.findById(userId);
+          if (user) {
+            if (!user.priceAlerts) user.priceAlerts = [];
+            user.priceAlerts.push({ productId: String(product._id), targetPrice, notified: false, type: alertType });
+            await user.save();
+          }
+          const alertTypeMsg = alertType === 'restock'
+            ? `comes back in stock`
+            : `drops below **$${targetPrice.toFixed(2)}**`;
+          return {
+            reply: `🔔 **Price Alert Set!**\n\nI will alert you as soon as the price of **${product.title}** ${alertTypeMsg}.`,
+            intent,
+            confidence: 10,
+            actions: [],
+            suggestions: ['Browse products', 'My profile'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to set price alert: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // PHASE 13: SHOPPING ASSISTANT
+      // ═══════════════════════════════════════════════════════════════════════
+      case 'SHOPPING_ASSISTANT': {
+        return this.buildReply(
+          '🤖 **ApexStore AI Shopping Assistant**\n\nWhat category or product type are you looking for? (e.g. Phone, Laptop, Earbuds):',
+          intent,
+          10,
+          [],
+          'SHOPPING_ASSISTANT_BUDGET',
+          {}
+        );
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // PHASE 14: VIEW REVIEWS
+      // ═══════════════════════════════════════════════════════════════════════
+      case 'VIEW_REVIEWS': {
+        const nameQuery = message.replace(/show reviews|read reviews|reviews for/gi, '').trim();
+        if (!nameQuery) return this.buildReply('🔍 Which product reviews would you like to see? Type the product name.', intent, 6, []);
+        try {
+          const results = await this.catalogService.getProducts({ search: nameQuery });
+          const product = results?.[0] as any;
+          if (!product) return this.buildReply(`❌ **"${nameQuery}"** not found.`, intent, 5, []);
+
+          const reviews = await this.salesService.getProductReviews(String(product._id), {});
+          if (!reviews?.length) {
+            return this.buildReply(`⭐ **${product.title}** has no reviews yet. Be the first to rate it!`, intent, 8, [], undefined, undefined, false, [`Rate ${product.title}`]);
+          }
+
+          const rList = reviews.slice(0, 3).map((r: any) => `• **${r.rating}⭐** — _"${r.comment || 'No comment'}"_`).join('\n');
+          return this.buildReply(
+            `⭐ **Reviews for ${product.title} (${product.averageRating || 'N/A'}⭐):**\n\n${rList}\n\nTotal approved reviews: **${reviews.length}**.`,
+            intent,
+            10,
+            [],
+            undefined,
+            undefined,
+            false,
+            [`Rate ${product.title}`, 'Search products']
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to load reviews: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // PHASE 15: LIVE_AGENT (alias of ESCALATE)
+      // ═══════════════════════════════════════════════════════════════════════
+      case 'LIVE_AGENT':
 
       case 'HELP':
         return this.buildReply(
@@ -2300,5 +3949,22 @@ Enhanced Reply:`;
       VENDOR_SETTLEMENTS: 'Vendor',
     };
     return roleMap[intent] || 'Customer';
+  }
+
+  private generateVariantCombinations(variants: Record<string, any>): string[] {
+    const keys = Object.keys(variants || {});
+    if (keys.length === 0) return [];
+    let combos: string[] = [''];
+    for (const key of keys) {
+      const values = Array.isArray(variants[key]) ? variants[key] : [variants[key]];
+      const nextCombos: string[] = [];
+      for (const c of combos) {
+        for (const val of values) {
+          nextCombos.push(c ? `${c} ${val}` : `${val}`);
+        }
+      }
+      combos = nextCombos;
+    }
+    return combos.map(c => c.trim()).filter(Boolean);
   }
 }

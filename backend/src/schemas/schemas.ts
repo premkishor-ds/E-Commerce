@@ -128,6 +128,12 @@ export class User extends Document {
 
   @Prop({ type: [String], default: [] })
   backupCodes: string[];
+
+  @Prop({ type: [Object], default: [] })
+  priceAlerts: Array<{ productId: string; targetPrice: number; notified: boolean; type?: string }>;
+
+  @Prop({ type: [Object], default: [] })
+  savedCart: Array<{ productId: string; quantity: number; variantKey?: string }>;
 }
 export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.index({ email: 1 });
@@ -183,6 +189,15 @@ export class Inventory extends Document {
 
   @Prop({ type: [Object], default: [] })
   logs: Array<{ quantityChanged: number; reason: string; timestamp: Date }>;
+
+  @Prop({ type: Date, default: null })
+  restockDate: Date | null;
+
+  @Prop({ default: false })
+  allowPreorder: boolean;
+
+  @Prop({ default: false })
+  allowBackorder: boolean;
 }
 export const InventorySchema = SchemaFactory.createForClass(Inventory);
 
@@ -349,6 +364,9 @@ export class Order extends Document {
 
   @Prop({ type: [Object], default: [] })
   statusHistory: Array<{ status: string; changedAt: Date; note: string }>;
+
+  @Prop({ default: '' })
+  deliverySlot: string;
 }
 export const OrderSchema = SchemaFactory.createForClass(Order);
 OrderSchema.index({ userId: 1, createdAt: -1 });

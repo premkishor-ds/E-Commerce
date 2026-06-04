@@ -4,6 +4,8 @@ import {
   CategoryRepository,
   BrandRepository,
   InventoryRepository,
+  UserRepository,
+  NotificationRepository,
 } from '../../repositories/concrete.repositories';
 
 @Injectable()
@@ -13,6 +15,8 @@ export class CatalogService {
     private readonly categoryRepository: CategoryRepository,
     private readonly brandRepository: BrandRepository,
     private readonly inventoryRepository: InventoryRepository,
+    private readonly userRepository: UserRepository,
+    private readonly notificationRepository: NotificationRepository,
   ) {}
 
   // Categories
@@ -61,7 +65,13 @@ export class CatalogService {
   }
 
   async updateProduct(id: string, dto: any) {
-    return this.productRepository.update(id, dto);
+    const updated = await this.productRepository.update(id, dto);
+    if (dto.price !== undefined && updated) {
+      const inv = await this.inventoryRepository.findOne({ sku: updated.sku });
+      const currentStock = inv ? inv.stock : 0;
+      await this.checkPriceAndStockAlerts(id, dto.price, currentStock);
+    }
+    return updated;
   }
 
   async deleteProduct(id: string) {
@@ -74,18 +84,68 @@ export class CatalogService {
   async updateStock(sku: string, stock: number) {
     const inv = await this.inventoryRepository.findOne({ sku });
     if (!inv) throw new NotFoundException('Inventory SKU not found');
+    const oldStock = inv.stock;
     inv.stock = stock;
     inv.logs.push({
-      quantityChanged: stock - inv.stock,
+      quantityChanged: stock - oldStock,
       reason: 'Manual Adjustment',
       timestamp: new Date(),
     });
-    return inv.save();
+    const saved = await inv.save();
+    if (oldStock <= 0 && stock > 0) {
+      const product = await this.productRepository.findOne({ sku });
+      if (product) {
+        await this.checkPriceAndStockAlerts(product._id.toString(), product.price, stock);
+      }
+    }
+    return saved;
   }
 
   async getInventoryAlerts() {
-    // Returns inventories under low stock threshold
     const items = await this.inventoryRepository.find({});
     return items.filter((i) => i.stock <= i.lowStockThreshold);
+  }
+
+  async checkPriceAndStockAlerts(productId: string, currentPrice: number, currentStock: number) {
+    const users = await this.userRepository.find({
+      'priceAlerts.productId': productId,
+    });
+    for (const user of users) {
+      let updated = false;
+      const alerts = (user as any).priceAlerts || [];
+      for (const alert of alerts) {
+        if (alert.productId === productId && !alert.notified) {
+          let trigger = false;
+          let msg = '';
+          const product = await this.productRepository.findById(productId);
+          if (!product) continue;
+
+          if ((!alert.type || alert.type === 'drop') && currentPrice <= alert.targetPrice) {
+            trigger = true;
+            msg = `Price Drop! The price of **${product.title}** has dropped to $${currentPrice.toFixed(2)}.`;
+          }
+          if (alert.type === 'restock' && currentStock > 0) {
+            trigger = true;
+            msg = `Back in stock! **${product.title}** is now available.`;
+          }
+
+          if (trigger) {
+            alert.notified = true;
+            updated = true;
+            await this.notificationRepository.create({
+              userId: user._id,
+              title: 'Price & Stock Alert',
+              message: msg,
+              isRead: false,
+              type: 'Alert',
+            });
+          }
+        }
+      }
+      if (updated) {
+        user.markModified('priceAlerts');
+        await user.save();
+      }
+    }
   }
 }
