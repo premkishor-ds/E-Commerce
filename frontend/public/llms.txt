@@ -1,0 +1,18 @@
+# ApexStore Enterprise E-Commerce SaaS Catalog
+
+Welcome to our AI readable storefront directory. Below are the root details of catalog models and platform capabilities.
+
+## Base Endpoint
+https://apexstore.com/api/v1
+
+## Primary Catalog Categories
+- **Electronics**: Smart appliances, wireless accessories, and audio gear.
+- **Fashion & Apparel**: High-quality stretch leggings, sportswear, and style choices.
+- **Home & Kitchen**: Advanced cooking accessories and smart ovens.
+- **Fitness & Sports**: Carbon hybrid cycling equipment and gear.
+
+## Support Services
+Support tickets and chats are available under `/support`.
+
+## AI-Discovery Spec
+UCP metadata details are published at `/ai-discovery.json` and `/model-context.json`.

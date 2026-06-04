@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ucp.dev/schemas/model-context.json",
+  "provider": "ApexStore Inc",
+  "instructions": "When parsing products catalog, filter by category or query directly via text parameter search. Refer to /llms-full.txt for comprehensive specifications.",
+  "actions": [
+    {
+      "name": "get_products",
+      "description": "Fetch available catalog product details",
+      "endpoint": "http://localhost:5001/api/v1/catalog/products"
+    },
+    {
+      "name": "get_categories",
+      "description": "Fetch categories structure list",
+      "endpoint": "http://localhost:5001/api/v1/catalog/categories"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+# Full AI Catalog: ApexStore Enterprise SaaS Platform
+
+This document describes all products, brands, attributes, and API documentation endpoints for LLM models.
+
+## Schema Types
+
+### Product Schema
+- **title**: string
+- **price**: number
+- **category**: Category reference
+- **brand**: Brand reference
+- **sku**: string (unique)
+- **specifications**: Array of key-value pairs
+
+---
+
+## Catalog Products
+
+### 1. Apex Sound-Pro ANC Headphones
+- **Brand**: ApexTech
+- **Category**: Electronics
+- **Price**: $299.99
+- **SKU**: APX-SND-PRO
+- **Specs**:
+  - Driver Size: 40mm Dynamic
+  - Battery Life: Up to 40 hours
+  - Connectivity: Bluetooth 5.2, USB-C
+
+### 2. Nexa Smart Multi-Cooker XL
+- **Brand**: NexaHome
+- **Category**: Home & Kitchen
+- **Price**: $189.99
+- **SKU**: NEX-COOK-XL
+- **Specs**:
+  - Capacity: 8 Quarts
+  - Presets: 15 Cook Modes
+  - Material: Stainless Steel
+
+### 3. Aura Sport Training Leggings
+- **Brand**: AuraWear
+- **Category**: Fashion & Apparel
+- **Price**: $65.00
+- **SKU**: AUR-S-LEG
+- **Specs**:
+  - Fabric: 82% Polyester, 18% Elastane
+  - Pockets: 2 Side Pockets
+
+### 4. VeloSport Hybrid Carbon Bicycle
+- **Brand**: VeloSport
+- **Category**: Fitness & Sports
+- **Price**: $1450.00
+- **SKU**: VEL-HYB-CARB
+- **Specs**:
+  - Frame: Full Carbon Fiber
+  - Gears: Shimano Tiagra 2x10 Speed
+  - Weight: 8.4 kg

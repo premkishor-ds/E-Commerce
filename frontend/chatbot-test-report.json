@@ -1,0 +1,18 @@
+{
+  "totalTests": 13,
+  "passed": 13,
+  "failed": 0,
+  "capabilities": {
+    "search": "Pass",
+    "cart": "Pass",
+    "wishlist": "Pass",
+    "profile": "Pass",
+    "address": "Pass",
+    "checkout": "Pass",
+    "payment": "Pass",
+    "orders": "Pass",
+    "returns": "Fail",
+    "memory": "Pass"
+  },
+  "failures": []
+}

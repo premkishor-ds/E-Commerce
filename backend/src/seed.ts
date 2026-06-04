@@ -1,0 +1,473 @@
+import mongoose from 'mongoose';
+import * as bcrypt from 'bcrypt';
+
+const MONGO_URI =
+  'mongodb+srv://premkishor:Hsndehzd6oFmbvHA@cluster0.x1ez0rp.mongodb.net/test';
+
+// Define schemas locally to avoid TS compilation issues in node script
+const UserSchema = new mongoose.Schema(
+  {
+    email: String,
+    passwordHash: String,
+    phone: String,
+    otpCode: String,
+    otpExpiresAt: Date,
+    roles: [String],
+    permissions: [String],
+  },
+  { timestamps: true },
+);
+
+const CategorySchema = new mongoose.Schema(
+  {
+    name: String,
+    slug: { type: String, unique: true },
+  },
+  { timestamps: true },
+);
+
+const BrandSchema = new mongoose.Schema(
+  {
+    name: { type: String, unique: true },
+  },
+  { timestamps: true },
+);
+
+const InventorySchema = new mongoose.Schema(
+  {
+    sku: { type: String, unique: true },
+    stock: Number,
+    lowStockThreshold: Number,
+    logs: [Object],
+  },
+  { timestamps: true },
+);
+
+const ProductSchema = new mongoose.Schema(
+  {
+    title: String,
+    description: String,
+    price: Number,
+    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+    brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' },
+    sku: { type: String, unique: true },
+    images: [String],
+    tags: [String],
+    averageRating: Number,
+    specifications: [Object],
+    faqs: [Object],
+  },
+  { timestamps: true },
+);
+
+const CartSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    items: [{ productId: mongoose.Schema.Types.ObjectId, quantity: Number }],
+  },
+  { timestamps: true },
+);
+
+const WishlistSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+  },
+  { timestamps: true },
+);
+
+const OrderSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    items: [
+      {
+        productId: mongoose.Schema.Types.ObjectId,
+        quantity: Number,
+        price: Number,
+      },
+    ],
+    status: String,
+    shippingAddress: Object,
+    totalPrice: Number,
+    trackingCode: String,
+  },
+  { timestamps: true },
+);
+
+const TicketSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    subject: String,
+    status: String,
+    priority: String,
+    messages: [
+      {
+        senderId: mongoose.Schema.Types.ObjectId,
+        message: String,
+        sentAt: Date,
+      },
+    ],
+  },
+  { timestamps: true },
+);
+
+const ReviewSchema = new mongoose.Schema(
+  {
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    rating: Number,
+    comment: String,
+    status: String,
+  },
+  { timestamps: true },
+);
+
+const UserMemorySchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    searchHistory: [String],
+    viewedProducts: [String],
+  },
+  { timestamps: true },
+);
+
+// Models
+const User = mongoose.model('User', UserSchema);
+const Category = mongoose.model('Category', CategorySchema);
+const Brand = mongoose.model('Brand', BrandSchema);
+const Inventory = mongoose.model('Inventory', InventorySchema);
+const Product = mongoose.model('Product', ProductSchema);
+const Cart = mongoose.model('Cart', CartSchema);
+const Wishlist = mongoose.model('Wishlist', WishlistSchema);
+const Order = mongoose.model('Order', OrderSchema);
+const Ticket = mongoose.model('Ticket', TicketSchema);
+const Review = mongoose.model('Review', ReviewSchema);
+const UserMemory = mongoose.model('UserMemory', UserMemorySchema);
+
+const usersData = [
+  {
+    email: 'john.doe@example.com',
+    password: 'Password123!',
+    roles: ['Customer'],
+    phone: '+12025550143',
+  },
+  {
+    email: 'alice.smith@example.com',
+    password: 'Password123!',
+    roles: ['Customer'],
+    phone: '+12025550189',
+  },
+  {
+    email: 'bob.johnson@example.com',
+    password: 'Password123!',
+    roles: ['Customer'],
+    phone: '+12025550156',
+  },
+  {
+    email: 'clara.oswald@example.com',
+    password: 'Password123!',
+    roles: ['Customer'],
+    phone: '+12025550172',
+  },
+  {
+    email: 'danny.pink@example.com',
+    password: 'Password123!',
+    roles: ['Customer'],
+    phone: '+12025550111',
+  },
+  {
+    email: 'amy.pond@example.com',
+    password: 'Password123!',
+    roles: ['Customer'],
+    phone: '+12025550122',
+  },
+  {
+    email: 'rory.williams@example.com',
+    password: 'Password123!',
+    roles: ['Customer'],
+    phone: '+12025550133',
+  },
+  {
+    email: 'river.song@example.com',
+    password: 'Password123!',
+    roles: ['Customer'],
+    phone: '+12025550144',
+  },
+  {
+    email: 'martha.jones@example.com',
+    password: 'Password123!',
+    roles: ['Customer'],
+    phone: '+12025550155',
+  },
+  {
+    email: 'donna.noble@example.com',
+    password: 'Password123!',
+    roles: ['Customer'],
+    phone: '+12025550166',
+  },
+  {
+    email: 'admin@example.com',
+    password: 'AdminPassword123!',
+    roles: ['Admin'],
+    phone: '+12025550000',
+  },
+];
+
+const categoriesData = [
+  { name: 'Electronics', slug: 'electronics' },
+  { name: 'Fashion', slug: 'fashion' },
+  { name: 'Home & Kitchen', slug: 'home-kitchen' },
+  { name: 'Fitness & Sports', slug: 'fitness-sports' },
+];
+
+const brandsData = [
+  { name: 'ApexTech' },
+  { name: 'AuraWear' },
+  { name: 'NexaHome' },
+  { name: 'VeloSport' },
+];
+
+const productsData = [
+  {
+    title: 'Apex Sound-Pro ANC Headphones',
+    description:
+      'Immersive sound with professional-grade Active Noise Cancellation, 40-hour playback duration.',
+    price: 299.99,
+    categoryName: 'Electronics',
+    brandName: 'ApexTech',
+    sku: 'APX-SND-PRO',
+    images: ['https://picsum.photos/seed/headphones/600/600'],
+    tags: ['audio', 'wireless', 'headphones'],
+    averageRating: 4.8,
+    specifications: [{ name: 'Driver Size', value: '40mm Dynamic' }],
+    faqs: [{ question: ' sweat resistant?', answer: 'Yes, IPX4.' }],
+  },
+  {
+    title: 'Nexa Smart Multi-Cooker XL',
+    description:
+      '10-in-1 kitchen appliance for pressure cooking, slow cooking, steaming, and baking.',
+    price: 189.99,
+    categoryName: 'Home & Kitchen',
+    brandName: 'NexaHome',
+    sku: 'NEX-COOK-XL',
+    images: ['https://picsum.photos/seed/cooker/600/600'],
+    tags: ['kitchen', 'cooking', 'smart-home'],
+    averageRating: 4.6,
+    specifications: [{ name: 'Capacity', value: '8 Quarts' }],
+    faqs: [{ question: 'Dishwasher safe?', answer: 'Yes.' }],
+  },
+  {
+    title: 'Aura Sport Training Leggings',
+    description:
+      'High-waisted compression tights featuring moisture-wicking technology.',
+    price: 65.0,
+    categoryName: 'Fashion',
+    brandName: 'AuraWear',
+    sku: 'AUR-S-LEG',
+    images: ['https://picsum.photos/seed/leggings/600/600'],
+    tags: ['clothing', 'athletic', 'leggings'],
+    averageRating: 4.5,
+    specifications: [{ name: 'Fabric Type', value: 'Polyester' }],
+    faqs: [{ question: 'Phone pocket?', answer: 'Yes.' }],
+  },
+  {
+    title: 'VeloSport Hybrid Carbon Bicycle',
+    description:
+      'Ultra-lightweight aerodynamic carbon fiber frame. Equipped with Shimano gears.',
+    price: 950.0,
+    categoryName: 'Fitness & Sports',
+    brandName: 'VeloSport',
+    sku: 'VEL-HYB-CARB',
+    images: ['https://picsum.photos/seed/bicycle/600/600'],
+    tags: ['cycling', 'hybrid', 'sports'],
+    averageRating: 4.9,
+    specifications: [{ name: 'Frame Material', value: 'Carbon Fiber' }],
+    faqs: [{ question: 'Assemble needed?', answer: 'Yes, partially.' }],
+  },
+];
+
+async function seed() {
+  await mongoose.connect(MONGO_URI);
+  console.log('Connected to Database. Seeding...');
+
+  // 1. Clean existing collections
+  await Promise.all([
+    User.deleteMany({}),
+    Category.deleteMany({}),
+    Brand.deleteMany({}),
+    Inventory.deleteMany({}),
+    Product.deleteMany({}),
+    Cart.deleteMany({}),
+    Wishlist.deleteMany({}),
+    Order.deleteMany({}),
+    Ticket.deleteMany({}),
+    Review.deleteMany({}),
+    UserMemory.deleteMany({}),
+  ]);
+  console.log('Cleared existing database entries.');
+
+  // 2. Insert Categories and Brands
+  const categories = await Category.insertMany(categoriesData);
+  const brands = await Brand.insertMany(brandsData);
+  console.log('Inserted Categories & Brands.');
+
+  // Helper map
+  const catMap = new Map(categories.map((c) => [c.name, c._id]));
+  const brandMap = new Map(brands.map((b) => [b.name, b._id]));
+
+  // 3. Insert Products and Inventories
+  const products = [];
+  for (const p of productsData) {
+    const catId = catMap.get(p.categoryName);
+    const brandId = brandMap.get(p.brandName);
+    const product = await Product.create({
+      title: p.title,
+      description: p.description,
+      price: p.price,
+      category: catId,
+      brand: brandId,
+      sku: p.sku,
+      images: p.images,
+      tags: p.tags,
+      averageRating: p.averageRating,
+      specifications: p.specifications,
+      faqs: p.faqs,
+    });
+    products.push(product);
+
+    // Create Inventory
+    await Inventory.create({
+      sku: p.sku,
+      stock: 50,
+      lowStockThreshold: 5,
+      logs: [
+        { quantityChanged: 50, reason: 'Initial Seed', timestamp: new Date() },
+      ],
+    });
+  }
+  console.log('Inserted Products & Inventories.');
+
+  // Helper map for products
+  const prodMap = new Map(products.map((p) => [p.sku, p]));
+
+  // 4. Insert 10 Users and their personalized activities
+  for (let i = 0; i < usersData.length; i++) {
+    const uData = usersData[i];
+    const passwordHash = await bcrypt.hash(uData.password, 10);
+    const user = await User.create({
+      email: uData.email,
+      passwordHash,
+      phone: uData.phone,
+      roles: uData.roles,
+    });
+
+    console.log(`Created User: ${user.email}`);
+
+    // Create User Memory searches
+    const searchTerms = [
+      ['audio', 'headphones', 'music'], // John
+      ['kitchen', 'cooking', 'home'], // Alice
+      ['clothing', 'leggings', 'fitness'], // Bob
+      ['cycling', 'bicycle', 'sports'], // Clara
+      ['headphones', 'sound', 'ApexTech'], // Danny
+      ['cooker', 'pot', 'appliances'], // Amy
+      ['leggings', 'wear', 'stretch'], // Rory
+      ['bicycle', 'carbon', 'VeloSport'], // River
+      ['audio', 'ANC', 'ApexSound'], // Martha
+      ['cooker', 'kitchen', 'XL'], // Donna
+    ][i];
+
+    await UserMemory.create({
+      userId: user._id,
+      searchHistory: searchTerms,
+      viewedProducts: [String(products[i % products.length]._id)],
+    });
+
+    // Create dynamic cart entries
+    const cartProd = products[(i + 1) % products.length];
+    await Cart.create({
+      userId: user._id,
+      items: [{ productId: cartProd._id, quantity: 1 }],
+    });
+
+    // Create dynamic wishlist entries
+    const wishProd = products[(i + 2) % products.length];
+    await Wishlist.create({
+      userId: user._id,
+      products: [wishProd._id],
+    });
+
+    // Create dynamic Orders (different status/totals)
+    const orderProd = products[(i + 3) % products.length] as any;
+    const statuses = [
+      'Pending',
+      'Shipped',
+      'Delivered',
+      'Paid',
+      'Delivered',
+      'Pending',
+      'Shipped',
+      'Delivered',
+      'Paid',
+      'Delivered',
+    ];
+    const order = await Order.create({
+      userId: user._id,
+      items: [
+        {
+          productId: orderProd._id,
+          quantity: 1,
+          price: orderProd.price as number,
+        },
+      ],
+      status: statuses[i],
+      shippingAddress: {
+        fullName: uData.email.split('@')[0].replace('.', ' '),
+        addressLine1: `${100 + i * 23} Commerce St`,
+        city: 'Metropolis',
+        state: 'NY',
+        postalCode: '10001',
+        country: 'US',
+        phone: uData.phone,
+      },
+      totalPrice: (orderProd.price as number) + 15.0,
+      trackingCode: statuses[i] !== 'Pending' ? `TRK-${Date.now()}-${i}` : '',
+    });
+
+    // Create support tickets for some users
+    if (i % 2 === 0) {
+      await Ticket.create({
+        userId: user._id,
+        subject: i === 0 ? 'Where is my order?' : 'Defective product received',
+        status: i === 0 ? 'Open' : 'Pending',
+        priority: i === 0 ? 'Medium' : 'High',
+        messages: [
+          {
+            senderId: user._id,
+            message: 'I need immediate assistance with my request.',
+            sentAt: new Date(),
+          },
+        ],
+      });
+    }
+
+    // Create reviews for delivered orders
+    if (statuses[i] === 'Delivered') {
+      await Review.create({
+        productId: orderProd._id,
+        userId: user._id,
+        rating: 4 + (i % 2),
+        comment: `Excellent product, really loved using it! Highly recommended.`,
+        status: 'Approved',
+      });
+    }
+  }
+
+  console.log('Database Seeding Completed Successfully!');
+  await mongoose.disconnect();
+}
+
+seed().catch((err) => {
+  console.error('Seeding failed:', err);
+  process.exit(1);
+});

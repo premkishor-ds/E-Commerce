@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "name": "ApexStore",
+  "description": "Enterprise-grade multi-vendor e-commerce platform.",
+  "url": "https://apexstore.com",
+  "api": {
+    "type": "openapi",
+    "url": "http://localhost:5001/api/docs-json"
+  },
+  "content": {
+    "llms": "/llms.txt",
+    "llms_full": "/llms-full.txt"
+  },
+  "entities": {
+    "products": "http://localhost:5001/api/v1/catalog/products",
+    "categories": "http://localhost:5001/api/v1/catalog/categories",
+    "brands": "http://localhost:5001/api/v1/catalog/brands"
+  }
+}
