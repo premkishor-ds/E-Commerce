@@ -65,6 +65,52 @@ function createQuery(result: any) {
   return query;
 }
 
+function applyMockUpdate(item: any, update: any) {
+  if (!item || !update) return;
+  for (const key of Object.keys(update)) {
+    if (!key.startsWith('$')) {
+      item[key] = update[key];
+    }
+  }
+  if (update.$set) {
+    for (const key of Object.keys(update.$set)) {
+      item[key] = update.$set[key];
+    }
+  }
+  if (update.$push) {
+    for (const key of Object.keys(update.$push)) {
+      item[key] = item[key] || [];
+      if (Array.isArray(item[key])) {
+        const val = update.$push[key];
+        if (val && typeof val === 'object' && '$each' in val && Array.isArray(val.$each)) {
+          item[key].push(...val.$each);
+        } else {
+          item[key].push(val);
+        }
+      }
+    }
+  }
+  if (update.$addToSet) {
+    for (const key of Object.keys(update.$addToSet)) {
+      item[key] = item[key] || [];
+      if (Array.isArray(item[key])) {
+        const val = update.$addToSet[key];
+        if (val && typeof val === 'object' && '$each' in val && Array.isArray(val.$each)) {
+          for (const subItem of val.$each) {
+            if (!item[key].includes(subItem)) {
+              item[key].push(subItem);
+            }
+          }
+        } else {
+          if (!item[key].includes(val)) {
+            item[key].push(val);
+          }
+        }
+      }
+    }
+  }
+}
+
 function createMockModel() {
   return class {
     static list: any[] = [];
@@ -172,7 +218,7 @@ function createMockModel() {
     static findByIdAndUpdate(id: any, update: any) {
       const item = this.list.find((i) => String(i._id) === String(id));
       if (item) {
-        Object.assign(item, update);
+        applyMockUpdate(item, update);
       }
       return createQuery(item);
     }
@@ -188,18 +234,7 @@ function createMockModel() {
         item = new this(filter);
         this.list.push(item);
       }
-      if (update.$push) {
-        const pushKey = Object.keys(update.$push)[0];
-        item[pushKey] = item[pushKey] || [];
-        item[pushKey].push(update.$push[pushKey]);
-      }
-      if (update.$addToSet) {
-        const setKey = Object.keys(update.$addToSet)[0];
-        item[setKey] = item[setKey] || [];
-        if (!item[setKey].includes(update.$addToSet[setKey])) {
-          item[setKey].push(update.$addToSet[setKey]);
-        }
-      }
+      applyMockUpdate(item, update);
       return createQuery(item);
     }
   };
@@ -551,6 +586,184 @@ describe('Chatbot Conversational Flows (e2e)', () => {
 
       const updatedOrder = await salesService.getOrderById(String(order._id));
       expect(updatedOrder.deliverySlot).toBe('Evening');
+    });
+
+    it('should handle real voice STT and TTS', async () => {
+      const voiceService = new (require('./modules/voice/voice.service').VoiceService)();
+      
+      // Test dynamic WAV generation (TTS)
+      const tts = await voiceService.textToSpeech('Test Audio Synthesis', 'en');
+      expect(tts.base64Audio).toBeDefined();
+      expect(tts.base64Audio.length).toBeGreaterThan(100);
+      expect(tts.audioUrl).toContain('synth_en_');
+
+      // Test real audio stream parsing (STT)
+      const stt = await voiceService.speechToText(tts.base64Audio, 'en');
+      expect(stt.text).toBeDefined();
+      expect(stt.intent).toBeDefined();
+    });
+
+    it('should verify payment webhook signatures strictly', async () => {
+      const paymentService = new (require('./modules/payment/payment.service').PaymentService)(
+        null, null, null, null, null, null, null, null
+      );
+      
+      // Stripe Webhook check
+      await expect(
+        paymentService.verifyStripeWebhook('invalid_sig', { type: 'payment_intent.succeeded' })
+      ).rejects.toThrow();
+
+      // Razorpay Signature Check
+      await expect(
+        paymentService.verifyRazorpaySignature('order_123', 'pay_123', 'invalid_sig', null)
+      ).rejects.toThrow();
+    });
+
+    it('should intercept messages during active live agent session', async () => {
+      const activeSes = {
+        _id: new Types.ObjectId(),
+        status: 'Active',
+        messages: [{ senderId: new Types.ObjectId(), senderName: 'Agent', message: 'Hello' }],
+        save: async function() { return this; }
+      };
+      const supportService = new (require('./modules/support/support.service').SupportService)(
+        null, null, {
+          findOne: async () => activeSes,
+          findById: async () => activeSes
+        }
+      );
+      
+      const localAgentService = new (require('./modules/agent/agent.service').AgentService)(
+        { getOrCreateSession: async () => {}, trackGuestSession: async () => {} },
+        null, null, supportService, null, null, null, null, null, null, null, null
+      );
+
+      const res = await localAgentService.processMessage({
+        message: 'help me please',
+        sessionId: 'session-live-1',
+        userId: new Types.ObjectId().toHexString(),
+        userRoles: ['Customer']
+      });
+
+      expect(res.reply).toContain('[Live Agent Active]');
+      expect(res.intent).toBe('LIVE_AGENT_MESSAGE');
+    });
+
+    it('should process CSV bulk import and update existing product details', async () => {
+      const category = await catalogService.createCategory({ name: 'BulkGeneral', slug: 'bulk-general' });
+      const brand = await catalogService.createBrand({ name: 'BulkBrand' });
+
+      const testSku = `SKU-BULK-${Date.now()}`;
+      
+      // Import 1: Create Product
+      const csvData1 = `Title,Price,SKU,Stock\nBulk Mouse,15.99,${testSku},100`;
+      const importRes1 = await catalogService.bulkImportCsv(csvData1);
+      expect(importRes1.success).toBe(true);
+      expect(importRes1.count).toBe(1);
+
+      // Verify created product details
+      const products1 = await catalogService.getProducts({ search: testSku });
+      expect(products1[0].price).toBe(15.99);
+
+      // Import 2: Update Existing Product (Bulk price/stock update)
+      const csvData2 = `Title,Price,SKU,Stock\nBulk Mouse,12.50,${testSku},250`;
+      const importRes2 = await catalogService.bulkImportCsv(csvData2);
+      expect(importRes2.success).toBe(true);
+      expect(importRes2.count).toBe(1);
+
+      // Verify updated product details
+      const products2 = await catalogService.getProducts({ search: testSku });
+      expect(products2[0].price).toBe(12.50);
+      
+      const inventory = await salesService.getInventoryByProductId(String(products2[0]._id));
+      expect(inventory.stock).toBe(250);
+    });
+
+    it('should update vendor product variants and link images conversationally', async () => {
+      // Set testProduct vendorId to current test user
+      const prod = await catalogService.getProductById(String(testProduct._id));
+      prod.vendorId = new Types.ObjectId(userId);
+      await prod.save();
+
+      // 1. Update Variants
+      const variantRes = await agentService.processMessage({
+        message: 'Red, Blue, Green',
+        sessionId: 'session-vendor-var',
+        userId,
+        userRoles: ['Vendor'],
+        activeStep: 'VENDOR_UPDATE_VARIANTS_VAL',
+        stepData: { productId: String(testProduct._id), variantKey: 'color' }
+      });
+      expect(variantRes.reply).toContain('Variants updated successfully');
+
+      const productWithVariants = await catalogService.getProductById(String(testProduct._id));
+      expect((productWithVariants as any).variants.color).toContain('Red');
+
+      // 2. Link Uploaded Image
+      const imageRes = await agentService.processMessage({
+        message: 'https://apexstore.com/images/mouse.png',
+        sessionId: 'session-vendor-img',
+        userId,
+        userRoles: ['Vendor'],
+        activeStep: 'UPLOAD_FILE_INPUT',
+        stepData: { productId: String(testProduct._id), fileType: 'image' }
+      });
+      expect(imageRes.reply).toContain('Image successfully associated');
+
+      const productWithImage = await catalogService.getProductById(String(testProduct._id));
+      expect((productWithImage as any).images[0]).toContain('_mouse.png');
+    });
+
+    it('should generate personalized, similar and bought together recommendations', async () => {
+      // Setup order history context to seed collaborative filtering
+      await salesService.placeOrder(userId, {
+        items: [{ productId: String(testProduct._id), quantity: 1 }],
+        shippingAddress: {
+          fullName: 'Jane Doe',
+          addressLine1: '456 Elm St',
+          city: 'Metropolis',
+          state: 'NY',
+          postalCode: '10001',
+          country: 'US',
+          phone: '1234567890',
+        },
+        paymentProvider: 'Wallet',
+      });
+
+      // Update search history in memory
+      await agentService.processMessage({
+        message: 'Apex Gaming Mouse',
+        sessionId: 'session-rec-1',
+        userId,
+        userRoles: ['Customer']
+      });
+
+      // Test general recommendation intent
+      const recGeneral = await agentService.processMessage({
+        message: 'recommend products',
+        sessionId: 'session-rec-1',
+        userId,
+        userRoles: ['Customer']
+      });
+      expect(recGeneral.reply).toContain('Recommendations');
+
+      // Test Frequently Bought Together intent
+      const recFbt = await agentService.processMessage({
+        message: 'what is frequently bought together with it',
+        sessionId: 'session-rec-1',
+        userId,
+        userRoles: ['Customer']
+      });
+      expect(recFbt.reply).toContain('Frequently Bought Together');
+
+      // Test Similar Products intent
+      const recSimilar = await agentService.processMessage({
+        message: 'show me similar products',
+        sessionId: 'session-rec-1',
+        userId,
+        userRoles: ['Customer']
+      });
+      expect(recSimilar.reply).toContain('Products Similar to');
     });
   });
 });

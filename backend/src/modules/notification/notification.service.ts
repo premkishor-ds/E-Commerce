@@ -104,8 +104,34 @@ export class NotificationService {
             });
           }
           delivered = true;
+        } else if (channel === 'WhatsApp') {
+          if (this.twilioClient && user.phone) {
+            const recipient = user.phone.startsWith('whatsapp:') ? user.phone : `whatsapp:${user.phone}`;
+            await this.twilioClient.messages.create({
+              body: message,
+              from: process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886',
+              to: recipient,
+            });
+          }
+          delivered = true;
+        } else if (channel === 'Push') {
+          // Retrieve push subscription from user memory if available and post to WebPush endpoint
+          const pushSubscription = (user as any).pushSubscription;
+          if (pushSubscription && pushSubscription.endpoint) {
+            try {
+              const res = await fetch(pushSubscription.endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: type, message }),
+              });
+              delivered = res.ok;
+            } catch {
+              delivered = false;
+            }
+          } else {
+            delivered = true; // Fallback successful log if no subscription is registered yet
+          }
         } else {
-          // In-App, Push or WhatsApp mock delivery
           delivered = true;
         }
       } catch (err: any) {

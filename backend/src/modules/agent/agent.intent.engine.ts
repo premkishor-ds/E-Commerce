@@ -169,6 +169,10 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'similar products',
     'alternative products',
     'recently viewed',
+    'bought together',
+    'frequently bought together',
+    'fbt',
+    'similar',
   ],
   ADD_CART: [
     'add to cart',
@@ -933,6 +937,21 @@ export function extractEntities(text: string): Record<string, string> {
 export function classifyIntent(message: string): IntentMatch {
   const lower = message.toLowerCase().trim();
   const scores: Record<string, number> = {};
+
+  if (
+    lower.includes('bought together') ||
+    lower.includes('frequently bought') ||
+    lower.includes('fbt') ||
+    lower.includes('similar products') ||
+    lower.includes('similar product') ||
+    lower === 'similar'
+  ) {
+    return {
+      intent: 'RECOMMEND',
+      score: 10,
+      entities: extractEntities(message),
+    };
+  }
 
   for (const [intent, keywords] of Object.entries(INTENT_KEYWORDS)) {
     let maxScore = 0;

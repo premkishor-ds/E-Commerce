@@ -2197,8 +2197,35 @@ Enhanced Reply:`;
           return this.buildReply('📦 Enter the new **stock** count:', 'VENDOR_PRODUCTS', 10, [], 'VENDOR_UPDATE_STOCK', data);
         } else if (q === '3' || q.includes('description')) {
           return this.buildReply('📝 Enter the new **description**:', 'VENDOR_PRODUCTS', 10, [], 'VENDOR_UPDATE_DESC', data);
+        } else if (q === '4' || q.includes('variant')) {
+          return this.buildReply('🎨 Enter the variant name / key (e.g. **color** or **size**):', 'VENDOR_PRODUCTS', 10, [], 'VENDOR_UPDATE_VARIANTS_KEY', data);
+        } else if (q === '5' || q.includes('image') || q.includes('photo')) {
+          return this.buildReply('🖼️ Please paste the **image URL** or file contents to upload as the product image:', 'VENDOR_PRODUCTS', 10, [], 'UPLOAD_FILE_INPUT', { ...data, fileType: 'image' });
         }
-        return this.buildReply('⚠️ Invalid selection. Please type 1, 2, or 3:', 'VENDOR_PRODUCTS', 0, [], 'VENDOR_UPDATE_SELECT', data, false, ['1', '2', '3']);
+        return this.buildReply('⚠️ Invalid selection. Please type 1, 2, 3, 4, or 5:', 'VENDOR_PRODUCTS', 0, [], 'VENDOR_UPDATE_SELECT', data, false, ['1', '2', '3', '4', '5']);
+      }
+
+      case 'VENDOR_UPDATE_VARIANTS_KEY': {
+        return this.buildReply(`🎨 Enter the values for **${message.trim()}** (comma-separated, e.g. "Red, Blue, Green"):`, 'VENDOR_PRODUCTS', 10, [], 'VENDOR_UPDATE_VARIANTS_VAL', { ...data, variantKey: message.trim() });
+      }
+
+      case 'VENDOR_UPDATE_VARIANTS_VAL': {
+        const values = message.split(',').map(v => v.trim()).filter(Boolean);
+        try {
+          const product = await this.catalogService.getProductById(data.productId);
+          const currentVariants = (product as any).variants || {};
+          currentVariants[data.variantKey] = values;
+          await this.catalogService.updateProduct(data.productId, { variants: currentVariants }, userId);
+          return {
+            reply: `✅ **Variants updated successfully!**\n\nAssociated variant **${data.variantKey}** with values: **${values.join(', ')}**`,
+            intent: 'VENDOR_PRODUCTS',
+            confidence: 10,
+            actions: [],
+            suggestions: ['My products'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Update failed: ${e.message}`, 'VENDOR_PRODUCTS', 0, []);
+        }
       }
 
       case 'VENDOR_UPDATE_PRICE': {
@@ -2267,7 +2294,8 @@ Enhanced Reply:`;
       }
       case 'UPLOAD_FILE_INPUT': {
         try {
-          const filename = message.includes('.') ? message : `${data.fileType || 'upload'}_${Date.now()}.png`;
+          const rawFilename = message.includes('.') ? message : `${data.fileType || 'upload'}_${Date.now()}.png`;
+          const filename = require('path').basename(rawFilename);
           const mockBuffer = Buffer.from(message);
           const mimeType = data.fileType === 'csv' ? 'text/csv' : (data.fileType === 'image' ? 'image/png' : 'application/pdf');
           
@@ -2278,8 +2306,19 @@ Enhanced Reply:`;
             mockBuffer,
           );
           
+          let extraInfo = '';
+          if (data.fileType === 'csv') {
+            const importRes = await this.catalogService.bulkImportCsv(mockBuffer.toString('utf-8'));
+            extraInfo = `\n📊 **Parsed & Imported**: Successfully processed **${importRes.count}** product records in the database.`;
+          } else if (data.fileType === 'image' && data.productId) {
+            await this.catalogService.updateProduct(data.productId, {
+              $push: { images: metadata.storageUrl }
+            });
+            extraInfo = `\n🖼️ **Linked**: Image successfully associated with product **#${data.productId}**.`;
+          }
+          
           return {
-            reply: `✅ **Upload Successful!**\n\n• **Filename**: ${metadata.filename}\n• **Size**: ${metadata.sizeBytes} bytes\n• **Security Scan**: Safe (Verified)\n• **Storage URL**: [View File](${metadata.storageUrl})`,
+            reply: `✅ **Upload Successful!**\n\n• **Filename**: ${metadata.filename}\n• **Size**: ${metadata.sizeBytes} bytes\n• **Security Scan**: Safe (Verified)\n• **Storage URL**: [View File](${metadata.storageUrl})${extraInfo}`,
             intent: 'UPLOAD_FILE',
             confidence: 10,
             actions: [],
@@ -3122,21 +3161,49 @@ Enhanced Reply:`;
       case 'RECOMMEND': {
         const memory = userId ? await this.memory.getUserMemory(userId) : null;
         const history = memory?.searchHistory || ctx.searchHistory;
-        const categories = memory?.preferredCategories || [];
 
         try {
-          const params: any = {};
-          if (categories.length) params.category = categories[0];
-          if (entities.category) params.category = entities.category;
-          if (entities.productType) params.search = entities.productType;
+          let top: any[] = [];
+          let recommendationType = 'Personalized Recommendations';
 
-          const results = await this.catalogService.getProducts(params);
-          const top = (results || [])
-            .sort(
-              (a: any, b: any) =>
-                (b.averageRating || 0) - (a.averageRating || 0),
-            )
-            .slice(0, 3);
+          if (/bought together|frequently bought|fbt/i.test(q)) {
+            // Find FBT for the last viewed or search product
+            const lastSearch = history[history.length - 1];
+            let targetProduct = null;
+            if (lastSearch) {
+              const matches = await this.catalogService.getProducts({ search: lastSearch });
+              targetProduct = matches?.[0];
+            }
+            if (targetProduct) {
+              top = await this.catalogService.getFrequentlyBoughtTogether(String(targetProduct._id));
+              recommendationType = `Frequently Bought Together with ${targetProduct.title}`;
+            }
+          } else if (/similar/i.test(q)) {
+            const lastSearch = history[history.length - 1];
+            let targetProduct = null;
+            if (lastSearch) {
+              const matches = await this.catalogService.getProducts({ search: lastSearch });
+              targetProduct = matches?.[0];
+            }
+            if (targetProduct) {
+              top = await this.catalogService.getSimilarProducts(String(targetProduct._id));
+              recommendationType = `Products Similar to ${targetProduct.title}`;
+            }
+          } else if (/recent|purchased|viewed/i.test(q) && userId) {
+            top = await this.catalogService.getRecentlyPurchased(userId);
+            recommendationType = 'Your Recently Purchased Items';
+          }
+
+          // Fallback to general personalized recommendation
+          if (top.length === 0) {
+            if (userId) {
+              top = await this.catalogService.getPersonalizedRecommendations(userId);
+            } else {
+              top = await this.catalogService.getTrendingProducts();
+              recommendationType = 'Trending Products';
+            }
+          }
+
           const list = top
             .map(
               (p: any) =>
@@ -3146,11 +3213,11 @@ Enhanced Reply:`;
 
           const personalized =
             history.length > 0
-              ? `\n\n💡 Based on your searches for: *${history.slice(-2).join(', ')}*`
+              ? `\n\n💡 Based on your search history for: *${history.slice(-2).join(', ')}*`
               : '';
 
           return this.buildReply(
-            `✨ **Top Recommendations for you:**${personalized}\n\n${list || 'No recommendations available right now. Browse our [catalog](/)!'}\n\nType any product name to add it to your cart!`,
+            `✨ **${recommendationType}:**${personalized}\n\n${list || 'No recommendations available right now. Browse our [catalog](/)!'}\n\nType any product name to add it to your cart!`,
             intent,
             8,
             [],
@@ -3164,9 +3231,9 @@ Enhanced Reply:`;
                   `Add ${p.title.split(' ').slice(0, 2).join(' ')} to cart`,
               ),
           );
-        } catch {
+        } catch (err: any) {
           return this.buildReply(
-            'Browse our **[full catalog](/)** for top-rated products!',
+            `Browse our **[full catalog](/)** for top-rated products! (Error: ${err.message})`,
             intent,
             5,
             [{ type: 'NAVIGATE', payload: { path: '/' } }],

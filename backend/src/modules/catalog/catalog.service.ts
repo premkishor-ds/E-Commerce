@@ -224,15 +224,23 @@ export class CatalogService {
 
       if (!title || isNaN(price) || !sku) continue;
 
-      const product = await this.createProduct({
-        title,
-        price,
-        sku,
-        stock,
-        description: `Imported ${title}`,
-        category: category?._id,
-        brand: brand?._id,
-      });
+      let product = await this.productRepository.findOne({ sku });
+      if (product) {
+        // Update price and details of existing product
+        await this.productRepository.update(String(product._id), { title, price });
+        await this.updateStock(sku, stock);
+      } else {
+        // Create new product
+        product = await this.createProduct({
+          title,
+          price,
+          sku,
+          stock,
+          description: `Imported ${title}`,
+          category: category?._id,
+          brand: brand?._id,
+        });
+      }
       imported.push(product);
     }
     return { success: true, count: imported.length };
@@ -429,14 +437,14 @@ export class CatalogService {
       for (const item of order.items) {
         purchasedProductIds.add(item.productId.toString());
         const prod = await this.productRepository.findById(item.productId.toString()).catch(() => null);
-        if (prod) interestedCategories.add(prod.category.toString());
+        if (prod && prod.category) interestedCategories.add(prod.category.toString());
       }
     }
 
     const cartItems = (user as any).savedCart || [];
     for (const item of cartItems) {
       const prod = await this.productRepository.findById(item.productId.toString()).catch(() => null);
-      if (prod) interestedCategories.add(prod.category.toString());
+      if (prod && prod.category) interestedCategories.add(prod.category.toString());
     }
 
 
@@ -444,7 +452,7 @@ export class CatalogService {
     // Score = (CategoryMatch * 50) + (AvgRating * 10) + (PurchasedBefore * -10)
     const scoredProducts = allProducts.map((p: any) => {
       let score = 0;
-      if (interestedCategories.has(p.category.toString())) {
+      if (p.category && interestedCategories.has(p.category.toString())) {
         score += 50;
       }
       if (purchasedProductIds.has(p._id.toString())) {

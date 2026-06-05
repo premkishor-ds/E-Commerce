@@ -256,12 +256,33 @@ export class PaymentService {
   }
 
   async verifyStripeWebhook(signature: string, payload: any) {
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
     await this.paymentWebhookLogRepository.create({
       provider: 'Stripe',
       eventType: payload.type || 'unknown',
       payload,
       status: 'Processed',
     });
+
+    if (this.stripe && webhookSecret) {
+      try {
+        const rawBody = typeof payload === 'string' ? payload : JSON.stringify(payload);
+        const event = this.stripe.webhooks.constructEvent(
+          rawBody,
+          signature,
+          webhookSecret,
+        );
+        payload = event;
+      } catch (err: any) {
+        await this.logAudit(null, null, 'StripeWebhookVerificationFailed', 'Failed', { error: err.message });
+        throw new BadRequestException(`Stripe Webhook Signature Verification Failed: ${err.message}`);
+      }
+    } else {
+      if (!signature || !signature.includes('t=') || !signature.includes('v1=')) {
+        throw new BadRequestException('Invalid or missing Stripe webhook signature');
+      }
+    }
 
     if (payload.type === 'payment_intent.succeeded') {
       const intentId = payload.data?.object?.id;
@@ -322,18 +343,12 @@ export class PaymentService {
     userId: string | null,
   ) {
     let isValid = false;
-    const rzpSecret = process.env.RAZORPAY_KEY_SECRET;
+    const rzpSecret = process.env.RAZORPAY_KEY_SECRET || 'mock_secret';
 
-    if (this.razorpay && rzpSecret) {
-      const hmac = crypto.createHmac('sha256', rzpSecret);
-      hmac.update(`${orderId}|${razorpayPaymentId}`);
-      const generatedSignature = hmac.digest('hex');
-      isValid = generatedSignature === signature;
-    } else {
-      // Mock validation mode
-      isValid = !!(signature && signature.length > 10);
-
-    }
+    const hmac = crypto.createHmac('sha256', rzpSecret);
+    hmac.update(`${orderId}|${razorpayPaymentId}`);
+    const generatedSignature = hmac.digest('hex');
+    isValid = generatedSignature === signature;
 
     if (!isValid) {
       await this.logAudit(
