@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AdminModule } from '@adminjs/nestjs';
 import AdminJSMongoose from '@adminjs/mongoose';
 import AdminJS from 'adminjs';
-import { getModelToken } from '@nestjs/mongoose';
+import { getModelToken, MongooseModule } from '@nestjs/mongoose';
 import { SchemasModule } from '../../schemas/schemas.module';
 import {
   User,
@@ -13,7 +13,10 @@ import {
   Coupon,
   Vendor,
   Inventory,
+  Log,
+  PaymentAuditLog,
 } from '../../schemas/schemas';
+import { ChatSession, ChatSessionSchema } from '../agent/agent.schemas';
 
 // Register Mongoose Adapter with AdminJS
 AdminJS.registerAdapter({
@@ -24,6 +27,9 @@ AdminJS.registerAdapter({
 @Module({
   imports: [
     SchemasModule,
+    MongooseModule.forFeature([
+      { name: ChatSession.name, schema: ChatSessionSchema },
+    ]),
     AdminModule.createAdminAsync({
       inject: [
         getModelToken(User.name),
@@ -34,6 +40,9 @@ AdminJS.registerAdapter({
         getModelToken(Coupon.name),
         getModelToken(Vendor.name),
         getModelToken(Inventory.name),
+        getModelToken(Log.name),
+        getModelToken(PaymentAuditLog.name),
+        getModelToken(ChatSession.name),
       ],
       useFactory: (
         userModel: any,
@@ -44,6 +53,9 @@ AdminJS.registerAdapter({
         couponModel: any,
         vendorModel: any,
         inventoryModel: any,
+        logModel: any,
+        paymentAuditLogModel: any,
+        chatSessionModel: any,
       ) => ({
         adminJsOptions: {
           rootPath: '/admin',
@@ -56,6 +68,9 @@ AdminJS.registerAdapter({
             { resource: ticketModel, options: { navigation: 'Support' } },
             { resource: reviewModel, options: { navigation: 'Support' } },
             { resource: vendorModel, options: { navigation: 'Vendors' } },
+            { resource: logModel, options: { navigation: 'Logs & Audits' } },
+            { resource: paymentAuditLogModel, options: { navigation: 'Logs & Audits' } },
+            { resource: chatSessionModel, options: { navigation: 'Logs & Audits' } },
           ],
           branding: {
             companyName: 'ApexStore',

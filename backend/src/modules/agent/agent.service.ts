@@ -422,7 +422,7 @@ Enhanced Reply:`;
     const isActuallyClarifying = intelResult.needsClarification && (ruleMatch.intent === 'UNKNOWN' || ruleMatch.score < 4);
 
     if (isActuallyFallback) {
-      const reply = intelResult.fallbackQuestion;
+      const reply = intelResult.fallbackQuestion ?? '';
       const translatedReply = this.translateReply('HELP', reply, lang);
       await this.memory.appendMessage(sessionId, 'bot', translatedReply, 'HELP');
       return {
@@ -435,7 +435,7 @@ Enhanced Reply:`;
     }
 
     if (isActuallyClarifying && intelResult.clarificationQuestion) {
-      const reply = intelResult.clarificationQuestion;
+      const reply = intelResult.clarificationQuestion ?? '';
       const translatedReply = this.translateReply('HELP', reply, lang);
       await this.memory.appendMessage(sessionId, 'bot', translatedReply, 'HELP');
       return {
@@ -2888,12 +2888,47 @@ Enhanced Reply:`;
           );
         }
 
-        // ── Photo / avatar update — still navigate to profile page ──
+        // ── Photo / avatar update — check if URL is provided to update directly ──
+        const urlMatch = message.match(/https?:\/\/[^\s]+/i);
+        if (
+          urlMatch &&
+          (q.includes('picture') ||
+            q.includes('photo') ||
+            q.includes('avatar') ||
+            q.includes('image') ||
+            q.includes('pic'))
+        ) {
+          const avatarUrl = urlMatch[0];
+          try {
+            await this.profileService.updateAvatar(userId, avatarUrl);
+            return {
+              reply: `🖼️ **Profile Picture Updated!**\n\nYour profile photo has been successfully updated to the new URL:\n\n${avatarUrl}`,
+              intent: 'UPDATE_PROFILE',
+              confidence: 10,
+              actions: [
+                {
+                  type: 'NOTIFY',
+                  payload: { message: `Profile picture updated successfully!` },
+                },
+              ],
+              suggestions: ['View profile', 'My orders'],
+            };
+          } catch (err: any) {
+            return this.buildReply(
+              `❌ Failed to update profile picture: ${err.message || 'Unknown error'}.`,
+              intent,
+              0,
+              [],
+            );
+          }
+        }
+
         if (
           q.includes('picture') ||
           q.includes('photo') ||
           q.includes('avatar') ||
-          q.includes('image')
+          q.includes('image') ||
+          q.includes('pic')
         ) {
           return this.buildReply(
             '🖼️ **Change Profile Picture / Photo:**\n\nTo update your profile avatar:\n1. Go to the [Profile Page](/profile)\n2. Click on your current avatar\n3. Paste a new image URL to update it instantly!',

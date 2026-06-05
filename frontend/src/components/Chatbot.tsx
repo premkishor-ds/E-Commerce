@@ -103,7 +103,7 @@ export default function Chatbot() {
   const [currentSuggestions, setCurrentSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Agent state (multi-step workflows)
   const [activeStep, setActiveStep] = useState<string | undefined>(undefined);
@@ -680,6 +680,78 @@ export default function Chatbot() {
     }
   }, [isTyping, isOnline, activeStep, stepData, callAgent, handleLocalStep, localFallback, executeActions, user]);
 
+  // Position/Dragging and Resizing state
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const chatWindowRef = useRef<HTMLDivElement>(null);
+
+  const [height, setHeight] = useState<number>(600);
+  const [isResizing, setIsResizing] = useState(false);
+  const resizeStartY = useRef<number>(0);
+  const resizeStartHeight = useRef<number>(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('input') || target.closest('a')) return;
+    
+    e.preventDefault();
+    setIsDragging(true);
+    
+    const rect = chatWindowRef.current?.getBoundingClientRect();
+    const currentX = rect ? rect.left : window.innerWidth - 424;
+    const currentY = rect ? rect.top : window.innerHeight - (height + 24);
+    
+    dragStart.current = {
+      x: e.clientX - currentX,
+      y: e.clientY - currentY,
+    };
+  };
+
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(true);
+    resizeStartY.current = e.clientY;
+    resizeStartHeight.current = height;
+  };
+
+  useEffect(() => {
+    if (!isDragging && !isResizing) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        let newX = e.clientX - dragStart.current.x;
+        let newY = e.clientY - dragStart.current.y;
+        
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const width = chatWindowRef.current?.offsetWidth || 400;
+        
+        newX = Math.max(0, Math.min(newX, windowWidth - width));
+        newY = Math.max(0, Math.min(newY, windowHeight - height));
+        
+        setPosition({ x: newX, y: newY });
+      } else if (isResizing) {
+        const deltaY = e.clientY - resizeStartY.current;
+        const newHeight = Math.max(400, Math.min(window.innerHeight - 50, resizeStartHeight.current - deltaY));
+        setHeight(newHeight);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      setIsResizing(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, isResizing, height]);
+
   // ─── RENDER ──────────────────────────────────────────────────────────────
  
   if (!mounted) return null;
@@ -707,11 +779,31 @@ export default function Chatbot() {
 
       {/* ── Chat Window ── */}
       {isOpen && (
-        <div className="flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 w-[360px] sm:w-[400px] h-[580px] rounded-2xl shadow-2xl overflow-hidden"
-          style={{ animation: 'apexSlideUp 0.2s ease-out' }}>
+        <div 
+          ref={chatWindowRef}
+          className="flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 w-[360px] sm:w-[400px] rounded-2xl shadow-2xl overflow-hidden relative"
+          style={{ 
+            animation: 'apexSlideUp 0.2s ease-out',
+            position: position ? 'fixed' : 'absolute',
+            height: `${height}px`,
+            ...(position 
+              ? { left: `${position.x}px`, top: `${position.y}px`, bottom: 'auto', right: 'auto' } 
+              : { bottom: '0px', right: '0px' }
+            )
+          }}
+        >
+          {/* Resize Handle at Top Border */}
+          <div 
+            onMouseDown={handleResizeMouseDown}
+            className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize z-50 hover:bg-indigo-500/20 active:bg-indigo-600/40 transition-colors"
+            title="Drag to resize height"
+          />
 
           {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-4 text-white flex items-center justify-between flex-shrink-0 shadow-md">
+          <div 
+            onMouseDown={handleMouseDown}
+            className="bg-gradient-to-r from-indigo-600 to-violet-600 p-4 text-white flex items-center justify-between flex-shrink-0 shadow-md cursor-grab active:cursor-grabbing select-none pt-5"
+          >
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="h-9 w-9 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
@@ -827,20 +919,26 @@ export default function Chatbot() {
           {/* Input */}
           <form
             onSubmit={e => { e.preventDefault(); handleSendMessage(inputValue); }}
-            className="p-3 bg-white dark:bg-zinc-900 border-t dark:border-zinc-800 flex gap-2 flex-shrink-0"
+            className="p-3 bg-white dark:bg-zinc-900 border-t dark:border-zinc-800 flex gap-2 flex-shrink-0 items-end"
           >
-            <input
+            <textarea
               ref={inputRef}
-              type="text"
+              rows={1}
               placeholder={TYPING_PLACEHOLDERS[placeholderIndex]}
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
-              className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 dark:bg-zinc-950 text-zinc-900 dark:text-white placeholder-zinc-400 transition-all disabled:opacity-50"
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage(inputValue);
+                }
+              }}
+              className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 dark:bg-zinc-950 text-zinc-900 dark:text-white placeholder-zinc-400 transition-all disabled:opacity-50 resize-none max-h-24 py-2"
             />
             <button
               type="submit"
               disabled={isTyping || !inputValue.trim()}
-              className="rounded-xl bg-indigo-600 text-white px-3 py-2 hover:bg-indigo-500 shadow active:scale-95 transition-all flex items-center justify-center shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="rounded-xl bg-indigo-600 text-white px-3 py-2 hover:bg-indigo-500 shadow active:scale-95 transition-all flex items-center justify-center shrink-0 disabled:opacity-40 disabled:cursor-not-allowed h-[32px] w-[38px]"
               aria-label="Send message"
             >
               {isTyping
