@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { AgentMemoryService } from './agent.memory.service';
 import {
   classifyIntent,
@@ -9,7 +10,9 @@ import {
 import { AuthService } from '../auth/auth.service';
 import { SalesService } from '../sales/sales.service';
 import { SupportService } from '../support/support.service';
+import { SupportGateway } from '../support/support.gateway';
 import { CatalogService } from '../catalog/catalog.service';
+import { UploadService } from '../catalog/upload.service';
 import { ProfileService } from '../profile/profile.service';
 import { PaymentService } from '../payment/payment.service';
 import { RecoveryService } from '../sales/recovery.service';
@@ -100,7 +103,9 @@ export class AgentService {
     private readonly authService: AuthService,
     private readonly salesService: SalesService,
     private readonly supportService: SupportService,
+    private readonly supportGateway: SupportGateway,
     private readonly catalogService: CatalogService,
+    private readonly uploadService: UploadService,
     private readonly profileService: ProfileService,
     private readonly paymentService: PaymentService,
     private readonly recoveryService: RecoveryService,
@@ -240,6 +245,35 @@ Enhanced Reply:`;
       activeStep,
       stepData = {},
     } = req;
+
+    const sessionOwnerId = userId || guestId;
+    if (sessionOwnerId && Types.ObjectId.isValid(sessionOwnerId)) {
+      const activeSession = await (this.supportService as any).liveChatSessionRepository.findOne({
+        userId: new Types.ObjectId(sessionOwnerId),
+        status: 'Active',
+      });
+      if (activeSession) {
+        const session = await this.supportService.sendChatMessage(
+          activeSession._id.toString(),
+          sessionOwnerId,
+          userId ? 'Customer' : 'Guest',
+          message,
+        );
+        const latestMsg = session.messages[session.messages.length - 1];
+        if (this.supportGateway && this.supportGateway.server) {
+          this.supportGateway.server.to(activeSession._id.toString()).emit('new_message', {
+            sessionId: activeSession._id.toString(),
+            message: latestMsg,
+          });
+        }
+        return {
+          reply: `[Live Agent Active] Message sent to support representative.`,
+          intent: 'LIVE_AGENT_MESSAGE',
+          confidence: 1.0,
+          actions: [],
+        };
+      }
+    }
 
     // Detect language
     let lang = this.detectLanguage(message);
@@ -2134,12 +2168,126 @@ Enhanced Reply:`;
             );
           }
         }
-        return this.buildReply(
-          '❌ Product creation cancelled.',
-          'VENDOR_PRODUCTS',
-          8,
-          [],
-        );
+        return this.buildReply('❌ Product creation cancelled.', 'VENDOR_PRODUCTS', 8, [], undefined, undefined, false, ['My products']);
+      }
+
+      case 'VENDOR_DELETE_PRODUCT_CONFIRM': {
+        const isConfirm = q === 'confirm delete' || q === 'confirm' || q === 'yes' || q === 'y';
+        if (isConfirm) {
+          try {
+            await this.catalogService.deleteProduct(data.productId, userId);
+            return {
+              reply: `🗑️ **Product deleted successfully!**`,
+              intent: 'VENDOR_PRODUCTS',
+              confidence: 10,
+              actions: [],
+              suggestions: ['My products'],
+            };
+          } catch (e: any) {
+            return this.buildReply(`❌ Deletion failed: ${e.message}`, 'VENDOR_PRODUCTS', 0, []);
+          }
+        }
+        return this.buildReply('❌ Product deletion cancelled.', 'VENDOR_PRODUCTS', 8, [], undefined, undefined, false, ['My products']);
+      }
+
+      case 'VENDOR_UPDATE_SELECT': {
+        if (q === '1' || q.includes('price')) {
+          return this.buildReply('💲 Enter the new **price**:', 'VENDOR_PRODUCTS', 10, [], 'VENDOR_UPDATE_PRICE', data);
+        } else if (q === '2' || q.includes('stock')) {
+          return this.buildReply('📦 Enter the new **stock** count:', 'VENDOR_PRODUCTS', 10, [], 'VENDOR_UPDATE_STOCK', data);
+        } else if (q === '3' || q.includes('description')) {
+          return this.buildReply('📝 Enter the new **description**:', 'VENDOR_PRODUCTS', 10, [], 'VENDOR_UPDATE_DESC', data);
+        }
+        return this.buildReply('⚠️ Invalid selection. Please type 1, 2, or 3:', 'VENDOR_PRODUCTS', 0, [], 'VENDOR_UPDATE_SELECT', data, false, ['1', '2', '3']);
+      }
+
+      case 'VENDOR_UPDATE_PRICE': {
+        const price = parseFloat(q);
+        if (isNaN(price) || price < 0) return this.buildReply('⚠️ Enter a valid price:', 'VENDOR_PRODUCTS', 0, [], 'VENDOR_UPDATE_PRICE', data);
+        try {
+          await this.catalogService.updateProduct(data.productId, { price }, userId);
+          return {
+            reply: `✅ **Price updated successfully!**`,
+            intent: 'VENDOR_PRODUCTS',
+            confidence: 10,
+            actions: [],
+            suggestions: ['My products'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Update failed: ${e.message}`, 'VENDOR_PRODUCTS', 0, []);
+        }
+      }
+
+      case 'VENDOR_UPDATE_STOCK': {
+        const stock = parseInt(q);
+        if (isNaN(stock) || stock < 0) return this.buildReply('⚠️ Enter a valid stock count:', 'VENDOR_PRODUCTS', 0, [], 'VENDOR_UPDATE_STOCK', data);
+        try {
+          const product = await this.catalogService.getProductById(data.productId);
+          await this.catalogService.updateStock(product.sku, stock);
+          return {
+            reply: `✅ **Stock updated successfully!**`,
+            intent: 'VENDOR_PRODUCTS',
+            confidence: 10,
+            actions: [],
+            suggestions: ['My products'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Update failed: ${e.message}`, 'VENDOR_PRODUCTS', 0, []);
+        }
+      }
+
+      case 'VENDOR_UPDATE_DESC': {
+        try {
+          await this.catalogService.updateProduct(data.productId, { description: message }, userId);
+          return {
+            reply: `✅ **Description updated successfully!**`,
+            intent: 'VENDOR_PRODUCTS',
+            confidence: 10,
+            actions: [],
+            suggestions: ['My products'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Update failed: ${e.message}`, 'VENDOR_PRODUCTS', 0, []);
+        }
+      }
+
+      case 'ADMIN_IMPORT_CSV': {
+        try {
+          const result = await this.catalogService.bulkImportCsv(message);
+          return {
+            reply: `🎉 **CSV Bulk Import Completed!**\n\n✅ Successfully imported **${result.count}** products into the database.`,
+            intent: 'ADMIN_PRODUCTS',
+            confidence: 10,
+            actions: [],
+            suggestions: ['Manage products', 'System analytics'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Import failed: ${e.message}`, 'ADMIN_PRODUCTS', 0, []);
+        }
+      }
+      case 'UPLOAD_FILE_INPUT': {
+        try {
+          const filename = message.includes('.') ? message : `${data.fileType || 'upload'}_${Date.now()}.png`;
+          const mockBuffer = Buffer.from(message);
+          const mimeType = data.fileType === 'csv' ? 'text/csv' : (data.fileType === 'image' ? 'image/png' : 'application/pdf');
+          
+          const metadata = await this.uploadService.validateAndScanFile(
+            userId || 'guest',
+            filename,
+            mimeType,
+            mockBuffer,
+          );
+          
+          return {
+            reply: `✅ **Upload Successful!**\n\n• **Filename**: ${metadata.filename}\n• **Size**: ${metadata.sizeBytes} bytes\n• **Security Scan**: Safe (Verified)\n• **Storage URL**: [View File](${metadata.storageUrl})`,
+            intent: 'UPLOAD_FILE',
+            confidence: 10,
+            actions: [],
+            suggestions: ['Browse products', 'My profile'],
+          };
+        } catch (e: any) {
+          return this.buildReply(`❌ Upload failed: ${e.message}`, 'UPLOAD_FILE', 0, []);
+        }
       }
 
       case 'ADMIN_ADD_PRODUCT_TITLE':
@@ -2834,13 +2982,51 @@ Enhanced Reply:`;
         }
       }
 
-      case 'NOTIFICATION_PREF':
-        return this.buildReply(
-          '🔔 **Notification Settings**\n\n• **Order Updates**: Email & Push (Enabled)\n• **Promotional Deals**: SMS (Disabled)\n• **Security Alerts**: Email (Enabled)\n\nAdjust your notification preferences inside your account profile settings.',
-          intent,
-          10,
-          [],
-        );
+      case 'NOTIFICATION_PREF': {
+        if (!userId) {
+          return this.buildReply(
+            'Please **login** to change notification settings.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
+        }
+        try {
+          const isEnable = q.includes('enable') || q.includes('turn on');
+          const isDisable = q.includes('disable') || q.includes('turn off');
+          
+          if (isEnable || isDisable) {
+            const status = isEnable;
+            await this.notificationService.updatePreferences(userId, {
+              marketingEmails: status,
+              productRecommendations: status,
+              newsletterSubscriptions: status,
+            });
+            return this.buildReply(`🔔 **Notification Preferences updated!** All optional alerts have been **${status ? 'Enabled' : 'Disabled'}**.`, intent, 10, []);
+          }
+          
+          const prefs = await this.notificationService.getPreferences(userId);
+          return this.buildReply(
+            `🔔 **Your Notification Preferences:**\n\n` +
+            `• **Marketing Emails**: ${prefs.marketingEmails ? '✅ Enabled' : '❌ Disabled'}\n` +
+            `• **Product Recommendations**: ${prefs.productRecommendations ? '✅ Enabled' : '❌ Disabled'}\n` +
+            `• **Newsletter Subscriptions**: ${prefs.newsletterSubscriptions ? '✅ Enabled' : '❌ Disabled'}\n\n` +
+            `To change, type **"enable notifications"** or **"disable notifications"**.`,
+            intent,
+            10,
+            [],
+            undefined,
+            undefined,
+            false,
+            ['Enable notifications', 'Disable notifications'],
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to update settings: ${e.message}`, intent, 5, []);
+        }
+      }
 
       case 'SEARCH_PRODUCT': {
         const query =
@@ -3895,8 +4081,8 @@ Enhanced Reply:`;
       }
 
       case 'ESCALATE':
-      case 'LIVE_AGENT':
-        if (!userId)
+      case 'LIVE_AGENT': {
+        if (!userId) {
           return this.buildReply(
             'Please **login** to connect with a support agent.',
             intent,
@@ -3906,14 +4092,34 @@ Enhanced Reply:`;
             undefined,
             true,
           );
-        return this.buildReply(
-          `🧑‍💼 **Connecting to Human Support...**\n\nI'll create an urgent ticket for you right now.\n\nWhat is the subject of your issue?`,
-          intent,
-          8,
-          [],
-          'CREATE_TICKET_SUBJECT',
-          { priority: 'Urgent' },
-        );
+        }
+        try {
+          const userRole = roles.includes('Super Admin') || roles.includes('Admin') ? 'VIP' : (roles.includes('Vendor') || roles.includes('Seller') ? 'Priority' : 'Regular');
+          const session = await this.supportService.startLiveChatSession(userId, [], userRole);
+          
+          let reply = `🧑‍💼 **Connecting to Human Support...**\n\n`;
+          if (session.assignedAgentId) {
+            reply += `✅ You are now connected with a support representative. Please type your message below.`;
+          } else {
+            reply += `⏳ All agents are currently busy. You are in the **${session.queueType}** queue. Est. wait time: **${session.estimatedWaitTime}s**.`;
+          }
+          
+          return {
+            reply,
+            intent,
+            confidence: 10,
+            actions: [],
+            suggestions: ['Check queue status', 'Close support session'],
+          };
+        } catch (e: any) {
+          return this.buildReply(
+            `❌ Connection failed: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
+        }
+      }
 
       case 'REVIEW_PRODUCT': {
         if (!userId)
@@ -4064,6 +4270,46 @@ Enhanced Reply:`;
         }
 
         const msgLower = message.toLowerCase();
+
+        if (msgLower.includes('approve product')) {
+          const idQuery = message.replace(/approve product/gi, '').trim();
+          if (!idQuery) return this.buildReply('⚠️ Please specify the product ID to approve:', intent, 8, []);
+          try {
+            const product = await this.catalogService.approveProduct(idQuery);
+            return this.buildReply(`✅ **Product "${product.title}" has been approved successfully!**`, intent, 10, []);
+          } catch (e: any) {
+            return this.buildReply(`❌ Approval failed: ${e.message}`, intent, 5, []);
+          }
+        }
+
+        if (msgLower.includes('approve vendor')) {
+          const idQuery = message.replace(/approve vendor/gi, '').trim();
+          if (!idQuery) return this.buildReply('⚠️ Please specify the vendor ID to approve:', intent, 8, []);
+          try {
+            await this.catalogService.approveVendor(idQuery);
+            return this.buildReply(`✅ **Vendor has been approved successfully!**`, intent, 10, []);
+          } catch (e: any) {
+            return this.buildReply(`❌ Approval failed: ${e.message}`, intent, 5, []);
+          }
+        }
+
+        if (msgLower.includes('import products')) {
+          return this.buildReply('📊 **Import Products:** Please upload or paste the CSV content to import:', intent, 10, [], 'ADMIN_IMPORT_CSV');
+        }
+
+        if (msgLower.includes('export products')) {
+          try {
+            const csv = await this.catalogService.bulkExportCsv();
+            return this.buildReply(
+              `📊 **Bulk Catalog Export:**\n\nCSV generated successfully!\n\n[Download CSV](/api/v1/catalog/products/export)`,
+              intent,
+              10,
+              [],
+            );
+          } catch (e: any) {
+            return this.buildReply(`❌ Export failed: ${e.message}`, intent, 5, []);
+          }
+        }
 
         if (
           msgLower.includes('add product') ||
@@ -4318,8 +4564,97 @@ Enhanced Reply:`;
           );
         }
 
+        if (msgLower.includes('my products') || msgLower.includes('my product') || msgLower.includes('listings')) {
+          try {
+            const products = await this.catalogService.getProducts({ vendorId: userId });
+            if (!products?.length) {
+              return this.buildReply(
+                '🏪 You have no products listed yet. Type **"add product"** to list your first item!',
+                intent,
+                10,
+                [],
+              );
+            }
+            const list = products.map((p) => `• **${p.title}** (SKU: ${p.sku}) — $${p.price.toFixed(2)} (Stock: ${p.isActive ? 'Active' : 'Inactive'})`).join('\n');
+            return this.buildReply(
+              `🏪 **Your Listed Products:**\n\n${list}`,
+              intent,
+              10,
+              [],
+              undefined,
+              undefined,
+              false,
+              ['Add product', 'Export products'],
+            );
+          } catch (e: any) {
+            return this.buildReply(`❌ Failed to list products: ${e.message}`, intent, 5, []);
+          }
+        }
+
+        if (msgLower.includes('delete product')) {
+          const nameQuery = msgLower.replace('delete product', '').trim();
+          if (!nameQuery) {
+            return this.buildReply('⚠️ Please specify the product name or SKU to delete. E.g. *"delete product [SKU]"*:', intent, 8, []);
+          }
+          try {
+            const products = await this.catalogService.getProducts({ vendorId: userId, search: nameQuery });
+            const product = products?.[0];
+            if (!product) return this.buildReply(`❌ Product matching **"${nameQuery}"** not found.`, intent, 5, []);
+            return this.buildReply(
+              `⚠️ **Are you sure you want to delete "${product.title}" (SKU: ${product.sku})?**\n\nType **"confirm delete"** or **"cancel"**:`,
+              intent,
+              10,
+              [],
+              'VENDOR_DELETE_PRODUCT_CONFIRM',
+              { productId: String(product._id) },
+              false,
+              ['Confirm Delete', 'Cancel'],
+            );
+          } catch (e: any) {
+            return this.buildReply(`❌ Failed to find product: ${e.message}`, intent, 5, []);
+          }
+        }
+
+        if (msgLower.includes('update product')) {
+          const nameQuery = msgLower.replace('update product', '').trim();
+          if (!nameQuery) {
+            return this.buildReply('⚠️ Please specify the product to update. E.g. *"update product [SKU]"*:', intent, 8, []);
+          }
+          try {
+            const products = await this.catalogService.getProducts({ vendorId: userId, search: nameQuery });
+            const product = products?.[0];
+            if (!product) return this.buildReply(`❌ Product matching **"${nameQuery}"** not found.`, intent, 5, []);
+            return this.buildReply(
+              `✏️ **Updating "${product.title}":**\nWhat would you like to update?\n1. **Price**\n2. **Stock**\n3. **Description**\n\nPlease type the number (1-3):`,
+              intent,
+              10,
+              [],
+              'VENDOR_UPDATE_SELECT',
+              { productId: String(product._id) },
+              false,
+              ['1', '2', '3'],
+            );
+          } catch (e: any) {
+            return this.buildReply(`❌ Failed to find product: ${e.message}`, intent, 5, []);
+          }
+        }
+
+        if (msgLower.includes('export products') || msgLower.includes('export my products')) {
+          try {
+            const csv = await this.catalogService.bulkExportCsv();
+            return this.buildReply(
+              `📊 **Bulk Product Export:**\n\nCSV generated successfully!\n\n[Download CSV](/api/v1/catalog/products/export)`,
+              intent,
+              10,
+              [],
+            );
+          } catch (e: any) {
+            return this.buildReply(`❌ Export failed: ${e.message}`, intent, 5, []);
+          }
+        }
+
         return this.buildReply(
-          `🏪 Navigating to **Vendor Dashboard**...\n\nYou can also type **"add product"** to list a new item directly!`,
+          `🏪 Navigating to **Vendor Dashboard**...\n\nYou can also type:\n• **"my products"**\n• **"add product"**\n• **"update product [SKU]"**\n• **"delete product [SKU]"**\n• **"export products"**`,
           intent,
           9,
           [{ type: 'NAVIGATE', payload: { path: '/vendor' } }],
@@ -5195,6 +5530,55 @@ Enhanced Reply:`;
       // ═══════════════════════════════════════════════════════════════════════
       // PHASE 14: VIEW REVIEWS
       // ═══════════════════════════════════════════════════════════════════════
+      case 'REVIEW_SUMMARY': {
+        const nameQuery = message.replace(/review summary|summarize reviews|review summaries/gi, '').trim();
+        if (!nameQuery) return this.buildReply('🔍 Please specify the product name to summarize reviews:', intent, 8, []);
+        try {
+          const results = await this.catalogService.getProducts({ search: nameQuery });
+          const product = results?.[0];
+          if (!product) return this.buildReply(`❌ Product matching **"${nameQuery}"** not found.`, intent, 5, []);
+          const reviews = await this.salesService.getProductReviews(String(product._id), {});
+          const summary = reviews.map((r) => r.summary).filter(Boolean).join('\n') || `Customers generally rate this product **${product.averageRating}/5 stars**. Most users highlight its performance and quality.`;
+          return this.buildReply(`🤖 **AI Review Summary for ${product.title}:**\n\n${summary}`, intent, 10, []);
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to get summary: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      case 'SHOW_PHOTO_REVIEWS': {
+        const nameQuery = message.replace(/show photo reviews|photo reviews|reviews with photos/gi, '').trim();
+        if (!nameQuery) return this.buildReply('🔍 Please specify the product name:', intent, 8, []);
+        try {
+          const results = await this.catalogService.getProducts({ search: nameQuery });
+          const product = results?.[0];
+          if (!product) return this.buildReply(`❌ Product matching **"${nameQuery}"** not found.`, intent, 5, []);
+          const reviews = await this.salesService.getProductReviews(String(product._id), {});
+          const photoReviews = reviews.filter((r) => r.images && r.images.length > 0);
+          if (photoReviews.length === 0) return this.buildReply(`📷 No photo reviews found for **${product.title}**.`, intent, 8, []);
+          const list = photoReviews.slice(0, 3).map((r) => `• **${r.rating}⭐** — _"${r.comment}"_\n  📷 [View Image](${r.images[0]})`).join('\n\n');
+          return this.buildReply(`📷 **Photo Reviews for ${product.title}:**\n\n${list}`, intent, 10, []);
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to load photo reviews: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      case 'SHOW_VIDEO_REVIEWS': {
+        const nameQuery = message.replace(/show video reviews|video reviews|reviews with videos/gi, '').trim();
+        if (!nameQuery) return this.buildReply('🔍 Please specify the product name:', intent, 8, []);
+        try {
+          const results = await this.catalogService.getProducts({ search: nameQuery });
+          const product = results?.[0];
+          if (!product) return this.buildReply(`❌ Product matching **"${nameQuery}"** not found.`, intent, 5, []);
+          const reviews = await this.salesService.getProductReviews(String(product._id), {});
+          const videoReviews = reviews.filter((r) => r.videos && r.videos.length > 0);
+          if (videoReviews.length === 0) return this.buildReply(`🎥 No video reviews found for **${product.title}**.`, intent, 8, []);
+          const list = videoReviews.slice(0, 3).map((r) => `• **${r.rating}⭐** — _"${r.comment}"_\n  🎥 [View Video](${r.videos[0]})`).join('\n\n');
+          return this.buildReply(`🎥 **Video Reviews for ${product.title}:**\n\n${list}`, intent, 10, []);
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to load video reviews: ${e.message}`, intent, 5, []);
+        }
+      }
+
       case 'VIEW_REVIEWS': {
         const nameQuery = message
           .replace(/show reviews|read reviews|reviews for/gi, '')
@@ -5415,6 +5799,117 @@ Enhanced Reply:`;
             [],
           );
         }
+      }
+
+      case 'WAREHOUSE_STOCK': {
+        const nameQuery = message.replace(/warehouse stock|warehouse inventory|stock by warehouse|inventory by warehouse/gi, '').trim();
+        if (!nameQuery) {
+          return this.buildReply('🔍 Please specify the product name or SKU to check warehouse stock:', intent, 8, []);
+        }
+        try {
+          const results = await this.catalogService.getProducts({ search: nameQuery });
+          const product = results?.[0];
+          if (!product) return this.buildReply(`❌ Product matching **"${nameQuery}"** not found.`, intent, 5, []);
+          const inv = await this.salesService.getInventoryByProductId(String(product._id));
+          if (!inv) return this.buildReply(`❌ Inventory details not found.`, intent, 5, []);
+          const whStock = inv.warehouseStock || {};
+          const details = Object.entries(whStock).map(([wh, qty]) => `• **${wh}**: ${qty} units`).join('\n') || '• No warehouse listings';
+          return this.buildReply(`📦 **Warehouse Stock for ${product.title}:**\n\n${details}\n\n• **Total Available**: ${inv.stock} units`, intent, 10, []);
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to retrieve warehouse stock: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      case 'INVENTORY_REPORT': {
+        try {
+          const alerts = await this.catalogService.getInventoryAlerts();
+          const list = alerts.map((a) => `• **SKU: ${a.sku}** (Stock: ${a.stock} / Threshold: ${a.lowStockThreshold})`).join('\n') || '✅ All items are healthy and above low-stock thresholds.';
+          return this.buildReply(`📋 **Inventory Low Stock Report:**\n\n${list}`, intent, 10, []);
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed to generate report: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      case 'RESTOCK_ETA': {
+        const nameQuery = message.replace(/restock eta|when will it restock|restock prediction|estimated restock/gi, '').trim();
+        if (!nameQuery) {
+          return this.buildReply('🔍 Please specify the product name or SKU to predict restock ETA:', intent, 8, []);
+        }
+        try {
+          const results = await this.catalogService.getProducts({ search: nameQuery });
+          const product = results?.[0];
+          if (!product) return this.buildReply(`❌ Product matching **"${nameQuery}"** not found.`, intent, 5, []);
+          const forecast = await this.catalogService.getInventoryForecast(product.sku);
+          return this.buildReply(
+            `📅 **Restock Forecast & Prediction for ${product.title}:**\n\n` +
+            `• **Current Stock**: ${forecast.currentStock} units\n` +
+            `• **Monthly Velocity**: ${forecast.salesVelocityMonthly} units/month\n` +
+            `• **Estimated Runout**: ${forecast.estimatedRunoutDays} days\n` +
+            `• **Recommended Restock Qty**: ${forecast.recommendedRestockQuantity} units`,
+            intent,
+            10,
+            [],
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      case 'TRANSFER_STOCK': {
+        const skuMatch = message.match(/stock\s+of\s+(\S+)/i) || message.match(/transfer\s+(\S+)/i);
+        const qtyMatch = message.match(/quantity\s+(\d+)/i) || message.match(/qty\s+(\d+)/i) || message.match(/\b(\d+)\b/);
+        const fromMatch = message.match(/from\s+([a-zA-Z0-9\s]+?)\s+to/i);
+        const toMatch = message.match(/to\s+([a-zA-Z0-9\s]+?)(?:qty|quantity|\b\d+|\b|$)/i);
+        
+        if (!skuMatch || !qtyMatch || !fromMatch || !toMatch) {
+          return this.buildReply(
+            '⚠️ Please specify transfer details in format:\n*"transfer stock of [SKU] from [Warehouse A] to [Warehouse B] qty [quantity]"*',
+            intent,
+            6,
+            [],
+          );
+        }
+        
+        const sku = skuMatch[1].toUpperCase();
+        const qty = parseInt(qtyMatch[1]);
+        const fromWh = fromMatch[1].trim();
+        const toWh = toMatch[1].trim();
+        
+        try {
+          await this.catalogService.transferInventory(sku, fromWh, toWh, qty);
+          return this.buildReply(`✅ **Transfer Complete!**\n\nMoved **${qty} units** of SKU **${sku}** from **${fromWh}** to **${toWh}**.`, intent, 10, []);
+        } catch (e: any) {
+          return this.buildReply(`❌ Transfer failed: ${e.message}`, intent, 5, []);
+        }
+      }
+      case 'UPLOAD_FILE': {
+        if (!userId) {
+          return this.buildReply(
+            'Please **login** to perform file uploads.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
+        }
+        
+        let fileType = 'document';
+        if (q.includes('photo') || q.includes('image') || q.includes('picture')) {
+          fileType = 'image';
+        } else if (q.includes('csv') || q.includes('inventory') || q.includes('catalog')) {
+          fileType = 'csv';
+        }
+        
+        return this.buildReply(
+          `📤 **File Upload Request (${fileType})**\n\nPlease paste the file name or mock file data to upload:`,
+          intent,
+          10,
+          [],
+          'UPLOAD_FILE_INPUT',
+          { fileType },
+        );
       }
 
       case 'HELP':

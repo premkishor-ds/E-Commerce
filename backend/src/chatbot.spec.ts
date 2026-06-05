@@ -46,6 +46,8 @@ import { PaymentService } from './modules/payment/payment.service';
 import { RecoveryService } from './modules/sales/recovery.service';
 import { VoiceService } from './modules/voice/voice.service';
 import { NotificationService } from './modules/notification/notification.service';
+import { SupportGateway } from './modules/support/support.gateway';
+import { UploadService } from './modules/catalog/upload.service';
 
 function createQuery(result: any) {
   const query = {
@@ -261,6 +263,8 @@ describe('Chatbot Conversational Flows (e2e)', () => {
       RecoveryService,
       VoiceService,
       NotificationService,
+      SupportGateway,
+      UploadService,
       UserRepository,
       ProductRepository,
       InventoryRepository,

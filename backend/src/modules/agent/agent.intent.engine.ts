@@ -395,6 +395,21 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     '5 star',
     'verified reviews',
   ],
+  REVIEW_SUMMARY: [
+    'review summary',
+    'summarize reviews',
+    'review summaries',
+  ],
+  SHOW_PHOTO_REVIEWS: [
+    'show photo reviews',
+    'photo reviews',
+    'reviews with photos',
+  ],
+  SHOW_VIDEO_REVIEWS: [
+    'show video reviews',
+    'video reviews',
+    'reviews with videos',
+  ],
   BROWSE_CATEGORY: [
     'category',
     'categories',
@@ -411,6 +426,36 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'stock',
     'availability',
     'how many left',
+  ],
+  WAREHOUSE_STOCK: [
+    'warehouse stock',
+    'warehouse inventory',
+    'stock by warehouse',
+    'inventory by warehouse',
+  ],
+  INVENTORY_REPORT: [
+    'inventory report',
+    'stock report',
+    'low stock report',
+  ],
+  RESTOCK_ETA: [
+    'restock eta',
+    'when will it restock',
+    'restock prediction',
+    'estimated restock',
+  ],
+  TRANSFER_STOCK: [
+    'transfer stock',
+    'warehouse transfer',
+    'move stock',
+  ],
+  UPLOAD_FILE: [
+    'upload return photo',
+    'upload inventory file',
+    'upload product image',
+    'upload file',
+    'upload document',
+    'attach file',
   ],
   PRICE_ALERT: [
     'notify me when',
@@ -1022,6 +1067,11 @@ export const INTENT_PERMISSIONS: Record<string, string[]> = {
   VIEW_PAYMENT_HISTORY: ['Customer', 'Admin', 'Super Admin'],
   CHECK_PAYMENT_STATUS: ['Customer', 'Admin', 'Super Admin'],
   RECOVER_CART: ['Customer', 'Admin', 'Super Admin'],
+  WAREHOUSE_STOCK: ['Admin', 'Super Admin', 'Vendor', 'Seller', 'Customer Support'],
+  INVENTORY_REPORT: ['Admin', 'Super Admin', 'Vendor', 'Seller', 'Customer Support'],
+  RESTOCK_ETA: ['Admin', 'Super Admin', 'Vendor', 'Seller', 'Customer Support', 'Customer'],
+  TRANSFER_STOCK: ['Admin', 'Super Admin', 'Vendor', 'Seller'],
+  UPLOAD_FILE: ['Customer', 'Admin', 'Super Admin', 'Vendor', 'Seller', 'Customer Support'],
 };
 
 export function hasPermission(intent: string, userRoles: string[]): boolean {
