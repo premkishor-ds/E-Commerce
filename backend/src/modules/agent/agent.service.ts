@@ -7,6 +7,7 @@ import {
   hasPermission,
   INTENT_PERMISSIONS,
 } from './agent.intent.engine';
+import { ChatbotIntelligenceService } from '../chatbot-intelligence/services/chatbot-intelligence.service';
 import { AuthService } from '../auth/auth.service';
 import { SalesService } from '../sales/sales.service';
 import { SupportService } from '../support/support.service';
@@ -18,6 +19,14 @@ import { PaymentService } from '../payment/payment.service';
 import { RecoveryService } from '../sales/recovery.service';
 import { VoiceService } from '../voice/voice.service';
 import { NotificationService } from '../notification/notification.service';
+import {
+  enrichIntentMatch,
+  detectEmotionalTone,
+  getEmpathyPrefix,
+  detectMultipleIntents,
+  correctTypos,
+  getClarification,
+} from './agent.semantic.engine';
 
 export interface AgentRequest {
   message: string;
@@ -111,6 +120,7 @@ export class AgentService {
     private readonly recoveryService: RecoveryService,
     private readonly voiceService: VoiceService,
     private readonly notificationService: NotificationService,
+    private readonly chatbotIntelligenceService: ChatbotIntelligenceService,
   ) {}
 
   // ─── TRANSLATION HELPERS ──────────────────────────────────────────────────
@@ -299,25 +309,109 @@ Enhanced Reply:`;
     await this.memory.getOrCreateSession(sessionId, userId, guestId);
     if (guestId) await this.memory.trackGuestSession(guestId, sessionId);
 
-    // Hybrid Intent engine: trust high-confidence rules, and use rules to refine generic AI intents
-    let intent = 'UNKNOWN';
-    let score = 1.0;
-    const ruleMatch = classifyIntent(workMessage);
-    const entities = ruleMatch.entities;
+    // ─── ACTIVE STEP FLOWS ──────────────────────────────────────────────────
+    // Run active step handler first if we are in an active workflow
+    const AUTH_STEPS = [
+      'LOGIN_EMAIL',
+      'LOGIN_PASSWORD',
+      'REGISTER_EMAIL',
+      'REGISTER_PASSWORD',
+    ];
+    const isStaleAuthStep =
+      activeStep && AUTH_STEPS.includes(activeStep) && !!userId;
 
-    if (ruleMatch.score >= 7.0) {
-      intent = ruleMatch.intent;
-      score = ruleMatch.score;
-    } else {
-      const gemmaIntent = await this.classifyIntentWithGemma(workMessage);
-      if (gemmaIntent && !(['HELP', 'UNKNOWN'].includes(gemmaIntent) && ruleMatch.intent !== 'UNKNOWN' && ruleMatch.score >= 4.0)) {
-        intent = gemmaIntent;
-        score = 10.0;
-      } else {
-        intent = ruleMatch.intent;
-        score = ruleMatch.score;
+    if (activeStep && !isStaleAuthStep) {
+      const ruleMatchForStep = classifyIntent(workMessage);
+      const stepEntities = ruleMatchForStep.entities;
+      const stepResult = await this.handleActiveStep(
+        workMessage,
+        activeStep,
+        stepData,
+        userId,
+        userRoles,
+        sessionId,
+        stepEntities,
+      );
+      if (stepResult) {
+        stepResult.reply = await this.enhanceReplyWithGemma(
+          stepResult.reply,
+          `Active workflow: ${activeStep}`,
+        );
+        stepResult.reply = this.translateReply(
+          stepResult.intent || 'UNKNOWN',
+          stepResult.reply,
+          lang,
+        );
+        await this.memory.appendMessage(
+          sessionId,
+          'bot',
+          stepResult.reply,
+          stepResult.intent || 'UNKNOWN',
+          stepResult.actions.map((a) => a.type),
+        );
+        return stepResult;
       }
     }
+
+    // 1. Get original rule-based results
+    const typoFixed = correctTypos(workMessage);
+    const ruleMatch = classifyIntent(typoFixed !== workMessage ? typoFixed : workMessage);
+    const originalEntities = ruleMatch.entities;
+
+    // 2. Route message through the Chatbot Intelligence Layer
+    const intelResult = this.chatbotIntelligenceService.processQuery(sessionId, workMessage);
+
+    // Keep GREET / BYE / THANKS / HELP if matched by rules
+    if (ruleMatch.intent === 'GREET' || ruleMatch.intent === 'BYE' || ruleMatch.intent === 'THANKS') {
+      intelResult.intent = ruleMatch.intent;
+    }
+
+    // Override generic intents with specific ruleMatch intents
+    if ((intelResult.intent === 'HELP' || intelResult.intent === 'UNKNOWN') && ruleMatch.intent !== 'UNKNOWN' && ruleMatch.intent !== 'HELP') {
+      intelResult.intent = ruleMatch.intent;
+    }
+
+    // Override if rule Match has higher confidence/score
+    if (ruleMatch.score > intelResult.confidence * 10) {
+      intelResult.intent = ruleMatch.intent;
+    }
+
+    const isActuallyFallback = intelResult.isFallback && (ruleMatch.intent === 'UNKNOWN' || ruleMatch.score < 4);
+    const isActuallyClarifying = intelResult.needsClarification && (ruleMatch.intent === 'UNKNOWN' || ruleMatch.score < 4);
+
+    if (isActuallyFallback) {
+      const reply = intelResult.fallbackQuestion;
+      const translatedReply = this.translateReply('HELP', reply, lang);
+      await this.memory.appendMessage(sessionId, 'bot', translatedReply, 'HELP');
+      return {
+        reply: translatedReply,
+        intent: 'HELP',
+        confidence: intelResult.confidence,
+        actions: [],
+        suggestions: intelResult.fallbackSuggestions,
+      };
+    }
+
+    if (isActuallyClarifying && intelResult.clarificationQuestion) {
+      const reply = intelResult.clarificationQuestion;
+      const translatedReply = this.translateReply('HELP', reply, lang);
+      await this.memory.appendMessage(sessionId, 'bot', translatedReply, 'HELP');
+      return {
+        reply: translatedReply,
+        intent: 'HELP',
+        confidence: intelResult.confidence,
+        actions: [],
+        suggestions: [],
+      };
+    }
+
+    let intent = intelResult.intent;
+    let score = Math.max(intelResult.confidence * 10, ruleMatch.score);
+    const entities = { ...originalEntities, ...intelResult.entities };
+
+    // 3. Detect emotional tone and inject empathy prefix into reply later
+    const emotionalTone = detectEmotionalTone(workMessage);
+    const empathyPrefix = getEmpathyPrefix(emotionalTone);
 
     // Save user message to database history
     await this.memory.appendMessage(sessionId, 'user', message, intent);
@@ -346,49 +440,6 @@ Enhanced Reply:`;
 
     // Get conversation context
     const ctx = await this.memory.getFullContext(sessionId, userId, guestId);
-
-    // ─── ACTIVE STEP FLOWS ──────────────────────────────────────────────────
-    // Skip login/register steps entirely if the user is already authenticated —
-    // this prevents a stale frontend activeStep from hijacking new messages.
-    const AUTH_STEPS = [
-      'LOGIN_EMAIL',
-      'LOGIN_PASSWORD',
-      'REGISTER_EMAIL',
-      'REGISTER_PASSWORD',
-    ];
-    const isStaleAuthStep =
-      activeStep && AUTH_STEPS.includes(activeStep) && !!userId;
-
-    if (activeStep && !isStaleAuthStep) {
-      const stepResult = await this.handleActiveStep(
-        workMessage,
-        activeStep,
-        stepData,
-        userId,
-        userRoles,
-        sessionId,
-        entities,
-      );
-      if (stepResult) {
-        stepResult.reply = await this.enhanceReplyWithGemma(
-          stepResult.reply,
-          `Active workflow: ${activeStep}`,
-        );
-        stepResult.reply = this.translateReply(
-          stepResult.intent || intent,
-          stepResult.reply,
-          lang,
-        );
-        await this.memory.appendMessage(
-          sessionId,
-          'bot',
-          stepResult.reply,
-          stepResult.intent || intent,
-          stepResult.actions.map((a) => a.type),
-        );
-        return stepResult;
-      }
-    }
 
     // ─── PERMISSION CHECK ────────────────────────────────────────────────────
     const evaluatedRoles = userRoles.length ? userRoles : ['Guest'];
@@ -422,6 +473,10 @@ Enhanced Reply:`;
       ctx,
       guestId,
     );
+    // Prepend empathy for emotional customers
+    if (empathyPrefix && !response.reply.startsWith(empathyPrefix)) {
+      response.reply = empathyPrefix + response.reply;
+    }
     response.reply = await this.enhanceReplyWithGemma(
       response.reply,
       `User says: ${workMessage}`,

@@ -1,6 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AgentService } from './modules/agent/agent.service';
+import { ChatbotIntelligenceService } from './modules/chatbot-intelligence/services/chatbot-intelligence.service';
+import { IntelligenceLoaderService } from './modules/chatbot-intelligence/services/intelligence-loader.service';
+import { SemanticSearchService } from './modules/chatbot-intelligence/services/semantic-search.service';
+import { GoalDetectionService } from './modules/chatbot-intelligence/services/goal-detection.service';
+import { EntityExtractionService } from './modules/chatbot-intelligence/services/entity-extraction.service';
+import { ConversationMemoryService } from './modules/chatbot-intelligence/services/conversation-memory.service';
+import { ClarificationService } from './modules/chatbot-intelligence/services/clarification.service';
+import { ConfidenceService } from './modules/chatbot-intelligence/services/confidence.service';
+import { FallbackService } from './modules/chatbot-intelligence/services/fallback.service';
+import { ConversationRecoveryService } from './modules/chatbot-intelligence/services/conversation-recovery.service';
+import { ActionPlannerService } from './modules/chatbot-intelligence/services/action-planner.service';
 import { CatalogService } from './modules/catalog/catalog.service';
 import { SalesService } from './modules/sales/sales.service';
 import { ProfileService } from './modules/profile/profile.service';
@@ -288,6 +299,17 @@ describe('Chatbot Conversational Flows (e2e)', () => {
 
     const providers: any[] = [
       AgentService,
+      ChatbotIntelligenceService,
+      IntelligenceLoaderService,
+      SemanticSearchService,
+      GoalDetectionService,
+      EntityExtractionService,
+      ConversationMemoryService,
+      ClarificationService,
+      ConfidenceService,
+      FallbackService,
+      ConversationRecoveryService,
+      ActionPlannerService,
       CatalogService,
       SalesService,
       ProfileService,

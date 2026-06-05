@@ -19,6 +19,7 @@ import { ProfileModule } from '../profile/profile.module';
 import { PaymentModule } from '../payment/payment.module';
 import { VoiceModule } from '../voice/voice.module';
 import { NotificationModule } from '../notification/notification.module';
+import { ChatbotIntelligenceModule } from '../chatbot-intelligence/chatbot-intelligence.module';
 
 @Module({
   imports: [
@@ -35,9 +36,11 @@ import { NotificationModule } from '../notification/notification.module';
     PaymentModule,
     VoiceModule,
     NotificationModule,
+    ChatbotIntelligenceModule,
   ],
   controllers: [AgentController],
   providers: [AgentService, AgentMemoryService],
   exports: [AgentService, AgentMemoryService],
 })
 export class AgentModule {}
+
