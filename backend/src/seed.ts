@@ -1,7 +1,11 @@
 import mongoose from 'mongoose';
 import * as bcrypt from 'bcrypt';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const MONGO_URI =
+  process.env.MONGODB_URI ||
   'mongodb+srv://premkishor:Hsndehzd6oFmbvHA@cluster0.x1ez0rp.mongodb.net/test';
 
 // Define schemas locally to avoid TS compilation issues in node script
@@ -225,9 +229,29 @@ const brandsData = [
   { name: 'AuraWear' },
   { name: 'NexaHome' },
   { name: 'VeloSport' },
+  { name: 'Apple' },
+  { name: 'Samsung' },
+  { name: 'Sony' },
+  { name: 'LG' },
+  { name: 'Dell' },
+  { name: 'HP' },
+  { name: 'Lenovo' },
+  { name: 'Asus' },
+  { name: 'Acer' },
+  { name: 'OnePlus' },
+  { name: 'Realme' },
+  { name: 'Oppo' },
+  { name: 'Vivo' },
+  { name: 'Xiaomi' },
+  { name: 'Redmi' },
+  { name: 'Motorola' },
+  { name: 'Nike' },
+  { name: 'Adidas' },
+  { name: 'Puma' },
+  { name: 'Reebok' },
 ];
 
-const productsData = [
+const initialProductsData = [
   {
     title: 'Apex Sound-Pro ANC Headphones',
     description:
@@ -236,7 +260,7 @@ const productsData = [
     categoryName: 'Electronics',
     brandName: 'ApexTech',
     sku: 'APX-SND-PRO',
-    images: ['https://picsum.photos/seed/headphones/600/600'],
+    images: ['/images/headphones.png'],
     tags: ['audio', 'wireless', 'headphones'],
     averageRating: 4.8,
     specifications: [{ name: 'Driver Size', value: '40mm Dynamic' }],
@@ -250,7 +274,7 @@ const productsData = [
     categoryName: 'Home & Kitchen',
     brandName: 'NexaHome',
     sku: 'NEX-COOK-XL',
-    images: ['https://picsum.photos/seed/cooker/600/600'],
+    images: ['/images/cooker.png'],
     tags: ['kitchen', 'cooking', 'smart-home'],
     averageRating: 4.6,
     specifications: [{ name: 'Capacity', value: '8 Quarts' }],
@@ -264,7 +288,7 @@ const productsData = [
     categoryName: 'Fashion',
     brandName: 'AuraWear',
     sku: 'AUR-S-LEG',
-    images: ['https://picsum.photos/seed/leggings/600/600'],
+    images: ['/images/leggings.png'],
     tags: ['clothing', 'athletic', 'leggings'],
     averageRating: 4.5,
     specifications: [{ name: 'Fabric Type', value: 'Polyester' }],
@@ -278,13 +302,133 @@ const productsData = [
     categoryName: 'Fitness & Sports',
     brandName: 'VeloSport',
     sku: 'VEL-HYB-CARB',
-    images: ['https://picsum.photos/seed/bicycle/600/600'],
+    images: ['/images/bicycle.png'],
     tags: ['cycling', 'hybrid', 'sports'],
     averageRating: 4.9,
     specifications: [{ name: 'Frame Material', value: 'Carbon Fiber' }],
     faqs: [{ question: 'Assemble needed?', answer: 'Yes, partially.' }],
   },
 ];
+
+function generate1000Products() {
+  const generated = [...initialProductsData];
+  
+  const productTypeCategoryMap: Record<string, string> = {
+    'multi-cooker': 'Home & Kitchen',
+    'cooker': 'Home & Kitchen',
+    'refrigerator': 'Home & Kitchen',
+    'washing machine': 'Home & Kitchen',
+    'microwave': 'Home & Kitchen',
+    'blender': 'Home & Kitchen',
+    'air purifier': 'Home & Kitchen',
+    
+    'smartwatch': 'Electronics',
+    'laptop': 'Electronics',
+    'phone': 'Electronics',
+    'headphone': 'Electronics',
+    'earphone': 'Electronics',
+    'earbud': 'Electronics',
+    'speaker': 'Electronics',
+    'watch': 'Electronics',
+    'camera': 'Electronics',
+    'tablet': 'Electronics',
+    'keyboard': 'Electronics',
+    'mouse': 'Electronics',
+    'monitor': 'Electronics',
+    'television': 'Electronics',
+    'tv': 'Electronics',
+    
+    'shirt': 'Fashion',
+    'shoes': 'Fashion',
+    'jacket': 'Fashion',
+    'bag': 'Fashion',
+    'leggings': 'Fashion',
+    
+    'treadmill': 'Fitness & Sports',
+    'bicycle': 'Fitness & Sports',
+  };
+
+  const productTypeImages: Record<string, string> = {
+    'multi-cooker': '/images/cooker.png',
+    'cooker': '/images/cooker.png',
+    'refrigerator': '/images/cooker.png',
+    'washing machine': '/images/cooker.png',
+    'microwave': '/images/cooker.png',
+    'blender': '/images/cooker.png',
+    'air purifier': '/images/cooker.png',
+    
+    'smartwatch': '/images/headphones.png',
+    'laptop': '/images/mouse.png',
+    'phone': '/images/mouse.png',
+    'headphone': '/images/headphones.png',
+    'earphone': '/images/headphones.png',
+    'earbud': '/images/headphones.png',
+    'speaker': '/images/headphones.png',
+    'watch': '/images/headphones.png',
+    'camera': '/images/headphones.png',
+    'tablet': '/images/mouse.png',
+    'keyboard': '/images/mouse.png',
+    'mouse': '/images/mouse.png',
+    'monitor': '/images/mouse.png',
+    'television': '/images/headphones.png',
+    'tv': '/images/headphones.png',
+    
+    'shirt': '/images/leggings.png',
+    'shoes': '/images/leggings.png',
+    'jacket': '/images/leggings.png',
+    'bag': '/images/leggings.png',
+    'leggings': '/images/leggings.png',
+    
+    'treadmill': '/images/bicycle.png',
+    'bicycle': '/images/bicycle.png',
+  };
+
+  const brands = [
+    'Apple', 'Samsung', 'Sony', 'LG', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer',
+    'OnePlus', 'Realme', 'Oppo', 'Vivo', 'Xiaomi', 'Redmi', 'Motorola',
+    'Nike', 'Adidas', 'Puma', 'Reebok', 'ApexTech', 'NexaHome', 'AuraWear', 'VeloSport'
+  ];
+
+  const productTypes = Object.keys(productTypeCategoryMap);
+
+  const adjectives = ['Premium', 'Ultra', 'Pro', 'Classic', 'Elite', 'Essential', 'Smart', 'NextGen', 'Wireless', 'Portable', 'Ergonomic', 'Deluxe'];
+  const models = ['X1', 'Series 5', 'Pro Max', 'Plus', 'Air', 'Neo', 'Prime', 'One', 'Wave', 'Infinity', 'Stealth', 'Force'];
+
+  let idCounter = 1;
+  while (generated.length < 1000) {
+    const brand = brands[generated.length % brands.length];
+    const productType = productTypes[generated.length % productTypes.length];
+    const catName = productTypeCategoryMap[productType];
+    const image = productTypeImages[productType] || '/images/mouse.png';
+    const adj = adjectives[(generated.length + 3) % adjectives.length];
+    const model = models[(generated.length + 7) % models.length];
+    
+    const title = `${brand} ${adj} ${productType.charAt(0).toUpperCase() + productType.slice(1)} ${model}`;
+    const description = `High-quality ${brand} ${productType} featuring state-of-the-art ${adj.toLowerCase()} design and ${model} performance for daily use.`;
+    const price = parseFloat((49.99 + (generated.length * 1.73) % 850).toFixed(2));
+    const sku = `${brand.substring(0, 3).toUpperCase()}-${productType.substring(0, 4).toUpperCase()}-${model.replace(/\s+/g, '').toUpperCase()}-${idCounter++}`;
+    const tags = [productType, brand.toLowerCase(), adj.toLowerCase()];
+    const averageRating = parseFloat((4.0 + (generated.length * 0.11) % 1.0).toFixed(1));
+
+    generated.push({
+      title,
+      description,
+      price,
+      categoryName: catName,
+      brandName: brand,
+      sku,
+      images: [image],
+      tags,
+      averageRating,
+      specifications: [{ name: 'Model Year', value: '2026' }, { name: 'Quality Grade', value: adj }],
+      faqs: [{ question: 'Is it original?', answer: `Yes, it is an official ${brand} product.` }],
+    });
+  }
+
+  return generated;
+}
+
+const productsData = generate1000Products();
 
 async function seed() {
   await mongoose.connect(MONGO_URI);
