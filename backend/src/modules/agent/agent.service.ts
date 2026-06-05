@@ -1171,8 +1171,9 @@ Enhanced Reply:`;
             [],
           );
         }
+        const fieldLabel = data.field === 'firstName' ? 'first name' : (data.field === 'lastName' ? 'last name' : 'display name');
         return this.buildReply(
-          `✏️ Got it! Shall I update your display name to **"${newName}"**?`,
+          `✏️ Got it! Shall I update your ${fieldLabel} to **"${newName}"**?`,
           'UPDATE_PROFILE',
           9,
           [],
@@ -1245,8 +1246,9 @@ Enhanced Reply:`;
               updatePayload.lastName = data.value.split(' ').slice(1).join(' ') || '';
             }
             await this.profileService.updateProfile(userId, updatePayload);
+            const fieldLabel = data.field === 'email' ? 'email address' : (data.field === 'firstName' ? 'first name' : (data.field === 'lastName' ? 'last name' : 'display name'));
             return {
-              reply: `✅ **Profile updated!**\n\nYour ${data.field === 'email' ? 'email address' : 'display name'} has been changed to **"${data.value}"** successfully!`,
+              reply: `✅ **Profile updated!**\n\nYour ${fieldLabel} has been changed to **"${data.value}"** successfully!`,
               intent: 'UPDATE_PROFILE',
               confidence: 10,
               actions: [
@@ -2968,6 +2970,68 @@ Enhanced Reply:`;
             [],
             'PROFILE_UPDATE_EMAIL',
             { field: 'email' },
+            false,
+            [],
+          );
+        }
+
+        // ── First Name change — start multi-step conversational flow ──
+        const inlineFirstName = message.match(
+          /(?:change|update|set)\s+(?:my\s+)?(?:first\s+name|firstname)\s+(?:to|as|:)\s+(.+)/i,
+        );
+        if (inlineFirstName && inlineFirstName[1]?.trim()) {
+          const newFirstName = inlineFirstName[1].trim();
+          return this.buildReply(
+            `✏️ Got it! You want to change your first name to **"${newFirstName}"**.\n\nShall I update it now?`,
+            intent,
+            9,
+            [],
+            'PROFILE_UPDATE_CONFIRM',
+            { field: 'firstName', value: newFirstName },
+            false,
+            ['Confirm', 'Cancel'],
+          );
+        }
+
+        if (q.includes('first name') || q.includes('firstname')) {
+          return this.buildReply(
+            `✏️ What would you like your **new first name** to be?\n\nJust type your new first name and I'll update it for you!`,
+            intent,
+            9,
+            [],
+            'PROFILE_UPDATE_NAME',
+            { field: 'firstName' },
+            false,
+            [],
+          );
+        }
+
+        // ── Last Name change — start multi-step conversational flow ──
+        const inlineLastName = message.match(
+          /(?:change|update|set)\s+(?:my\s+)?(?:last\s+name|lastname)\s+(?:to|as|:)\s+(.+)/i,
+        );
+        if (inlineLastName && inlineLastName[1]?.trim()) {
+          const newLastName = inlineLastName[1].trim();
+          return this.buildReply(
+            `✏️ Got it! You want to change your last name to **"${newLastName}"**.\n\nShall I update it now?`,
+            intent,
+            9,
+            [],
+            'PROFILE_UPDATE_CONFIRM',
+            { field: 'lastName', value: newLastName },
+            false,
+            ['Confirm', 'Cancel'],
+          );
+        }
+
+        if (q.includes('last name') || q.includes('lastname')) {
+          return this.buildReply(
+            `✏️ What would you like your **new last name** to be?\n\nJust type your new last name and I'll update it for you!`,
+            intent,
+            9,
+            [],
+            'PROFILE_UPDATE_NAME',
+            { field: 'lastName' },
             false,
             [],
           );
