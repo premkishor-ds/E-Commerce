@@ -29,7 +29,12 @@ import {
   PaymentWebhookLog,
   AgentStatus,
   LiveChatSession,
+  LedgerEntry,
+  Warehouse,
+  FileMetadata,
 } from '../schemas/schemas';
+
+
 
 @Injectable()
 export class UserRepository extends BaseRepository<User> {
@@ -222,3 +227,26 @@ export class LiveChatSessionRepository extends BaseRepository<LiveChatSession> {
     super(model);
   }
 }
+
+@Injectable()
+export class LedgerEntryRepository extends BaseRepository<LedgerEntry> {
+  constructor(@InjectModel(LedgerEntry.name) model: Model<LedgerEntry>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class WarehouseRepository extends BaseRepository<Warehouse> {
+  constructor(@InjectModel(Warehouse.name) model: Model<Warehouse>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class FileMetadataRepository extends BaseRepository<FileMetadata> {
+  constructor(@InjectModel(FileMetadata.name) model: Model<FileMetadata>) {
+    super(model);
+  }
+}
+
+

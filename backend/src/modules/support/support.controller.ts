@@ -105,8 +105,9 @@ export class SupportController {
 
   @Post('chat/session')
   @ApiOperation({ summary: 'Start a live chat session (Handoff)' })
-  async startLiveChat(@Request() req: any) {
-    return this.supportService.startLiveChatSession(req.user.id);
+  async startLiveChat(@Request() req: any, @Body('skills') skills?: string[]) {
+    const primaryRole = req.user.roles && req.user.roles.length > 0 ? req.user.roles[0] : 'Customer';
+    return this.supportService.startLiveChatSession(req.user.id, skills || [], primaryRole);
   }
 
   @Post('chat/session/:id/message')
@@ -116,14 +117,17 @@ export class SupportController {
     @Request() req: any,
     @Body('senderName') senderName: string,
     @Body('message') message: string,
+    @Body('attachmentUrl') attachmentUrl?: string,
   ) {
     return this.supportService.sendChatMessage(
       id,
       req.user.id,
       senderName || 'User',
       message,
+      attachmentUrl,
     );
   }
+
 
   @Post('chat/session/:id/rate')
   @ApiOperation({ summary: 'Rate a closed live chat session' })

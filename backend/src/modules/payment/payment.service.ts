@@ -12,10 +12,18 @@ import {
   PaymentWebhookLogRepository,
   UserRepository,
   WalletTransactionRepository,
+  LedgerEntryRepository,
 } from '../../repositories/concrete.repositories';
+import Stripe from 'stripe';
+import Razorpay from 'razorpay';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class PaymentService {
+  private stripe: any = null;
+  private razorpay: any = null;
+
+
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly paymentRepository: PaymentRepository,
@@ -24,9 +32,56 @@ export class PaymentService {
     private readonly paymentWebhookLogRepository: PaymentWebhookLogRepository,
     private readonly userRepository: UserRepository,
     private readonly walletTransactionRepository: WalletTransactionRepository,
-  ) {}
+    private readonly ledgerEntryRepository: LedgerEntryRepository,
+  ) {
+    // Instantiate Stripe if key is provided and not mocked
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (stripeKey && stripeKey !== 'mock_key' && !stripeKey.startsWith('pi_')) {
+      this.stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' as any });
+    }
 
-  // MOCK LOG HELPER
+    // Instantiate Razorpay if key is provided and not mocked
+    const rzpId = process.env.RAZORPAY_KEY_ID;
+    const rzpSecret = process.env.RAZORPAY_KEY_SECRET;
+    if (rzpId && rzpId !== 'mock_key' && rzpSecret && rzpSecret !== 'mock_secret') {
+      this.razorpay = new Razorpay({
+        key_id: rzpId,
+        key_secret: rzpSecret,
+      });
+    }
+  }
+
+  // --- LEDGER DOUBLE ENTRY SYSTEM ---
+  private async recordDoubleEntry(
+    userId: string,
+    transactionId: string,
+    amount: number,
+    fromAccount: string,
+    toAccount: string,
+    description: string,
+  ) {
+    const userObjectId = new Types.ObjectId(userId);
+    // 1. Debit Entry (Adding money to target account, or reducing cash)
+    await this.ledgerEntryRepository.create({
+      userId: userObjectId,
+      amount: Math.abs(amount),
+      entryType: 'Debit',
+      accountName: toAccount,
+      transactionId,
+      description,
+    });
+    // 2. Credit Entry (Reducing money from source account)
+    await this.ledgerEntryRepository.create({
+      userId: userObjectId,
+      amount: -Math.abs(amount),
+      entryType: 'Credit',
+      accountName: fromAccount,
+      transactionId,
+      description,
+    });
+  }
+
+  // AUDIT LOG HELPER
   private async logAudit(
     userId: string | null,
     orderId: string | null,
@@ -44,12 +99,31 @@ export class PaymentService {
   }
 
   // --- STRIPE INTEGRATION ---
-
   async createStripePaymentIntent(orderId: string, userId: string | null) {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new NotFoundException('Order not found');
 
-    const clientSecret = `pi_${Math.random().toString(36).substring(2, 12)}_secret_${Math.random().toString(36).substring(2, 8)}`;
+    let clientSecret = '';
+    let status = 'Pending';
+    const amountInCents = Math.round(order.totalPrice * 100);
+
+    if (this.stripe) {
+      try {
+        const intent = await this.stripe.paymentIntents.create({
+          amount: amountInCents,
+          currency: 'usd',
+          metadata: { orderId, userId: userId || '' },
+        });
+        clientSecret = intent.client_secret || '';
+      } catch (err: any) {
+        await this.logAudit(userId, orderId, 'StripeIntentCreationFailed', 'Failed', { error: err.message });
+        throw new BadRequestException(`Stripe Error: ${err.message}`);
+      }
+    } else {
+      // Fallback Mock mode
+      clientSecret = `pi_${Math.random().toString(36).substring(2, 12)}_secret_${Math.random().toString(36).substring(2, 8)}`;
+    }
+
     await this.paymentRepository.create({
       orderId: order._id,
       amount: order.totalPrice,
@@ -62,11 +136,12 @@ export class PaymentService {
       clientSecret,
       amount: order.totalPrice,
     });
+
     return {
       clientSecret,
       amount: order.totalPrice,
       currency: 'usd',
-      status: 'Pending',
+      status,
     };
   }
 
@@ -80,6 +155,19 @@ export class PaymentService {
     await this.orderRepository.update(payment.orderId.toString(), {
       status: 'Paid',
     });
+
+    // Double entry accounting recording: Debit Cash (Asset), Credit Revenue (Equity/Income)
+    if (userId) {
+      await this.recordDoubleEntry(
+        userId,
+        transactionId,
+        payment.amount,
+        'Cash',
+        'Revenue',
+        `Stripe Payment Confirmation for Order #${payment.orderId.toString().slice(-6)}`
+      );
+    }
+
     await this.logAudit(
       userId,
       payment.orderId.toString(),
@@ -107,7 +195,21 @@ export class PaymentService {
       throw new BadRequestException('Refund amount exceeds transaction amount');
     }
 
-    const refundTxId = `re_${Math.random().toString(36).substring(2, 12)}`;
+    let refundTxId = '';
+    if (this.stripe && !payment.transactionId.startsWith('pi_mock')) {
+      try {
+        const refund = await this.stripe.refunds.create({
+          payment_intent: payment.transactionId,
+          amount: Math.round(refundAmount * 100),
+        });
+        refundTxId = refund.id;
+      } catch (err: any) {
+        throw new BadRequestException(`Stripe Refund Error: ${err.message}`);
+      }
+    } else {
+      refundTxId = `re_${Math.random().toString(36).substring(2, 12)}`;
+    }
+
     await this.refundTransactionRepository.create({
       orderId: payment.orderId,
       paymentId: payment._id,
@@ -123,6 +225,19 @@ export class PaymentService {
     await payment.save();
 
     await this.orderRepository.update(orderId, { status: 'Returned' });
+
+    // Ledger record: Debit Revenue (reversal), Credit Cash (Refund payout)
+    if (userId) {
+      await this.recordDoubleEntry(
+        userId,
+        refundTxId,
+        refundAmount,
+        'Revenue',
+        'Cash',
+        `Stripe Refund for Order #${orderId.slice(-6)}`
+      );
+    }
+
     await this.logAudit(
       userId || null,
       orderId,
@@ -158,12 +273,28 @@ export class PaymentService {
   }
 
   // --- RAZORPAY INTEGRATION ---
-
   async createRazorpayOrder(orderId: string, userId: string | null) {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new NotFoundException('Order not found');
 
-    const razorpayOrderId = `order_${Math.random().toString(36).substring(2, 14)}`;
+    let razorpayOrderId = '';
+    const amountInPaise = Math.round(order.totalPrice * 100);
+
+    if (this.razorpay) {
+      try {
+        const rzpOrder = await this.razorpay.orders.create({
+          amount: amountInPaise,
+          currency: 'INR',
+          receipt: `receipt_${orderId}`,
+        });
+        razorpayOrderId = rzpOrder.id;
+      } catch (err: any) {
+        throw new BadRequestException(`Razorpay Error: ${err.message}`);
+      }
+    } else {
+      razorpayOrderId = `order_${Math.random().toString(36).substring(2, 14)}`;
+    }
+
     await this.paymentRepository.create({
       orderId: order._id,
       amount: order.totalPrice,
@@ -176,6 +307,7 @@ export class PaymentService {
       razorpayOrderId,
       amount: order.totalPrice,
     });
+
     return {
       id: razorpayOrderId,
       amount: order.totalPrice * 100,
@@ -189,8 +321,20 @@ export class PaymentService {
     signature: string,
     userId: string | null,
   ) {
-    // Simulated cryptographic signature check
-    const isValid = signature && signature.length > 10;
+    let isValid = false;
+    const rzpSecret = process.env.RAZORPAY_KEY_SECRET;
+
+    if (this.razorpay && rzpSecret) {
+      const hmac = crypto.createHmac('sha256', rzpSecret);
+      hmac.update(`${orderId}|${razorpayPaymentId}`);
+      const generatedSignature = hmac.digest('hex');
+      isValid = generatedSignature === signature;
+    } else {
+      // Mock validation mode
+      isValid = !!(signature && signature.length > 10);
+
+    }
+
     if (!isValid) {
       await this.logAudit(
         userId,
@@ -214,6 +358,19 @@ export class PaymentService {
     await this.orderRepository.update(payment.orderId.toString(), {
       status: 'Paid',
     });
+
+    // Accounting Record: Debit Cash (Asset), Credit Revenue (Equity)
+    if (userId) {
+      await this.recordDoubleEntry(
+        userId,
+        razorpayPaymentId,
+        payment.amount,
+        'Cash',
+        'Revenue',
+        `Razorpay Payment Confirmation for Order #${payment.orderId.toString().slice(-6)}`
+      );
+    }
+
     await this.logAudit(
       userId,
       payment.orderId.toString(),
@@ -237,7 +394,21 @@ export class PaymentService {
     if (!payment) throw new NotFoundException('Payment not found');
 
     const refundAmount = amount || payment.amount;
-    const refundTxId = `rfnd_${Math.random().toString(36).substring(2, 12)}`;
+    let refundTxId = '';
+
+    if (this.razorpay && !payment.transactionId.startsWith('order_mock')) {
+      try {
+        const refund = await this.razorpay.payments.refund(payment.transactionId, {
+          amount: Math.round(refundAmount * 100),
+          notes: { reason: reason || 'Customer request' },
+        });
+        refundTxId = refund.id;
+      } catch (err: any) {
+        throw new BadRequestException(`Razorpay Refund Error: ${err.message}`);
+      }
+    } else {
+      refundTxId = `rfnd_${Math.random().toString(36).substring(2, 12)}`;
+    }
 
     await this.refundTransactionRepository.create({
       orderId: payment.orderId,
@@ -254,6 +425,19 @@ export class PaymentService {
     await payment.save();
 
     await this.orderRepository.update(orderId, { status: 'Returned' });
+
+    // Ledger Entry: Debit Revenue, Credit Cash
+    if (userId) {
+      await this.recordDoubleEntry(
+        userId,
+        refundTxId,
+        refundAmount,
+        'Revenue',
+        'Cash',
+        `Razorpay Refund for Order #${orderId.slice(-6)}`
+      );
+    }
+
     await this.logAudit(userId || null, orderId, 'RazorpayRefund', 'Success', {
       refundTxId,
       amount: refundAmount,
@@ -263,7 +447,6 @@ export class PaymentService {
   }
 
   // --- WALLET & HYBRID PAYMENTS ---
-
   async validateWalletBalance(userId: string, amount: number) {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new NotFoundException('User not found');
@@ -281,13 +464,23 @@ export class PaymentService {
     user.walletBalance = balance - amount;
     await user.save();
 
-    await this.walletTransactionRepository.create({
+    const txn = await this.walletTransactionRepository.create({
       userId: user._id,
       amount: -amount,
       transactionType: 'Debit',
       description: `Payment for Order #${orderId.slice(-6).toUpperCase()}`,
       status: 'Completed',
     });
+
+    // Ledger recording: Debit Wallet (Liability), Credit Revenue (Equity)
+    await this.recordDoubleEntry(
+      userId,
+      txn._id.toString(),
+      amount,
+      'Wallet',
+      'Revenue',
+      `Wallet Payment for Order #${orderId.slice(-6)}`
+    );
 
     await this.logAudit(userId, orderId, 'WalletPaymentProcessed', 'Success', {
       amount,
@@ -331,7 +524,6 @@ export class PaymentService {
   }
 
   // --- COD ELIGIBILITY ---
-
   async checkCodEligibility(orderId: string) {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new NotFoundException('Order not found');
@@ -348,7 +540,6 @@ export class PaymentService {
   }
 
   // --- HISTORY & UTILS ---
-
   async getPaymentHistory(userId: string) {
     const orders = await this.orderRepository.find({
       userId: new Types.ObjectId(userId),
@@ -361,7 +552,6 @@ export class PaymentService {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new NotFoundException('Order not found');
 
-    // Create a new retry payment txn
     const transactionId =
       'TXN-RETRY-' + Math.random().toString(36).substring(2, 10).toUpperCase();
     const payment = await this.paymentRepository.create({

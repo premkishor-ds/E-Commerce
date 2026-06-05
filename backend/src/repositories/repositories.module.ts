@@ -27,6 +27,9 @@ import {
   PaymentWebhookLogRepository,
   AgentStatusRepository,
   LiveChatSessionRepository,
+  LedgerEntryRepository,
+  WarehouseRepository,
+  FileMetadataRepository,
 } from './concrete.repositories';
 
 const REPOSITORIES = [
@@ -56,7 +59,12 @@ const REPOSITORIES = [
   PaymentWebhookLogRepository,
   AgentStatusRepository,
   LiveChatSessionRepository,
+  LedgerEntryRepository,
+  WarehouseRepository,
+  FileMetadataRepository,
 ];
+
+
 
 @Global()
 @Module({

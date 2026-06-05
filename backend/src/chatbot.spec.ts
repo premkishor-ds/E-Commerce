@@ -35,7 +35,12 @@ import {
   PaymentWebhookLogRepository,
   AgentStatusRepository,
   LiveChatSessionRepository,
+  LedgerEntryRepository,
+  WarehouseRepository,
+  FileMetadataRepository,
 } from './repositories/concrete.repositories';
+
+
 
 import { PaymentService } from './modules/payment/payment.service';
 import { RecoveryService } from './modules/sales/recovery.service';
@@ -239,6 +244,9 @@ describe('Chatbot Conversational Flows (e2e)', () => {
       'PaymentWebhookLog',
       'AgentStatus',
       'LiveChatSession',
+      'LedgerEntry',
+      'Warehouse',
+      'FileMetadata',
     ];
 
     const providers: any[] = [
@@ -278,7 +286,12 @@ describe('Chatbot Conversational Flows (e2e)', () => {
       PaymentWebhookLogRepository,
       AgentStatusRepository,
       LiveChatSessionRepository,
+      LedgerEntryRepository,
+      WarehouseRepository,
+      FileMetadataRepository,
     ];
+
+
 
     for (const schema of schemas) {
       mockModels[schema] = createMockModel();

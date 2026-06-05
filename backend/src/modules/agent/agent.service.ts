@@ -2023,7 +2023,127 @@ Enhanced Reply:`;
         );
       }
 
+      case 'VENDOR_ADD_PRODUCT_TITLE':
+        return this.buildReply(
+          `💲 Please enter the **price** for "${message}":`,
+          'VENDOR_PRODUCTS',
+          9,
+          [],
+          'VENDOR_ADD_PRODUCT_PRICE',
+          { title: message.trim() },
+        );
+
+      case 'VENDOR_ADD_PRODUCT_PRICE': {
+        const price = parseFloat(message.trim());
+        if (isNaN(price) || price < 0) {
+          return this.buildReply(
+            '⚠️ Please enter a valid number for price:',
+            'VENDOR_PRODUCTS',
+            0,
+            [],
+            'VENDOR_ADD_PRODUCT_PRICE',
+            data,
+          );
+        }
+        return this.buildReply(
+          `🏷️ Please enter the **SKU** code for this product (e.g. VEN-LAP-101):`,
+          'VENDOR_PRODUCTS',
+          9,
+          [],
+          'VENDOR_ADD_PRODUCT_SKU',
+          { ...data, price },
+        );
+      }
+
+      case 'VENDOR_ADD_PRODUCT_SKU':
+        return this.buildReply(
+          `📦 Please enter the initial **stock quantity** (e.g. 20):`,
+          'VENDOR_PRODUCTS',
+          9,
+          [],
+          'VENDOR_ADD_PRODUCT_STOCK',
+          { ...data, sku: message.trim().toUpperCase() },
+        );
+
+      case 'VENDOR_ADD_PRODUCT_STOCK': {
+        const stock = parseInt(message.trim());
+        if (isNaN(stock) || stock < 0) {
+          return this.buildReply(
+            '⚠️ Please enter a valid non-negative integer for stock:',
+            'VENDOR_PRODUCTS',
+            0,
+            [],
+            'VENDOR_ADD_PRODUCT_STOCK',
+            data,
+          );
+        }
+        const fullData: any = { ...data, stock };
+        return this.buildReply(
+          `🏪 **Confirm Vendor Product Details:**\n\n` +
+            `• **Title**: ${fullData.title}\n` +
+            `• **Price**: $${fullData.price.toFixed(2)}\n` +
+            `• **SKU**: ${fullData.sku}\n` +
+            `• **Stock**: ${fullData.stock}\n\n` +
+            `Type **"confirm"** or **"cancel"** to submit for approval:`,
+          'VENDOR_PRODUCTS',
+          9,
+          [],
+          'VENDOR_ADD_PRODUCT_CONFIRM',
+          fullData,
+          false,
+          ['Confirm', 'Cancel'],
+        );
+      }
+
+      case 'VENDOR_ADD_PRODUCT_CONFIRM': {
+        const isConfirm = q === 'confirm' || q === 'yes' || q === 'y';
+        if (isConfirm) {
+          try {
+            let category = await (this.catalogService as any).categoryRepository.findOne({});
+            if (!category) {
+              category = await this.catalogService.createCategory({ name: 'General', slug: 'general' });
+            }
+            let brand = await (this.catalogService as any).brandRepository.findOne({});
+            if (!brand) {
+              brand = await this.catalogService.createBrand({ name: 'General' });
+            }
+
+            const product = await this.catalogService.createProduct({
+              title: data.title,
+              description: `Vendor created product: ${data.title}`,
+              price: data.price,
+              sku: data.sku,
+              stock: data.stock,
+              category: category._id,
+              brand: brand._id,
+            }, userId);
+
+            return {
+              reply: `🎉 **Product Created Successfully and Pending Approval!**\n\n✅ **${product.title}** has been added with SKU **${data.sku}**. An admin will review it shortly.`,
+              intent: 'VENDOR_PRODUCTS',
+              confidence: 10,
+              actions: [],
+              suggestions: ['My products', 'Vendor dashboard'],
+            };
+          } catch (e: any) {
+            return this.buildReply(
+              `❌ Failed to create product: ${e.message}`,
+              'VENDOR_PRODUCTS',
+              0,
+              [],
+            );
+          }
+        }
+        return this.buildReply(
+          '❌ Product creation cancelled.',
+          'VENDOR_PRODUCTS',
+          8,
+          [],
+        );
+      }
+
       case 'ADMIN_ADD_PRODUCT_TITLE':
+
         return this.buildReply(
           `💲 Please enter the **price** for "${message}":`,
           'ADMIN_PRODUCTS',
@@ -4168,8 +4288,7 @@ Enhanced Reply:`;
         }
       }
 
-      case 'VENDOR_PRODUCTS':
-      case 'VENDOR_ANALYTICS':
+      case 'VENDOR_PRODUCTS': {
         if (
           !roles.some((r) =>
             ['Vendor', 'Seller', 'Admin', 'Super Admin'].includes(r),
@@ -4182,14 +4301,35 @@ Enhanced Reply:`;
             [],
           );
         }
+
+        const msgLower = message.toLowerCase();
+        if (
+          msgLower.includes('add product') ||
+          msgLower.includes('add my product') ||
+          msgLower.includes('create product')
+        ) {
+          return this.buildReply(
+            '🏪 **Create Vendor Product Wizard**\n\nPlease enter the **Title** of the new product:',
+            intent,
+            10,
+            [],
+            'VENDOR_ADD_PRODUCT_TITLE',
+            {},
+          );
+        }
+
         return this.buildReply(
-          `🏪 Navigating to **Vendor Dashboard**...`,
+          `🏪 Navigating to **Vendor Dashboard**...\n\nYou can also type **"add product"** to list a new item directly!`,
           intent,
           9,
           [{ type: 'NAVIGATE', payload: { path: '/vendor' } }],
         );
+      }
 
+
+      case 'VENDOR_ANALYTICS':
       case 'VENDOR_SETTLEMENTS':
+
         if (
           !roles.some((r) =>
             ['Vendor', 'Seller', 'Admin', 'Super Admin'].includes(r),

@@ -108,7 +108,7 @@ export class SupportService {
 
   // --- LIVE CHAT SESSION ---
 
-  async startLiveChatSession(userId: string) {
+  async startLiveChatSession(userId: string, skillsRequired: string[] = [], userRole = 'Customer') {
     // Check if there's already an active session
     const active = await this.liveChatSessionRepository.findOne({
       userId: new Types.ObjectId(userId),
@@ -116,28 +116,73 @@ export class SupportService {
     });
     if (active) return active;
 
-    // Assign to a random online agent if available
-    const onlineAgents = await this.getAvailableAgents();
-    let assignedAgentId: Types.ObjectId | null = null;
-    if (onlineAgents.length > 0) {
-      assignedAgentId = onlineAgents[0].agentId;
-      onlineAgents[0].activeQueueCount += 1;
-      if (onlineAgents[0].activeQueueCount >= 3) {
-        onlineAgents[0].status = 'Busy';
-      }
-      await onlineAgents[0].save();
+    // Determine queue type based on user role or parameters
+    let queueType = 'Regular';
+    if (userRole === 'VIP' || userRole === 'Admin' || userRole === 'Super Admin') {
+      queueType = 'VIP';
+    } else if (userRole === 'Vendor' || userRole === 'Seller') {
+      queueType = 'Priority';
     }
+
+    // Skills matching: find online agents who possess the required skills
+    const onlineAgents = await this.getAvailableAgents();
+    const matchingAgents = onlineAgents.filter(agent => {
+      const skills = (agent as any).skills || [];
+      const hasSkills = skillsRequired.every(skill => skills.includes(skill));
+      const hasCapacity = agent.activeQueueCount < ((agent as any).maxCapacity || 3);
+      return hasSkills && hasCapacity;
+    });
+
+    let assignedAgentId: Types.ObjectId | null = null;
+    if (matchingAgents.length > 0) {
+      // Assign to the agent with the lowest load
+      matchingAgents.sort((a, b) => a.activeQueueCount - b.activeQueueCount);
+      const chosenAgent = matchingAgents[0];
+      assignedAgentId = chosenAgent.agentId;
+      chosenAgent.activeQueueCount += 1;
+      
+      const maxCap = (chosenAgent as any).maxCapacity || 3;
+      if (chosenAgent.activeQueueCount >= maxCap) {
+        chosenAgent.status = 'Busy';
+      }
+      // Add to agent's active sessions list
+      const assigned = (chosenAgent as any).assignedSessions || [];
+      assigned.push(new Types.ObjectId(userId));
+      chosenAgent.markModified('assignedSessions');
+      await chosenAgent.save();
+    }
+
+    // Calculate queue position if not assigned immediately
+    let queuePosition = 0;
+    let estimatedWaitTime = 0;
+    if (!assignedAgentId) {
+      const waitingInQueue = await this.liveChatSessionRepository.find({
+        status: 'Active',
+        assignedAgentId: null,
+        queueType,
+      });
+      queuePosition = waitingInQueue.length + 1;
+      const agentDivisor = onlineAgents.length || 1;
+      estimatedWaitTime = Math.round((queuePosition * 120) / agentDivisor);
+    }
+
+    // Priority score calculated from queue type
+    const priorityScore = queueType === 'VIP' ? 10 : queueType === 'Priority' ? 5 : 0;
 
     return this.liveChatSessionRepository.create({
       userId: new Types.ObjectId(userId),
       assignedAgentId,
       status: 'Active',
+      queueType,
+      priorityScore,
+      estimatedWaitTime,
       messages: [
         {
           senderId: new Types.ObjectId(userId),
           senderName: 'Customer',
-          message:
-            'Chat session initiated. Connecting to a support representative...',
+          message: assignedAgentId
+            ? 'Chat session initiated. You are now connected with a support representative.'
+            : `Chat session initiated. You are in the ${queueType} queue at position #${queuePosition}. Est. wait time: ${estimatedWaitTime}s.`,
           sentAt: new Date(),
         },
       ],
@@ -151,6 +196,7 @@ export class SupportService {
     senderId: string,
     senderName: string,
     message: string,
+    attachmentUrl?: string,
   ) {
     const session = await this.liveChatSessionRepository.findById(sessionId);
     if (!session) throw new NotFoundException('Live chat session not found');
@@ -162,6 +208,7 @@ export class SupportService {
       senderName,
       message,
       sentAt: new Date(),
+      attachmentUrl: attachmentUrl || '',
     });
     return session.save();
   }
@@ -177,7 +224,7 @@ export class SupportService {
     const session = await this.liveChatSessionRepository.findById(sessionId);
     if (!session) throw new NotFoundException('Live chat session not found');
 
-    session.status = 'ForceClosed';
+    session.status = 'Closed';
     session.transcript = session.messages
       .map((m) => `[${m.senderName}]: ${m.message}`)
       .join('\n');
@@ -191,7 +238,13 @@ export class SupportService {
       });
       if (agent) {
         agent.activeQueueCount = Math.max(0, agent.activeQueueCount - 1);
-        if (agent.status === 'Busy' && agent.activeQueueCount < 3) {
+        const assigned = (agent as any).assignedSessions || [];
+        const filtered = assigned.filter((id: any) => String(id) !== String(session._id));
+        (agent as any).assignedSessions = filtered;
+        agent.markModified('assignedSessions');
+
+        const maxCap = (agent as any).maxCapacity || 3;
+        if (agent.status === 'Busy' && agent.activeQueueCount < maxCap) {
           agent.status = 'Online';
         }
         await agent.save();
@@ -215,6 +268,9 @@ export class SupportService {
       });
       if (oldAgent) {
         oldAgent.activeQueueCount = Math.max(0, oldAgent.activeQueueCount - 1);
+        const assigned = (oldAgent as any).assignedSessions || [];
+        (oldAgent as any).assignedSessions = assigned.filter((id: any) => String(id) !== String(session._id));
+        oldAgent.markModified('assignedSessions');
         if (oldAgent.status === 'Busy') oldAgent.status = 'Online';
         await oldAgent.save();
       }
@@ -226,7 +282,13 @@ export class SupportService {
     });
     if (newAgent) {
       newAgent.activeQueueCount += 1;
-      if (newAgent.activeQueueCount >= 3) newAgent.status = 'Busy';
+      const assigned = (newAgent as any).assignedSessions || [];
+      assigned.push(session._id);
+      (newAgent as any).assignedSessions = assigned;
+      newAgent.markModified('assignedSessions');
+
+      const maxCap = (newAgent as any).maxCapacity || 3;
+      if (newAgent.activeQueueCount >= maxCap) newAgent.status = 'Busy';
       await newAgent.save();
     }
 
@@ -242,4 +304,5 @@ export class SupportService {
       userId: new Types.ObjectId(userId),
     });
   }
+
 }

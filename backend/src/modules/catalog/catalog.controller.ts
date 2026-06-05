@@ -21,10 +21,35 @@ import { RolesGuard } from '../auth/rbac.guard';
 import { Roles } from '../auth/rbac.decorator';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 
+import { UploadService } from './upload.service';
+
 @ApiTags('Catalog (Products, Categories, Brands)')
 @Controller('catalog')
 export class CatalogController {
-  constructor(private readonly catalogService: CatalogService) {}
+  constructor(
+    private readonly catalogService: CatalogService,
+    private readonly uploadService: UploadService,
+  ) {}
+
+  @Post('upload')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Securely upload a file via chatbot' })
+  async uploadFile(
+    @Request() req: any,
+    @Body('filename') filename: string,
+    @Body('mimeType') mimeType: string,
+    @Body('base64Data') base64Data: string,
+  ) {
+    const buffer = Buffer.from(base64Data, 'base64');
+    return this.uploadService.validateAndScanFile(
+      req.user.id,
+      filename,
+      mimeType,
+      buffer,
+    );
+  }
+
 
   // --- CATEGORIES ---
 

@@ -11,6 +11,7 @@ import {
   UserRepository,
   NotificationRepository,
   OrderRepository,
+  VendorRepository,
 } from '../../repositories/concrete.repositories';
 import { Types } from 'mongoose';
 
@@ -24,7 +25,9 @@ export class CatalogService {
     private readonly userRepository: UserRepository,
     private readonly notificationRepository: NotificationRepository,
     private readonly orderRepository: OrderRepository,
+    private readonly vendorRepository: VendorRepository,
   ) {}
+
 
   // --- CATEGORIES & BRANDS ---
 
@@ -193,6 +196,11 @@ export class CatalogService {
   async setProductActivation(productId: string, active: boolean) {
     return this.productRepository.update(productId, { isActive: active });
   }
+
+  async approveVendor(vendorId: string) {
+    return this.vendorRepository.update(vendorId, { status: 'Approved' });
+  }
+
 
   // --- BULK OPERATIONS ---
 
@@ -410,39 +418,49 @@ export class CatalogService {
     const user = await this.userRepository.findById(userId);
     if (!user) return this.getTrendingProducts();
 
-    // Analyze Wishlist, Cart and Price Alerts categories
-    const categoriesSet = new Set<string>();
+    const allProducts = await this.productRepository.find({ isActive: true });
+    const userOrders = await this.orderRepository.find({ userId: user._id });
+    
+    // Extract categories user has bought or saved
+    const interestedCategories = new Set<string>();
+    const purchasedProductIds = new Set<string>();
 
-    // Scan saved cart
+    for (const order of userOrders) {
+      for (const item of order.items) {
+        purchasedProductIds.add(item.productId.toString());
+        const prod = await this.productRepository.findById(item.productId.toString()).catch(() => null);
+        if (prod) interestedCategories.add(prod.category.toString());
+      }
+    }
+
     const cartItems = (user as any).savedCart || [];
     for (const item of cartItems) {
-      const p = await this.productRepository
-        .findById(item.productId)
-        .catch(() => null);
-      if (p) categoriesSet.add(p.category.toString());
+      const prod = await this.productRepository.findById(item.productId.toString()).catch(() => null);
+      if (prod) interestedCategories.add(prod.category.toString());
     }
 
-    // Scan price alerts
-    const alerts = (user as any).priceAlerts || [];
-    for (const alert of alerts) {
-      const p = await this.productRepository
-        .findById(alert.productId)
-        .catch(() => null);
-      if (p) categoriesSet.add(p.category.toString());
-    }
 
-    if (categoriesSet.size === 0) return this.getTrendingProducts();
+    // Rank products using Hybrid Scorer:
+    // Score = (CategoryMatch * 50) + (AvgRating * 10) + (PurchasedBefore * -10)
+    const scoredProducts = allProducts.map((p: any) => {
+      let score = 0;
+      if (interestedCategories.has(p.category.toString())) {
+        score += 50;
+      }
+      if (purchasedProductIds.has(p._id.toString())) {
+        score -= 10; // De-prioritize already purchased items to encourage new discoveries
+      }
+      score += (p.averageRating || 0) * 10;
+      return { product: p, score };
+    });
 
-    const categoryList = Array.from(categoriesSet).map(
-      (id) => new Types.ObjectId(id),
-    );
-    return this.productRepository.find(
-      {
-        category: { $in: categoryList },
-      },
-      { limit: 5, sort: { averageRating: -1 } },
-    );
+    // Return top 5 products sorted by recommendation score
+    return scoredProducts
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map(item => item.product);
   }
+
 
   async getCrossSellProducts(productId: string) {
     const product = await this.getProductById(productId);

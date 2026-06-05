@@ -53,6 +53,12 @@ import {
   AgentStatusSchema,
   LiveChatSession,
   LiveChatSessionSchema,
+  LedgerEntry,
+  LedgerEntrySchema,
+  Warehouse,
+  WarehouseSchema,
+  FileMetadata,
+  FileMetadataSchema,
 } from './schemas';
 
 @Module({
@@ -84,8 +90,13 @@ import {
       { name: PaymentWebhookLog.name, schema: PaymentWebhookLogSchema },
       { name: AgentStatus.name, schema: AgentStatusSchema },
       { name: LiveChatSession.name, schema: LiveChatSessionSchema },
+      { name: LedgerEntry.name, schema: LedgerEntrySchema },
+      { name: Warehouse.name, schema: WarehouseSchema },
+      { name: FileMetadata.name, schema: FileMetadataSchema },
     ]),
   ],
   exports: [MongooseModule],
 })
 export class SchemasModule {}
+
+

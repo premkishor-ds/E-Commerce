@@ -826,6 +826,15 @@ export class AgentStatus extends Document {
 
   @Prop({ type: [String], default: [] })
   notes: string[];
+
+  @Prop({ type: [String], default: [] })
+  skills: string[]; // e.g., 'refunds', 'tech_support', 'billing'
+
+  @Prop({ default: 3 })
+  maxCapacity: number;
+
+  @Prop({ type: [Types.ObjectId], ref: 'LiveChatSession', default: [] })
+  assignedSessions: Types.ObjectId[];
 }
 export const AgentStatusSchema = SchemaFactory.createForClass(AgentStatus);
 
@@ -848,6 +857,7 @@ export class LiveChatSession extends Document {
         senderName: { type: String, required: true },
         message: { type: String, required: true },
         sentAt: { type: Date, default: Date.now },
+        attachmentUrl: { type: String, default: '' },
       },
     ],
     default: [],
@@ -857,6 +867,7 @@ export class LiveChatSession extends Document {
     senderName: string;
     message: string;
     sentAt: Date;
+    attachmentUrl?: string;
   }>;
 
   @Prop({ default: 0 })
@@ -864,6 +875,83 @@ export class LiveChatSession extends Document {
 
   @Prop({ default: '' })
   transcript: string;
+
+  @Prop({ required: true, default: 'Regular' })
+  queueType: string; // Regular, Priority, VIP
+
+  @Prop({ default: 0 })
+  estimatedWaitTime: number; // in seconds
+
+  @Prop({ default: 0 })
+  priorityScore: number;
 }
 export const LiveChatSessionSchema =
   SchemaFactory.createForClass(LiveChatSession);
+
+// --- LEDGER ENTRY (Double Entry Bookkeeping) ---
+@Schema({ timestamps: true })
+export class LedgerEntry extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
+  userId: Types.ObjectId;
+
+  @Prop({ required: true })
+  amount: number; // Positive for Debit, Negative for Credit
+
+  @Prop({ required: true, enum: ['Debit', 'Credit'] })
+  entryType: string;
+
+  @Prop({ required: true })
+  accountName: string; // e.g., 'Cash', 'Revenue', 'Refunds', 'Wallet'
+
+  @Prop({ required: true, index: true })
+  transactionId: string; // References OrderId or Payment ID
+
+  @Prop({ default: '' })
+  description: string;
+}
+export const LedgerEntrySchema = SchemaFactory.createForClass(LedgerEntry);
+
+// --- WAREHOUSE ---
+@Schema({ timestamps: true })
+export class Warehouse extends Document {
+  @Prop({ required: true, unique: true })
+  name: string;
+
+  @Prop({ required: true, unique: true, index: true })
+  code: string;
+
+  @Prop({ default: '' })
+  address: string;
+
+  @Prop({ default: true })
+  isActive: boolean;
+}
+export const WarehouseSchema = SchemaFactory.createForClass(Warehouse);
+
+// --- FILE METADATA ---
+@Schema({ timestamps: true })
+export class FileMetadata extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  userId: Types.ObjectId;
+
+  @Prop({ required: true })
+  filename: string;
+
+  @Prop({ required: true })
+  mimeType: string;
+
+  @Prop({ required: true })
+  sizeBytes: number;
+
+  @Prop({ default: 'Pending' })
+  scanStatus: string; // Pending, Safe, Infected, Failed
+
+  @Prop({ default: '' })
+  sha256: string;
+
+  @Prop({ default: '' })
+  storageUrl: string;
+}
+export const FileMetadataSchema = SchemaFactory.createForClass(FileMetadata);
+
+
