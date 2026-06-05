@@ -829,5 +829,161 @@ describe('Chatbot Conversational Flows (e2e)', () => {
       });
       expect(recSimilar.reply).toContain('Products Similar to');
     });
+
+    it('should support conversational quantity adjustments and deletion in cart', async () => {
+      const sessionId = 'cart-conversational-session';
+      const simpleProd = await catalogService.createProduct({
+        title: 'Apex Simple Mug',
+        description: 'A simple ceramic mug',
+        price: 10,
+        sku: 'SKU-MUG-123',
+      });
+
+      const step1 = await agentService.processMessage({
+        message: 'Add Apex Simple Mug to cart',
+        sessionId,
+        userId,
+        userRoles: ['Customer'],
+      });
+      expect(step1.reply).toContain('Added to Cart');
+
+      const step2 = await agentService.processMessage({
+        message: 'Add one more',
+        sessionId,
+        userId,
+        userRoles: ['Customer'],
+      });
+      expect(step2.reply).toContain('Added one more');
+
+      const step3 = await agentService.processMessage({
+        message: 'Remove one',
+        sessionId,
+        userId,
+        userRoles: ['Customer'],
+      });
+      expect(step3.reply).toContain('Removed one');
+
+      const step4 = await agentService.processMessage({
+        message: 'Delete it',
+        sessionId,
+        userId,
+        userRoles: ['Customer'],
+      });
+      expect(step4.reply).toContain('Removed from Cart');
+    });
+
+    it('should support follow-up product details (battery, color, specs)', async () => {
+      const sessionId = 'detail-followup-session';
+
+      const step1 = await agentService.processMessage({
+        message: 'Tell me about Super Phone A',
+        sessionId,
+      });
+      expect(step1.reply).toContain('Product Details: Super Phone A');
+
+      const step2 = await agentService.processMessage({
+        message: 'What is battery backup?',
+        sessionId,
+      });
+      expect(step2.reply).toContain('Specifications for Super Phone A');
+
+      const step3 = await agentService.processMessage({
+        message: 'Available in black?',
+        sessionId,
+      });
+      expect(step3.reply).toContain('Available Variants for Super Phone A');
+    });
+
+    it('should support follow-up order tracking and cancellation', async () => {
+      const sessionId = 'order-followup-session';
+
+      await salesService.placeOrder(userId, {
+        items: [{ productId: String(testProduct._id), quantity: 1 }],
+        shippingAddress: {
+          fullName: 'Jane Doe',
+          addressLine1: '456 Elm St',
+          city: 'Metropolis',
+          state: 'NY',
+          postalCode: '10001',
+          country: 'US',
+          phone: '1234567890',
+        },
+        paymentProvider: 'Stripe',
+      });
+
+      const step1 = await agentService.processMessage({
+        message: 'Where is my order?',
+        sessionId,
+        userId,
+        userRoles: ['Customer'],
+      });
+      expect(step1.reply).toContain('Latest Order Status');
+
+      const step2 = await agentService.processMessage({
+        message: 'Can I cancel it?',
+        sessionId,
+        userId,
+        userRoles: ['Customer'],
+      });
+      expect(step2.reply).toContain('Are you sure you want to cancel order');
+    });
+
+    it('should support conversational profile email update', async () => {
+      const sessionId = 'profile-conversational-session';
+
+      const step1 = await agentService.processMessage({
+        message: 'Change my email',
+        sessionId,
+        userId,
+        userRoles: ['Customer'],
+      });
+      expect(step1.nextStep).toBe('PROFILE_UPDATE_EMAIL');
+
+      const step2 = await agentService.processMessage({
+        message: 'prem@gmail.com',
+        sessionId,
+        userId,
+        userRoles: ['Customer'],
+        activeStep: 'PROFILE_UPDATE_EMAIL',
+        stepData: step1.stepData,
+      });
+      expect(step2.nextStep).toBe('PROFILE_UPDATE_CONFIRM');
+
+      const step3 = await agentService.processMessage({
+        message: 'confirm',
+        sessionId,
+        userId,
+        userRoles: ['Customer'],
+        activeStep: 'PROFILE_UPDATE_CONFIRM',
+        stepData: step2.stepData,
+      });
+      expect(step3.reply).toContain('email address has been changed to');
+      expect(step3.reply).toContain('prem@gmail.com');
+    });
+
+    it('should support context switching in product searches', async () => {
+      const sessionId = 'search-switching-session';
+
+      const step1 = await agentService.processMessage({
+        message: 'Show phones',
+        sessionId,
+      });
+      expect(step1.reply).toContain('Found 2 products');
+
+      await catalogService.createProduct({
+        title: 'Super Laptop A',
+        description: 'High performance gaming laptop',
+        price: 80000,
+        sku: 'SKU-LAP-A',
+      });
+
+      const step2 = await agentService.processMessage({
+        message: 'I need a laptop',
+        sessionId,
+      });
+      expect(step2.reply).toContain('Found 1 products');
+      expect(step2.reply).toContain('Super Laptop A');
+      expect(step2.reply).not.toContain('Super Phone A');
+    });
   });
 });

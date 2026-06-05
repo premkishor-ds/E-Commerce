@@ -376,6 +376,48 @@ Enhanced Reply:`;
       intelResult.intent = ruleMatch.intent;
     }
 
+    let intent = intelResult.intent;
+    let score = Math.max(intelResult.confidence * 10, ruleMatch.score);
+    const entities = { ...originalEntities, ...intelResult.entities };
+
+    // ─── CONTEXTUAL FORCE MAPPINGS ──────────────────────────────────────────
+    const intelContext = this.chatbotIntelligenceService.getContext(sessionId);
+    const lowerMsg = workMessage.toLowerCase();
+
+    let forceMapped = false;
+    // 1. Profile Email Update
+    if (lowerMsg.includes('email') && (lowerMsg.includes('change') || lowerMsg.includes('update') || lowerMsg.includes('set') || lowerMsg.includes('modify'))) {
+      intent = 'UPDATE_PROFILE';
+      score = 10;
+      forceMapped = true;
+    }
+
+    // 2. Product Detail Follow-ups
+    const detailFollowUpKeywords = /battery|weight|camera|spec|color|size|variant|warrant|available|screen|display/i;
+    if (detailFollowUpKeywords.test(workMessage) && intelContext.selectedProduct) {
+      intent = 'GET_PRODUCT';
+      score = 10;
+      forceMapped = true;
+    }
+
+    // 3. Order Tracking / Cancellation Follow-ups
+    const orderFollowUpKeywords = /cancel|track|status|where|arrive|arrival/i;
+    if (orderFollowUpKeywords.test(workMessage) && intelContext.selectedOrder) {
+      if (/cancel/i.test(workMessage)) {
+        intent = 'CANCEL_ORDER';
+      } else {
+        intent = 'TRACK_ORDER';
+      }
+      score = 10;
+      forceMapped = true;
+    }
+
+    if (forceMapped) {
+      intelResult.isFallback = false;
+      intelResult.needsClarification = false;
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     const isActuallyFallback = intelResult.isFallback && (ruleMatch.intent === 'UNKNOWN' || ruleMatch.score < 4);
     const isActuallyClarifying = intelResult.needsClarification && (ruleMatch.intent === 'UNKNOWN' || ruleMatch.score < 4);
 
@@ -404,10 +446,6 @@ Enhanced Reply:`;
         suggestions: [],
       };
     }
-
-    let intent = intelResult.intent;
-    let score = Math.max(intelResult.confidence * 10, ruleMatch.score);
-    const entities = { ...originalEntities, ...intelResult.entities };
 
     // 3. Detect emotional tone and inject empathy prefix into reply later
     const emotionalTone = detectEmotionalTone(workMessage);
@@ -1145,6 +1183,32 @@ Enhanced Reply:`;
         );
       }
 
+      case 'PROFILE_UPDATE_EMAIL': {
+        const newEmail = message.trim();
+        if (!newEmail || !newEmail.includes('@')) {
+          return this.buildReply(
+            '⚠️ Please enter a valid email address:',
+            'UPDATE_PROFILE',
+            0,
+            [],
+            'PROFILE_UPDATE_EMAIL',
+            data,
+            false,
+            [],
+          );
+        }
+        return this.buildReply(
+          `✏️ Got it! Shall I update your email address to **"${newEmail}"**?`,
+          'UPDATE_PROFILE',
+          9,
+          [],
+          'PROFILE_UPDATE_CONFIRM',
+          { ...data, value: newEmail },
+          false,
+          ['Confirm', 'Cancel'],
+        );
+      }
+
       case 'PROFILE_UPDATE_CONFIRM': {
         const isConfirm =
           q === 'yes' ||
@@ -1174,26 +1238,28 @@ Enhanced Reply:`;
             );
           }
           try {
-            await this.profileService.updateProfile(userId, {
-              displayName: data.value,
-              firstName: data.value.split(' ')[0] || data.value,
-              lastName: data.value.split(' ').slice(1).join(' ') || '',
-            });
+            const updatePayload: Record<string, any> = {};
+            updatePayload[data.field] = data.value;
+            if (data.field === 'displayName') {
+              updatePayload.firstName = data.value.split(' ')[0] || data.value;
+              updatePayload.lastName = data.value.split(' ').slice(1).join(' ') || '';
+            }
+            await this.profileService.updateProfile(userId, updatePayload);
             return {
-              reply: `✅ **Profile updated!**\n\nYour display name has been changed to **"${data.value}"** successfully!`,
+              reply: `✅ **Profile updated!**\n\nYour ${data.field === 'email' ? 'email address' : 'display name'} has been changed to **"${data.value}"** successfully!`,
               intent: 'UPDATE_PROFILE',
               confidence: 10,
               actions: [
                 {
                   type: 'NOTIFY',
-                  payload: { message: `Name updated to "${data.value}"` },
+                  payload: { message: `Profile updated: ${data.field} set to "${data.value}"` },
                 },
               ],
               suggestions: ['View profile', 'Change password', 'My orders'],
             };
           } catch (err: any) {
             return this.buildReply(
-              `❌ Failed to update name: ${err.message || 'Unknown error'}. Please try again.`,
+              `❌ Failed to update profile: ${err.message || 'Unknown error'}. Please try again.`,
               'UPDATE_PROFILE',
               0,
               [],
@@ -1201,7 +1267,7 @@ Enhanced Reply:`;
           }
         } else if (isCancel) {
           return this.buildReply(
-            '❌ Name update cancelled. Your profile is unchanged.',
+            '❌ Profile update cancelled. Your profile is unchanged.',
             'UPDATE_PROFILE',
             8,
             [],
@@ -1212,7 +1278,7 @@ Enhanced Reply:`;
           );
         } else {
           return this.buildReply(
-            `⚠️ Please confirm or cancel the name update to **"${data.value}"**.\n\nType **Confirm** or **Cancel**:`,
+            `⚠️ Please confirm or cancel the profile update to **"${data.value}"**.\n\nType **Confirm** or **Cancel**:`,
             'UPDATE_PROFILE',
             0,
             [],
@@ -2841,6 +2907,37 @@ Enhanced Reply:`;
           );
         }
 
+        // ── Email change — start multi-step conversational flow ──
+        const inlineEmail = message.match(
+          /(?:change|update|set)\s+(?:my\s+)?email\s+(?:to|:)\s+(\S+@\S+\.\S+)/i,
+        );
+        if (inlineEmail && inlineEmail[1]?.trim()) {
+          const newEmail = inlineEmail[1].trim();
+          return this.buildReply(
+            `✏️ Got it! You want to change your email to **"${newEmail}"**.\n\nShall I update it now?`,
+            intent,
+            9,
+            [],
+            'PROFILE_UPDATE_CONFIRM',
+            { field: 'email', value: newEmail },
+            false,
+            ['Confirm', 'Cancel'],
+          );
+        }
+
+        if (q.includes('email')) {
+          return this.buildReply(
+            `✏️ What would you like your **new email address** to be?\n\nJust type your new email:`,
+            intent,
+            9,
+            [],
+            'PROFILE_UPDATE_EMAIL',
+            { field: 'email' },
+            false,
+            [],
+          );
+        }
+
         // ── Name change — start multi-step conversational flow ──
         // If a new name was provided inline (e.g. "change my name to John Smith")
         const inlineName = message.match(
@@ -3132,14 +3229,53 @@ Enhanced Reply:`;
         let mergedBrand = entities.brand;
         let mergedCategory = entities.category;
 
-        if (!mergedProductType && !mergedBrand && !mergedCategory) {
-          const intelContext = this.chatbotIntelligenceService.getContext(sessionId);
+        const intelContext = this.chatbotIntelligenceService.getContext(sessionId);
+
+        // Context Switching check
+        let isTopicChanged = false;
+        if (entities.productType && intelContext.productType && entities.productType !== intelContext.productType) {
+          isTopicChanged = true;
+        } else if (entities.category && intelContext.category && entities.category !== intelContext.category) {
+          isTopicChanged = true;
+        }
+
+        if (isTopicChanged) {
+          // Clear previous product search context properties
+          delete intelContext.productType;
+          delete intelContext.product;
+          delete intelContext.brand;
+          delete intelContext.category;
+          delete intelContext.maxPrice;
+          delete intelContext.minPrice;
+          delete intelContext.color;
+          delete intelContext.size;
+          delete intelContext.sort;
+          delete intelContext.ram;
+          delete intelContext.storage;
+          
+          mergedProductType = entities.productType;
+          mergedBrand = entities.brand;
+          mergedCategory = entities.category;
+        } else if (!mergedProductType && !mergedBrand && !mergedCategory) {
           if (intelContext) {
             mergedProductType = intelContext.productType || intelContext.product || '';
             mergedBrand = intelContext.brand || '';
             mergedCategory = intelContext.category || '';
           }
         }
+
+        // Store current search properties in context
+        intelContext.intent = 'SEARCH_PRODUCT';
+        if (mergedProductType) intelContext.productType = mergedProductType;
+        if (mergedBrand) intelContext.brand = mergedBrand;
+        if (mergedCategory) intelContext.category = mergedCategory;
+        if (entities.maxPrice) intelContext.maxPrice = entities.maxPrice;
+        if (entities.minPrice) intelContext.minPrice = entities.minPrice;
+        if (entities.color) intelContext.color = entities.color;
+        if (entities.size) intelContext.size = entities.size;
+        if (entities.sort) intelContext.sort = entities.sort;
+        if (entities.ram) intelContext.ram = entities.ram;
+        if (entities.storage) intelContext.storage = entities.storage;
 
         const query =
           mergedProductType || mergedBrand || mergedCategory || '';
@@ -3331,11 +3467,33 @@ Enhanced Reply:`;
       }
 
       case 'ADD_CART': {
+        const intelContext = this.chatbotIntelligenceService.getContext(sessionId);
+        const isOneMore = /one more|another|more/i.test(message) && !entities.productType;
+        if (isOneMore && intelContext.selectedProduct) {
+          const product = intelContext.selectedProduct;
+          if (userId) {
+            await this.salesService.addToCart(userId, String(product._id), 1);
+          }
+          return {
+            reply: `🛒 **Added one more!**\n\n✅ Increased quantity of **${product.title}** in your cart.`,
+            intent,
+            confidence: 10,
+            actions: [{
+              type: 'ADD_TO_CART',
+              payload: {
+                id: String(product._id),
+                title: product.title,
+                price: product.price,
+                quantity: 1,
+              }
+            }],
+            suggestions: ['Checkout now', 'View cart'],
+          };
+        }
+
         let productName =
           entities.productType ||
-          message
-            .replace(/add|to cart|buy|purchase|get|i'll take/gi, '')
-            .trim();
+          message.replace(/add|to cart|buy|purchase|get|i'll take/gi, '').trim();
 
         // ── Contextual / pronoun reference detection ──────────────────────────
         // Detect when the extracted name is a pronoun/filler rather than a real
@@ -3487,6 +3645,8 @@ Enhanced Reply:`;
             );
           }
 
+          intelContext.selectedProduct = product;
+
           return {
             reply: `🛒 **Added to Cart!**\n\n✅ **${actionTitle}** ($${product.price.toFixed(2)}) has been added to your cart.\n\nWould you like to **checkout now** or continue shopping?`,
             intent,
@@ -3516,6 +3676,48 @@ Enhanced Reply:`;
             undefined,
             true,
           );
+
+        const intelContext = this.chatbotIntelligenceService.getContext(sessionId);
+
+        // Check pronoun actions
+        const isRemoveOne = /remove one|decrease|less/i.test(message);
+        const isDeleteIt = /delete it|remove it/i.test(message);
+
+        if ((isRemoveOne || isDeleteIt) && intelContext.selectedProduct) {
+          const product = intelContext.selectedProduct;
+          const cart = await this.salesService.getCart(userId);
+          const item = cart.items.find(i => String(i.productId) === String(product._id));
+          if (item) {
+            if (isRemoveOne && item.quantity > 1) {
+              const newQty = item.quantity - 1;
+              await this.salesService.updateCartQuantity(userId, String(product._id), newQty);
+              return {
+                reply: `🗑️ **Removed one!**\n\n❌ Decreased quantity of **${product.title}** in your cart.`,
+                intent,
+                confidence: 10,
+                actions: [{
+                  type: 'REMOVE_FROM_CART',
+                  payload: { id: String(product._id) }
+                }],
+                suggestions: ['View cart', 'Checkout'],
+              };
+            } else {
+              // Delete entirely
+              await this.salesService.removeFromCart(userId, String(product._id));
+              return {
+                reply: `🗑️ **Removed from Cart!**\n\n❌ **${product.title}** has been removed from your cart.`,
+                intent,
+                confidence: 10,
+                actions: [{
+                  type: 'REMOVE_FROM_CART',
+                  payload: { id: String(product._id) }
+                }],
+                suggestions: ['View cart', 'Continue shopping'],
+              };
+            }
+          }
+        }
+
         const productName =
           entities.productType ||
           message.replace(/remove|from cart|delete|clear/gi, '').trim();
@@ -3798,6 +4000,9 @@ Enhanced Reply:`;
           );
         try {
           const orders = await this.salesService.getOrders(userId);
+          if (orders && orders.length > 0) {
+            orders.sort((a: any, b: any) => String(b._id).localeCompare(String(a._id)));
+          }
           if (!orders?.length) {
             return this.buildReply(
               '📦 You have **no orders** yet!\n\nBrowse our catalog to start shopping.',
@@ -3838,7 +4043,11 @@ Enhanced Reply:`;
       }
 
       case 'TRACK_ORDER': {
-        const orderId = entities.orderId;
+        const intelContext = this.chatbotIntelligenceService.getContext(sessionId);
+        let orderId = entities.orderId;
+        if (!orderId && intelContext.selectedOrder) {
+          orderId = 'ORD-' + String(intelContext.selectedOrder._id);
+        }
         try {
           if (orderId) {
             // Find by matching order ID (supports both logged-in and guest order IDs)
@@ -3854,6 +4063,7 @@ Enhanced Reply:`;
               const matchesExplicitOrder = cleanId.length >= 8; // If they provided the exact order ID, allow tracking details directly
 
               if (matchesUser || matchesGuest || matchesExplicitOrder) {
+                intelContext.selectedOrder = order;
                 return this.buildReply(
                   `📍 **Order Tracking: #${String(order._id).slice(-8).toUpperCase()}**\n\n• **Status**: ${order.status}\n• **Total**: $${order.totalPrice?.toFixed(2)}\n• **Placed**: ${new Date((order as any).createdAt).toLocaleDateString()}\n• **Tracking Code**: ${(order as any).trackingCode || 'Pending Dispatch'}`,
                   intent,
@@ -3878,9 +4088,13 @@ Enhanced Reply:`;
           }
 
           const orders = await this.salesService.getOrders(userId);
+          if (orders && orders.length > 0) {
+            orders.sort((a: any, b: any) => String(b._id).localeCompare(String(a._id)));
+          }
           const latest = orders?.[0];
           if (!latest)
             return this.buildReply('No orders found to track.', intent, 7, []);
+          intelContext.selectedOrder = latest;
           return this.buildReply(
             `📍 **Latest Order Status:**\n\n• **Order**: #${String(latest._id).slice(-8).toUpperCase()}\n• **Status**: ${latest.status}\n• **Total**: $${latest.totalPrice?.toFixed(2)}\n• **Placed**: ${new Date((latest as any).createdAt).toLocaleDateString()}`,
             intent,
@@ -3912,7 +4126,11 @@ Enhanced Reply:`;
             undefined,
             true,
           );
-        const orderId = entities.orderId;
+        const intelContext = this.chatbotIntelligenceService.getContext(sessionId);
+        let orderId = entities.orderId;
+        if (!orderId && intelContext.selectedOrder) {
+          orderId = 'ORD-' + String(intelContext.selectedOrder._id);
+        }
         if (!orderId) {
           return this.buildReply(
             'Please specify your **Order ID** to cancel it.\nExample: *"cancel order ORD-123456"*',
@@ -4000,6 +4218,9 @@ Enhanced Reply:`;
           );
         try {
           const orders = await this.salesService.getOrders(userId);
+          if (orders && orders.length > 0) {
+            orders.sort((a: any, b: any) => String(b._id).localeCompare(String(a._id)));
+          }
           const latest = orders?.[0];
           if (!latest || latest.items.length === 0)
             return this.buildReply(
@@ -4870,7 +5091,8 @@ Enhanced Reply:`;
       // PHASE 1: GET_PRODUCT
       // ═══════════════════════════════════════════════════════════════════════
       case 'GET_PRODUCT': {
-        const nameQuery =
+        const intelContext = this.chatbotIntelligenceService.getContext(sessionId);
+        let nameQuery =
           entities.productType ||
           entities.brand ||
           message
@@ -4879,6 +5101,11 @@ Enhanced Reply:`;
               '',
             )
             .trim();
+
+        const detailFollowUpKeywords = /battery|weight|camera|spec|color|size|variant|warrant|available|screen|display/i;
+        if ((!nameQuery || detailFollowUpKeywords.test(message)) && intelContext.selectedProduct) {
+          nameQuery = intelContext.selectedProduct.title;
+        }
 
         if (!nameQuery || nameQuery.length < 2) {
           return this.buildReply(
@@ -4897,6 +5124,9 @@ Enhanced Reply:`;
             search: nameQuery,
           });
           const product = results?.[0] as any;
+          if (product) {
+            intelContext.selectedProduct = product;
+          }
           if (!product)
             return this.buildReply(
               `❌ **"${nameQuery}"** not found. Try a different name.`,
@@ -4905,9 +5135,9 @@ Enhanced Reply:`;
               [],
             );
 
-          const showSpecs = /spec|specification|feature/i.test(message);
+          const showSpecs = /spec|specification|feature|battery|weight|camera|screen|display/i.test(message);
           const showWarranty = /warrant/i.test(message);
-          const showVariants = /variant|color|size|ram|storage/i.test(message);
+          const showVariants = /variant|color|size|ram|storage|availab/i.test(message);
 
           const specs =
             (product.specifications || [])
