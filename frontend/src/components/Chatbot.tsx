@@ -206,10 +206,12 @@ export default function Chatbot() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping, isOpen]);
 
-  // Focus input on open
+  // Focus input on open or when typing ends
   useEffect(() => {
-    if (isOpen) setTimeout(() => inputRef.current?.focus(), 100);
-  }, [isOpen]);
+    if (isOpen && !isTyping) {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [isOpen, isTyping]);
 
   // Check agent connectivity
   useEffect(() => {
@@ -833,7 +835,6 @@ export default function Chatbot() {
               placeholder={TYPING_PLACEHOLDERS[placeholderIndex]}
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
-              disabled={isTyping}
               className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 dark:bg-zinc-950 text-zinc-900 dark:text-white placeholder-zinc-400 transition-all disabled:opacity-50"
             />
             <button
