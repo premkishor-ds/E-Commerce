@@ -313,6 +313,19 @@ const initialProductsData = [
 function generate1000Products() {
   const generated = [...initialProductsData];
   
+  const brands = [
+    'Samsung', 'Apple', 'Sony', 'Nike', 'Adidas', 'Dell', 'HP', 'Lenovo', 'OnePlus', 'Google',
+    'LG', 'Asus', 'Acer', 'Realme', 'Oppo', 'Vivo', 'Xiaomi', 'Redmi', 'Motorola',
+    'Puma', 'Reebok', 'ApexTech', 'NexaHome', 'AuraWear', 'VeloSport'
+  ];
+
+  const productTypes = [
+    'phone', 'laptop', 'mouse', 'shoes', 'watch', 'TV', 'earbuds', 'speaker',
+    'multi-cooker', 'treadmill', 'headphone', 'camera', 'tablet', 'shirt',
+    'jacket', 'bag', 'cooker', 'bicycle', 'keyboard', 'monitor',
+    'refrigerator', 'washing machine', 'microwave', 'blender', 'air purifier'
+  ];
+
   const productTypeCategoryMap: Record<string, string> = {
     'multi-cooker': 'Home & Kitchen',
     'cooker': 'Home & Kitchen',
@@ -328,6 +341,7 @@ function generate1000Products() {
     'headphone': 'Electronics',
     'earphone': 'Electronics',
     'earbud': 'Electronics',
+    'earbuds': 'Electronics',
     'speaker': 'Electronics',
     'watch': 'Electronics',
     'camera': 'Electronics',
@@ -337,6 +351,7 @@ function generate1000Products() {
     'monitor': 'Electronics',
     'television': 'Electronics',
     'tv': 'Electronics',
+    'TV': 'Electronics',
     
     'shirt': 'Fashion',
     'shoes': 'Fashion',
@@ -345,7 +360,7 @@ function generate1000Products() {
     'leggings': 'Fashion',
     
     'treadmill': 'Fitness & Sports',
-    'bicycle': 'Fitness & Sports',
+    'bicycle': 'Fitness & Sports'
   };
 
   const productTypeImages: Record<string, string> = {
@@ -357,24 +372,26 @@ function generate1000Products() {
     'blender': '/images/cooker.png',
     'air purifier': '/images/cooker.png',
     
-    'smartwatch': '/images/headphones.png',
-    'laptop': '/images/mouse.png',
-    'phone': '/images/mouse.png',
+    'smartwatch': '/images/smartwatch.png',
+    'laptop': '/images/laptop.png',
+    'phone': '/images/phone.png',
     'headphone': '/images/headphones.png',
     'earphone': '/images/headphones.png',
-    'earbud': '/images/headphones.png',
+    'earbud': '/images/earbuds.png',
+    'earbuds': '/images/earbuds.png',
     'speaker': '/images/headphones.png',
-    'watch': '/images/headphones.png',
+    'watch': '/images/smartwatch.png',
     'camera': '/images/headphones.png',
-    'tablet': '/images/mouse.png',
+    'tablet': '/images/laptop.png',
     'keyboard': '/images/mouse.png',
     'mouse': '/images/mouse.png',
     'monitor': '/images/mouse.png',
-    'television': '/images/headphones.png',
-    'tv': '/images/headphones.png',
+    'television': '/images/tv.png',
+    'tv': '/images/tv.png',
+    'TV': '/images/tv.png',
     
     'shirt': '/images/leggings.png',
-    'shoes': '/images/leggings.png',
+    'shoes': '/images/shoes.png',
     'jacket': '/images/leggings.png',
     'bag': '/images/leggings.png',
     'leggings': '/images/leggings.png',
@@ -383,46 +400,95 @@ function generate1000Products() {
     'bicycle': '/images/bicycle.png',
   };
 
-  const brands = [
-    'Apple', 'Samsung', 'Sony', 'LG', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer',
-    'OnePlus', 'Realme', 'Oppo', 'Vivo', 'Xiaomi', 'Redmi', 'Motorola',
-    'Nike', 'Adidas', 'Puma', 'Reebok', 'ApexTech', 'NexaHome', 'AuraWear', 'VeloSport'
-  ];
+  const colors = ['black', 'white', 'blue', 'red', 'gold', 'silver', 'green', 'yellow', 'pink', 'gray', 'purple', 'orange'];
+  const sizes = ['S', 'M', 'L', 'XL', 'XXL', '9', '10', '8', '6', '7', '11', '12'];
+  const prices = [100, 200, 500, 1000, 15000, 20000, 50000];
 
-  const productTypes = Object.keys(productTypeCategoryMap);
-
-  const adjectives = ['Premium', 'Ultra', 'Pro', 'Classic', 'Elite', 'Essential', 'Smart', 'NextGen', 'Wireless', 'Portable', 'Ergonomic', 'Deluxe'];
-  const models = ['X1', 'Series 5', 'Pro Max', 'Plus', 'Air', 'Neo', 'Prime', 'One', 'Wave', 'Infinity', 'Stealth', 'Force'];
+  const keywordMap: Record<string, string> = {
+    'multi-cooker': 'cooker,kitchen',
+    'cooker': 'cooker,kitchen',
+    'refrigerator': 'refrigerator,appliance',
+    'washing machine': 'washingmachine,appliance',
+    'microwave': 'microwave,kitchen',
+    'blender': 'blender,kitchen',
+    'air purifier': 'airpurifier,appliance',
+    
+    'smartwatch': 'smartwatch,watch',
+    'laptop': 'laptop,computer',
+    'phone': 'smartphone,phone',
+    'headphone': 'headphones,audio',
+    'earphone': 'earphones,audio',
+    'earbud': 'earbuds,audio',
+    'earbuds': 'earbuds,audio',
+    'speaker': 'speaker,audio',
+    'watch': 'watch',
+    'camera': 'camera',
+    'tablet': 'tablet,ipad',
+    'keyboard': 'keyboard,computer',
+    'mouse': 'mouse,computer',
+    'monitor': 'monitor,screen',
+    'television': 'television,tv',
+    'tv': 'television,tv',
+    'TV': 'television,tv',
+    
+    'shirt': 'shirt,apparel',
+    'shoes': 'shoes,sneakers',
+    'jacket': 'jacket,apparel',
+    'bag': 'bag,backpack',
+    'leggings': 'leggings,apparel',
+    
+    'treadmill': 'treadmill,fitness',
+    'bicycle': 'bicycle,bike'
+  };
 
   let idCounter = 1;
-  while (generated.length < 1000) {
-    const brand = brands[generated.length % brands.length];
-    const productType = productTypes[generated.length % productTypes.length];
-    const catName = productTypeCategoryMap[productType];
-    const image = productTypeImages[productType] || '/images/mouse.png';
-    const adj = adjectives[(generated.length + 3) % adjectives.length];
-    const model = models[(generated.length + 7) % models.length];
-    
-    const title = `${brand} ${adj} ${productType.charAt(0).toUpperCase() + productType.slice(1)} ${model}`;
-    const description = `High-quality ${brand} ${productType} featuring state-of-the-art ${adj.toLowerCase()} design and ${model} performance for daily use.`;
-    const price = parseFloat((49.99 + (generated.length * 1.73) % 850).toFixed(2));
-    const sku = `${brand.substring(0, 3).toUpperCase()}-${productType.substring(0, 4).toUpperCase()}-${model.replace(/\s+/g, '').toUpperCase()}-${idCounter++}`;
-    const tags = [productType, brand.toLowerCase(), adj.toLowerCase()];
-    const averageRating = parseFloat((4.0 + (generated.length * 0.11) % 1.0).toFixed(1));
+  
+  // Use nested loops to generate 1000 completely unique data combinations
+  for (let b = 0; b < brands.length; b++) {
+    for (let p = 0; p < productTypes.length; p++) {
+      for (let c = 0; c < colors.length; c++) {
+        for (let s = 0; s < sizes.length; s++) {
+          if (generated.length >= 1000) {
+            return generated;
+          }
+          const brand = brands[b];
+          const productType = productTypes[p];
+          const catName = productTypeCategoryMap[productType] || 'Electronics';
+          
+          const kw = keywordMap[productType] || 'gadget';
+          const image = `https://loremflickr.com/600/600/${kw}?lock=${idCounter}`;
+          
+          const color = colors[c];
+          const size = sizes[s];
+          const basePrice = prices[(b + p + c + s) % prices.length];
+          const price = parseFloat((basePrice - (idCounter % 5) * (basePrice > 1000 ? 100 : 5)).toFixed(2));
+          
+          const title = `${brand} ${productType.charAt(0).toUpperCase() + productType.slice(1)} - ${color.toUpperCase()} (${size})`;
+          const description = `This ${brand} ${productType} is a premium product in ${color} color and size ${size}, built for outstanding reliability and performance.`;
+          const sku = `SKU-${brand.substring(0, 3).toUpperCase()}-${productType.substring(0, 4).toUpperCase()}-${color.substring(0, 3).toUpperCase()}-${size}-${idCounter++}`;
+          const tags = [productType, brand.toLowerCase(), color, size.toLowerCase()];
+          const averageRating = parseFloat((4.0 + (idCounter % 10) * 0.1).toFixed(1));
 
-    generated.push({
-      title,
-      description,
-      price,
-      categoryName: catName,
-      brandName: brand,
-      sku,
-      images: [image],
-      tags,
-      averageRating,
-      specifications: [{ name: 'Model Year', value: '2026' }, { name: 'Quality Grade', value: adj }],
-      faqs: [{ question: 'Is it original?', answer: `Yes, it is an official ${brand} product.` }],
-    });
+          generated.push({
+            title,
+            description,
+            price,
+            categoryName: catName,
+            brandName: brand,
+            sku,
+            images: [image],
+            tags,
+            averageRating,
+            specifications: [
+              { name: 'Color', value: color },
+              { name: 'Size', value: size },
+              { name: 'Model Year', value: '2026' }
+            ],
+            faqs: [{ question: 'Is it original?', answer: `Yes, it is an official ${brand} product.` }],
+          });
+        }
+      }
+    }
   }
 
   return generated;

@@ -32,7 +32,7 @@ const initialProducts: Product[] = [
     category: 'Electronics',
     brand: 'ApexTech',
     sku: 'APX-SND-PRO',
-    images: ['https://picsum.photos/seed/headphones/600/600'],
+    images: ['/images/headphones.png'],
     tags: ['audio', 'wireless', 'headphones', 'premium'],
     averageRating: 4.8,
     specifications: [
@@ -57,7 +57,7 @@ const initialProducts: Product[] = [
     category: 'Home & Kitchen',
     brand: 'NexaHome',
     sku: 'NEX-COOK-XL',
-    images: ['https://picsum.photos/seed/cooker/600/600'],
+    images: ['/images/cooker.png'],
     tags: ['kitchen', 'cooking', 'smart-home', 'appliances'],
     averageRating: 4.6,
     specifications: [
@@ -80,7 +80,7 @@ const initialProducts: Product[] = [
     category: 'Fashion & Apparel',
     brand: 'AuraWear',
     sku: 'AUR-S-LEG',
-    images: ['https://picsum.photos/seed/leggings/600/600'],
+    images: ['/images/leggings.png'],
     tags: ['clothing', 'athletic', 'stretch', 'leggings'],
     averageRating: 4.5,
     specifications: [
@@ -102,7 +102,7 @@ const initialProducts: Product[] = [
     category: 'Fitness & Sports',
     brand: 'VeloSport',
     sku: 'VEL-HYB-CARB',
-    images: ['https://picsum.photos/seed/bicycle/600/600'],
+    images: ['/images/bicycle.png'],
     tags: ['outdoor', 'fitness', 'cycling', 'bicycle'],
     averageRating: 4.9,
     specifications: [
@@ -120,54 +120,156 @@ const initialProducts: Product[] = [
 ];
 
 const generatedProducts: Product[] = [];
-const categories = ['Electronics', 'Home & Kitchen', 'Fashion & Apparel', 'Fitness & Sports'];
-const brands = ['ApexTech', 'NexaHome', 'AuraWear', 'VeloSport'];
-const adjectives = ['Pro', 'Ultra', 'Infinity', 'Classic', 'Apex', 'Eco', 'Elite', 'Flex', 'Nomad', 'Summit', 'Vantage', 'Matrix', 'Fusion', 'Axis', 'Element'];
 
-const nounMap: Record<string, string[]> = {
-  'Electronics': ['Wireless Earbuds', 'Smart Watch', 'USB-C Docking Station', 'Mechanical Keyboard', '4K Web Camera', 'Noise Cancelling Mic', 'Smart Speaker', 'Power Bank 20k', 'Gaming Mouse', 'IPS Monitor'],
-  'Fashion & Apparel': ['Winter Parka Jacket', 'Slim Fit Denim Jeans', 'Runners Mesh Sneakers', 'Wool Knit Sweater', 'Classic Cotton Tee', 'Leather Travel Belt', 'Athletic Crew Socks', 'Waterproof Windbreaker', 'Leather Chelsea Boots', 'Active Track Jacket'],
-  'Home & Kitchen': ['Air Fryer Oven', 'Drip Coffee Maker', 'Stainless Knife Set', 'Silicon Spatula Set', 'Non-stick Frying Pan', 'Ceramic Tea Pot', 'Electric Water Kettle', 'Smart Food Scale', 'Knife Sharpener', 'Glass Food Containers'],
-  'Fitness & Sports': ['Yoga Foam Roller', 'Adjustable Dumbbell Set', 'Resistance Band Pack', 'Speed Jump Rope', 'Ergonomic Water Bottle', 'Hydration Backpack', 'Cycling GPS Computer', 'Padded Bike Shorts', 'Running Waist Pack', 'Protein Shaker Cup']
+const brands = [
+  'Samsung', 'Apple', 'Sony', 'Nike', 'Adidas', 'Dell', 'HP', 'Lenovo', 'OnePlus', 'Google',
+  'LG', 'Asus', 'Acer', 'Realme', 'Oppo', 'Vivo', 'Xiaomi', 'Redmi', 'Motorola',
+  'Puma', 'Reebok', 'ApexTech', 'NexaHome', 'AuraWear', 'VeloSport'
+];
+
+const productTypes = [
+  'phone', 'laptop', 'mouse', 'shoes', 'watch', 'TV', 'earbuds', 'speaker',
+  'multi-cooker', 'treadmill', 'headphone', 'camera', 'tablet', 'shirt',
+  'jacket', 'bag', 'cooker', 'bicycle', 'keyboard', 'monitor',
+  'refrigerator', 'washing machine', 'microwave', 'blender', 'air purifier'
+];
+
+const productTypeCategoryMap: Record<string, string> = {
+  'multi-cooker': 'Home & Kitchen',
+  'cooker': 'Home & Kitchen',
+  'refrigerator': 'Home & Kitchen',
+  'washing machine': 'Home & Kitchen',
+  'microwave': 'Home & Kitchen',
+  'blender': 'Home & Kitchen',
+  'air purifier': 'Home & Kitchen',
+  
+  'smartwatch': 'Electronics',
+  'laptop': 'Electronics',
+  'phone': 'Electronics',
+  'headphone': 'Electronics',
+  'earphone': 'Electronics',
+  'earbud': 'Electronics',
+  'earbuds': 'Electronics',
+  'speaker': 'Electronics',
+  'watch': 'Electronics',
+  'camera': 'Electronics',
+  'tablet': 'Electronics',
+  'keyboard': 'Electronics',
+  'mouse': 'Electronics',
+  'monitor': 'Electronics',
+  'television': 'Electronics',
+  'tv': 'Electronics',
+  'TV': 'Electronics',
+  
+  'shirt': 'Fashion & Apparel',
+  'shoes': 'Fashion & Apparel',
+  'jacket': 'Fashion & Apparel',
+  'bag': 'Fashion & Apparel',
+  'leggings': 'Fashion & Apparel',
+  
+  'treadmill': 'Fitness & Sports',
+  'bicycle': 'Fitness & Sports'
 };
 
-for (let i = 1; i <= 1000; i++) {
-  const cat = categories[i % categories.length];
-  const brand = brands[i % brands.length];
-  const adj = adjectives[i % adjectives.length];
-  const nouns = nounMap[cat];
-  const noun = nouns[i % nouns.length];
+const colors = ['black', 'white', 'blue', 'red', 'gold', 'silver', 'green', 'yellow', 'pink', 'gray', 'purple', 'orange'];
+const sizes = ['S', 'M', 'L', 'XL', 'XXL', '9', '10', '8', '6', '7', '11', '12'];
+const prices = [100, 200, 500, 1000, 15000, 20000, 50000];
 
-  const uniqueTitle = `${brand} ${adj} ${noun} v${i}`;
-  const uniqueDescription = `The ${brand} ${adj} is a premium ${noun.toLowerCase()} designed for maximum performance in ${cat.toLowerCase()} activities. Version ${i} includes certified components.`;
+const keywordMap: Record<string, string> = {
+  'multi-cooker': 'cooker,kitchen',
+  'cooker': 'cooker,kitchen',
+  'refrigerator': 'refrigerator,appliance',
+  'washing machine': 'washingmachine,appliance',
+  'microwave': 'microwave,kitchen',
+  'blender': 'blender,kitchen',
+  'air purifier': 'airpurifier,appliance',
+  
+  'smartwatch': 'smartwatch,watch',
+  'laptop': 'laptop,computer',
+  'phone': 'smartphone,phone',
+  'headphone': 'headphones,audio',
+  'earphone': 'earphones,audio',
+  'earbud': 'earbuds,audio',
+  'earbuds': 'earbuds,audio',
+  'speaker': 'speaker,audio',
+  'watch': 'watch',
+  'camera': 'camera',
+  'tablet': 'tablet,ipad',
+  'keyboard': 'keyboard,computer',
+  'mouse': 'mouse,computer',
+  'monitor': 'monitor,screen',
+  'television': 'television,tv',
+  'tv': 'television,tv',
+  'TV': 'television,tv',
+  
+  'shirt': 'shirt,apparel',
+  'shoes': 'shoes,sneakers',
+  'jacket': 'jacket,apparel',
+  'bag': 'bag,backpack',
+  'leggings': 'leggings,apparel',
+  
+  'treadmill': 'treadmill,fitness',
+  'bicycle': 'bicycle,bike'
+};
 
-  // Use deterministic seed-based Picsum URLs that always load correctly
-  const uniqueImg = `https://picsum.photos/seed/prod-${i}/600/600`;
+let idCounter = 1;
 
-  generatedProducts.push({
-    id: `generated-prod-${i}`,
-    title: uniqueTitle,
-    description: uniqueDescription,
-    price: parseFloat((45 + (i * 2.5) % 800).toFixed(2)),
-    category: cat,
-    brand: brand,
-    sku: `SKU-GEN-${100000 + i}`,
-    images: [uniqueImg],
-    tags: [cat.toLowerCase().replace(' ', '-'), brand.toLowerCase(), adj.toLowerCase(), 'generated'],
-    averageRating: parseFloat((4.0 + (i % 10) * 0.1).toFixed(1)),
-    specifications: [
-      { name: 'Model Line', value: `${adj} Series` },
-      { name: 'Hardware Revision', value: `Rev-${i}` },
-      { name: 'Safety Certificate', value: 'CE Standard' }
-    ],
-    faqs: [
-      { question: 'What is the shipping dimensions?', answer: 'It is packaged in a standard compact box optimized for safe transit.' }
-    ],
-    reviews: [
-      { user: `Customer-${i}`, rating: 5, comment: `High-quality ${noun.toLowerCase()}. Fully satisfied.`, verified: true }
-    ]
-  });
+function generateMockProducts() {
+  for (let b = 0; b < brands.length; b++) {
+    for (let p = 0; p < productTypes.length; p++) {
+      for (let c = 0; c < colors.length; c++) {
+        for (let s = 0; s < sizes.length; s++) {
+          if (generatedProducts.length >= 1000) {
+            return;
+          }
+          const brand = brands[b];
+          const productType = productTypes[p];
+          const cat = productTypeCategoryMap[productType] || 'Electronics';
+          
+          const kw = keywordMap[productType] || 'gadget';
+          const image = `https://loremflickr.com/600/600/${kw}?lock=${idCounter}`;
+          
+          const color = colors[c];
+          const size = sizes[s];
+          const basePrice = prices[(b + p + c + s) % prices.length];
+          const price = parseFloat((basePrice - (idCounter % 5) * (basePrice > 1000 ? 100 : 5)).toFixed(2));
+          
+          const uniqueTitle = `${brand} ${productType.charAt(0).toUpperCase() + productType.slice(1)} - ${color.toUpperCase()} (${size})`;
+          const uniqueDescription = `This ${brand} ${productType} is a premium product in ${color} color and size ${size}, built for outstanding reliability and performance.`;
+          const sku = `SKU-${brand.substring(0, 3).toUpperCase()}-${productType.substring(0, 4).toUpperCase()}-${color.substring(0, 3).toUpperCase()}-${size}-${idCounter++}`;
+          const tags = [productType, brand.toLowerCase(), color, size.toLowerCase()];
+          const averageRating = parseFloat((4.0 + (idCounter % 10) * 0.1).toFixed(1));
+
+          generatedProducts.push({
+            id: `generated-prod-${idCounter}`,
+            title: uniqueTitle,
+            description: uniqueDescription,
+            price: price,
+            category: cat,
+            brand: brand,
+            sku: sku,
+            images: [image],
+            tags: tags,
+            averageRating: averageRating,
+            specifications: [
+              { name: 'Color', value: color },
+              { name: 'Size', value: size },
+              { name: 'Model Year', value: '2026' }
+            ],
+            faqs: [
+              { question: 'What is the shipping dimensions?', answer: 'It is packaged in a standard compact box optimized for safe transit.' }
+            ],
+            reviews: [
+              { user: `Customer-${idCounter}`, rating: 5, comment: `High-quality ${productType}. Fully satisfied.`, verified: true }
+            ]
+          });
+        }
+      }
+    }
+  }
 }
+
+generateMockProducts();
 
 export const PRODUCTS: Product[] = [...initialProducts, ...generatedProducts];
 
