@@ -937,6 +937,7 @@ export function extractEntities(text: string): Record<string, string> {
 export function classifyIntent(message: string): IntentMatch {
   const lower = message.toLowerCase().trim();
   const scores: Record<string, number> = {};
+  const entities = extractEntities(message);
 
   if (
     lower.includes('bought together') ||
@@ -949,7 +950,7 @@ export function classifyIntent(message: string): IntentMatch {
     return {
       intent: 'RECOMMEND',
       score: 10,
-      entities: extractEntities(message),
+      entities,
     };
   }
 
@@ -990,10 +991,39 @@ export function classifyIntent(message: string): IntentMatch {
     }
   }
 
+  // Robust fallback logic:
+  // 1. If we couldn't classify, but the message contains a brand, category, or product type, classify as SEARCH_PRODUCT or BROWSE_CATEGORY
+  if (topIntent === 'UNKNOWN' || topScore < 3) {
+    if (entities.productType || entities.brand) {
+      topIntent = 'SEARCH_PRODUCT';
+      topScore = 6;
+    } else if (entities.category) {
+      topIntent = 'BROWSE_CATEGORY';
+      topScore = 6;
+    }
+  }
+
+  // 2. If the user mentions action words along with anything, map to SEARCH_PRODUCT
+  if (topIntent === 'UNKNOWN' || topScore < 3) {
+    const hasAction = /\b(buy|get|purchase|order|checkout|find|search|looking for|want|need)\b/i.test(lower);
+    if (hasAction) {
+      topIntent = 'SEARCH_PRODUCT';
+      topScore = 5.5;
+    }
+  }
+
+  // 3. Fallback to HELP if the user asks generic question words but no match found
+  if (topIntent === 'UNKNOWN' || topScore < 1.5) {
+    if (/\b(how|what|help|info|support|guide|menu|options|commands)\b/i.test(lower)) {
+      topIntent = 'HELP';
+      topScore = 5;
+    }
+  }
+
   return {
     intent: topIntent,
     score: topScore,
-    entities: extractEntities(message),
+    entities,
   };
 }
 

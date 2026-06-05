@@ -299,19 +299,24 @@ Enhanced Reply:`;
     await this.memory.getOrCreateSession(sessionId, userId, guestId);
     if (guestId) await this.memory.trackGuestSession(guestId, sessionId);
 
-    // Hybrid Intent engine
+    // Hybrid Intent engine: trust high-confidence rules, and use rules to refine generic AI intents
     let intent = 'UNKNOWN';
     let score = 1.0;
     const ruleMatch = classifyIntent(workMessage);
     const entities = ruleMatch.entities;
 
-    const gemmaIntent = await this.classifyIntentWithGemma(workMessage);
-    if (gemmaIntent) {
-      intent = gemmaIntent;
-      score = 10.0;
-    } else {
+    if (ruleMatch.score >= 7.0) {
       intent = ruleMatch.intent;
       score = ruleMatch.score;
+    } else {
+      const gemmaIntent = await this.classifyIntentWithGemma(workMessage);
+      if (gemmaIntent && !(['HELP', 'UNKNOWN'].includes(gemmaIntent) && ruleMatch.intent !== 'UNKNOWN' && ruleMatch.score >= 4.0)) {
+        intent = gemmaIntent;
+        score = 10.0;
+      } else {
+        intent = ruleMatch.intent;
+        score = ruleMatch.score;
+      }
     }
 
     // Save user message to database history
@@ -3070,11 +3075,26 @@ Enhanced Reply:`;
       case 'SEARCH_PRODUCT': {
         const query =
           entities.productType || entities.brand || entities.category || '';
-        const searchQuery =
+        let searchQuery =
           query ||
           message
-            .replace(/show|find|search|looking for|get me|i want|need/gi, '')
+            .replace(/show|find|search|looking for|get me|i want|need|to buy|buy|purchase/gi, '')
             .trim();
+
+        // If the query is empty or too generic, guide the user instead of searching
+        const genericTerms = /^(some\s+)?(product|products|item|items|thing|things|stuff|anything|something|goods)?$/i;
+        if (!searchQuery || genericTerms.test(searchQuery)) {
+          return this.buildReply(
+            `🛒 **Welcome to ApexStore!**\n\nI'd love to help you find what you're looking for. What kind of products are you interested in today?\n\nHere are some of our popular categories:\n• 📱 **Electronics** (e.g., headphones, laptops)\n• 👕 **Fashion & Apparel** (e.g., shoes, jackets)\n• 🍳 **Home & Kitchen** (e.g., blenders, lamps)\n• 🏋️ **Fitness & Sports** (e.g., yoga mats, dumbbells)\n\nJust tell me what you're looking for, or browse all products on the [Search page](/search)!`,
+            intent,
+            8,
+            [{ type: 'NAVIGATE', payload: { path: '/search' } }],
+            undefined,
+            undefined,
+            false,
+            ['Browse Electronics', 'Browse Fashion', 'Best sellers'],
+          );
+        }
 
         try {
           const results = await this.catalogService.getProducts({
@@ -4343,6 +4363,9 @@ Enhanced Reply:`;
           if (!idQuery) return this.buildReply('⚠️ Please specify the product ID to approve:', intent, 8, []);
           try {
             const product = await this.catalogService.approveProduct(idQuery);
+            if (!product) {
+              return this.buildReply(`❌ Product not found or approval failed.`, intent, 5, []);
+            }
             return this.buildReply(`✅ **Product "${product.title}" has been approved successfully!**`, intent, 10, []);
           } catch (e: any) {
             return this.buildReply(`❌ Approval failed: ${e.message}`, intent, 5, []);
