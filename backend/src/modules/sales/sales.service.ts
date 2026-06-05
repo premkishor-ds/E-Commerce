@@ -18,6 +18,15 @@ import {
   NotificationRepository,
 } from '../../repositories/concrete.repositories';
 import { Types } from 'mongoose';
+import { createHash } from 'crypto';
+
+function safeObjectId(id: string | Types.ObjectId): Types.ObjectId {
+  if (!id) return new Types.ObjectId();
+  if (id instanceof Types.ObjectId) return id;
+  if (Types.ObjectId.isValid(id)) return new Types.ObjectId(id);
+  const hash = createHash('md5').update(String(id)).digest('hex').substring(0, 24);
+  return new Types.ObjectId(hash);
+}
 
 @Injectable()
 export class SalesService {
@@ -39,11 +48,11 @@ export class SalesService {
   // CART
   async getCart(userId: string) {
     let cart = await this.cartRepository.findOne({
-      userId: new Types.ObjectId(userId),
+      userId: safeObjectId(userId),
     });
     if (!cart) {
       cart = await this.cartRepository.create({
-        userId: new Types.ObjectId(userId),
+        userId: safeObjectId(userId),
         items: [],
       });
     }
@@ -173,11 +182,11 @@ export class SalesService {
   // WISHLIST
   async getWishlist(userId: string) {
     let wishlist = await this.wishlistRepository.findOne({
-      userId: new Types.ObjectId(userId),
+      userId: safeObjectId(userId),
     });
     if (!wishlist) {
       wishlist = await this.wishlistRepository.create({
-        userId: new Types.ObjectId(userId),
+        userId: safeObjectId(userId),
         products: [],
       });
     }
@@ -355,7 +364,7 @@ export class SalesService {
     };
 
     if (userId) {
-      orderData.userId = new Types.ObjectId(userId);
+      orderData.userId = safeObjectId(userId);
     } else if (dto.guestId) {
       orderData.guestId = dto.guestId;
       orderData.isGuestOrder = true;
@@ -373,9 +382,13 @@ export class SalesService {
         'TXN-' + Math.random().toString(36).substring(2, 10).toUpperCase(),
     });
 
-    // Empty User Cart if logged in
+    // Empty User/Guest Cart if logged in or guest
     if (userId) {
       const cart = await this.getCart(userId);
+      cart.items = [];
+      await cart.save();
+    } else if (dto.guestId) {
+      const cart = await this.getCart(dto.guestId);
       cart.items = [];
       await cart.save();
     }
@@ -384,7 +397,7 @@ export class SalesService {
   }
 
   async getOrders(userId: string) {
-    return this.orderRepository.find({ userId: new Types.ObjectId(userId) });
+    return this.orderRepository.find({ userId: safeObjectId(userId) });
   }
 
   async getOrderById(id: string) {

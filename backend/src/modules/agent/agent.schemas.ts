@@ -38,6 +38,9 @@ export class ChatSession extends Document {
 
   @Prop({ type: [String], default: [] })
   viewedProducts: string[];
+
+  @Prop({ type: Object, default: {} })
+  conversationState: Record<string, any>;
 }
 export const ChatSessionSchema = SchemaFactory.createForClass(ChatSession);
 ChatSessionSchema.index({ userId: 1, createdAt: -1 });

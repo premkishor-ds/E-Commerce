@@ -120,10 +120,6 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'show me',
     'find',
     'looking for',
-    'want',
-    'need',
-    'get me',
-    'i want',
     'display',
     'list',
   ],
@@ -287,6 +283,9 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'complete purchase',
     'pay now',
     'start checkout',
+    'payment page',
+    'go to payment',
+    'checkout process',
   ],
   VIEW_ORDERS: [
     'my orders',
@@ -776,7 +775,8 @@ export function extractEntities(text: string): Record<string, string> {
     'orange',
   ];
   for (const c of colors) {
-    if (lower.includes(c)) {
+    const regex = new RegExp('\\b' + c + '\\b', 'i');
+    if (regex.test(lower)) {
       entities.color = c;
       break;
     }
@@ -805,7 +805,8 @@ export function extractEntities(text: string): Record<string, string> {
     xs: 'XS',
   };
   for (const s of sizes) {
-    if (lower.includes(s)) {
+    const regex = new RegExp('\\b' + s + '\\b', 'i');
+    if (regex.test(lower)) {
       entities.size = sizeAliases[s] || s.replace('size ', '');
       break;
     }
@@ -842,7 +843,8 @@ export function extractEntities(text: string): Record<string, string> {
     'toys',
   ];
   for (const cat of categories) {
-    if (lower.includes(cat)) {
+    const regex = new RegExp('\\b' + cat + '\\b', 'i');
+    if (regex.test(lower)) {
       entities.category = cat;
       break;
     }
@@ -883,7 +885,8 @@ export function extractEntities(text: string): Record<string, string> {
     (a, b) => b.length - a.length,
   );
   for (const pt of sortedProductTypes) {
-    if (lower.includes(pt)) {
+    const regex = new RegExp('\\b' + pt + '\\b', 'i');
+    if (regex.test(lower)) {
       entities.productType = pt;
       break;
     }
@@ -917,7 +920,8 @@ export function extractEntities(text: string): Record<string, string> {
     'velosport',
   ];
   for (const brand of brands) {
-    if (lower.includes(brand)) {
+    const regex = new RegExp('\\b' + brand + '\\b', 'i');
+    if (regex.test(lower)) {
       entities.brand = brand;
       break;
     }
@@ -1015,21 +1019,26 @@ export function classifyIntent(message: string): IntentMatch {
     let maxScore = 0;
     for (const kw of keywords) {
       let score = 0;
+      const escapedKw = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const wordBoundaryRegex = new RegExp('\\b' + escapedKw + '\\b', 'i');
+      const startsWithRegex = new RegExp('^' + escapedKw + '\\b', 'i');
+
       if (lower === kw) {
         score = 10;
-      } // Exact match
-      else if (lower.startsWith(kw)) {
+      } else if (startsWithRegex.test(lower)) {
         score = 7;
-      } // Starts with
-      else if (lower.includes(kw)) {
+      } else if (wordBoundaryRegex.test(lower)) {
         score = 4;
-      } // Contains
-      else {
+      } else {
         // Partial token match
         const kwTokens = kw.split(' ');
         const msgTokens = lower.split(/\s+/);
         const matches = kwTokens.filter((t) => msgTokens.includes(t)).length;
-        score = matches * 1.5;
+        if (matches === kwTokens.length && kwTokens.length > 1) {
+          score = 6.5;
+        } else {
+          score = matches * 1.5;
+        }
       }
       if (score > maxScore) {
         maxScore = score;
@@ -1084,6 +1093,16 @@ export function classifyIntent(message: string): IntentMatch {
     if (/\b(how|what|help|info|support|guide|menu|options|commands)\b/i.test(lower)) {
       topIntent = 'HELP';
       topScore = 5;
+    }
+  }
+
+  // 4. Override ADD_CART if it was classified due to "buy" or "purchase" but contains brand/productType without explicit "add" or "cart" keywords
+  if (topIntent === 'ADD_CART') {
+    const hasExplicitCartWord = /\b(add|cart|put|take)\b/i.test(lower);
+    const hasSearchCues = (entities.brand || entities.productType || entities.category) && /\b(buy|purchase|want to buy)\b/i.test(lower);
+    if (hasSearchCues && !hasExplicitCartWord) {
+      topIntent = 'SEARCH_PRODUCT';
+      topScore = 8;
     }
   }
 

@@ -10,8 +10,8 @@ This workspace contains all environments and user consoles for the ApexStore E-C
 * **URL**: [http://localhost:3000](http://localhost:3000)
 * **Access Role**: `Customer`
 * **Login Credentials**:
-  * **Email**: *Any valid email address* (e.g., `customer@example.com`)
-  * **Password**: *Any password* (e.g., `password123`)
+  * **Email**: *Any valid email address* (e.g., `test2@mail.com`)
+  * **Password**: *Any password* (e.g., `test2123`)
   * *Alternatively*: Click **Google** or **GitHub** buttons to bypass, or input any phone number and use OTP **`123456`**.
 
 ### 2. Seller Console (Store & Inventory Management)

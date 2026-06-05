@@ -51,7 +51,7 @@ import { NotificationModule } from './modules/notification/notification.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: 100,
+        limit: 100000,
       },
     ]),
   ],

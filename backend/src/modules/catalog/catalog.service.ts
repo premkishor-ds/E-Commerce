@@ -17,6 +17,9 @@ import { Types } from 'mongoose';
 
 @Injectable()
 export class CatalogService {
+  private categoryCache: any[] | null = null;
+  private brandCache: any[] | null = null;
+
   constructor(
     private readonly productRepository: ProductRepository,
     private readonly categoryRepository: CategoryRepository,
@@ -28,10 +31,31 @@ export class CatalogService {
     private readonly vendorRepository: VendorRepository,
   ) {}
 
+  private async getCategoryByName(name: string) {
+    if (!this.categoryCache) {
+      this.categoryCache = await this.categoryRepository.find({});
+    }
+    const found = this.categoryCache.find(
+      (c) => c.name.toLowerCase() === name.toLowerCase()
+    );
+    return found ? found._id : null;
+  }
+
+  private async getBrandByName(name: string) {
+    if (!this.brandCache) {
+      this.brandCache = await this.brandRepository.find({});
+    }
+    const found = this.brandCache.find(
+      (b) => b.name.toLowerCase() === name.toLowerCase()
+    );
+    return found ? found._id : null;
+  }
+
 
   // --- CATEGORIES & BRANDS ---
 
   async createCategory(dto: any) {
+    this.categoryCache = null;
     return this.categoryRepository.create(dto);
   }
 
@@ -40,6 +64,7 @@ export class CatalogService {
   }
 
   async createBrand(dto: any) {
+    this.brandCache = null;
     return this.brandRepository.create(dto);
   }
 
@@ -93,11 +118,31 @@ export class CatalogService {
 
   async getProducts(filters: any) {
     const query: any = {};
-    if (filters.category && Types.ObjectId.isValid(filters.category)) {
-      query.category = filters.category;
+    if (filters.category) {
+      if (Types.ObjectId.isValid(filters.category)) {
+        query.category = filters.category;
+      } else {
+        const catId = await this.getCategoryByName(filters.category);
+        if (catId) {
+          query.category = catId;
+        } else {
+          // Force no match if category is invalid/not found
+          query.category = new Types.ObjectId();
+        }
+      }
     }
-    if (filters.brand && Types.ObjectId.isValid(filters.brand)) {
-      query.brand = filters.brand;
+    if (filters.brand) {
+      if (Types.ObjectId.isValid(filters.brand)) {
+        query.brand = filters.brand;
+      } else {
+        const brandId = await this.getBrandByName(filters.brand);
+        if (brandId) {
+          query.brand = brandId;
+        } else {
+          // Force no match if brand is invalid/not found
+          query.brand = new Types.ObjectId();
+        }
+      }
     }
     if (filters.vendorId) query.vendorId = new Types.ObjectId(filters.vendorId);
     if (filters.approved !== undefined) query.isApproved = filters.approved;
@@ -110,7 +155,7 @@ export class CatalogService {
     let products = await this.productRepository.find(query);
 
     // Fallback to regex-like filter if $text finds nothing (production only to prevent breaking mock)
-    if ((!products || products.length === 0) && filters.search && process.env.NODE_ENV !== 'test') {
+    if ((!products || products.length === 0) && filters.search) {
       const fallbackQuery = { ...query };
       delete fallbackQuery.$text;
       const allProds = await this.productRepository.find(fallbackQuery);
@@ -165,7 +210,30 @@ export class CatalogService {
       });
     }
 
-    return products;
+    // Populate brand and category documents for validation inside agent.service using caches to avoid database bottlenecks
+    let plainProducts = (products || []).map((p: any) => typeof p.toObject === 'function' ? p.toObject() : p);
+    if (plainProducts.length > 0) {
+      if (!this.brandCache) {
+        this.brandCache = await this.brandRepository.find({});
+      }
+      if (!this.categoryCache) {
+        this.categoryCache = await this.categoryRepository.find({});
+      }
+      for (const p of plainProducts) {
+        if (p.brand && Types.ObjectId.isValid(p.brand)) {
+          const brandIdStr = p.brand.toString();
+          const brandDoc = this.brandCache.find(b => b._id.toString() === brandIdStr);
+          if (brandDoc) p.brand = brandDoc;
+        }
+        if (p.category && Types.ObjectId.isValid(p.category)) {
+          const categoryIdStr = p.category.toString();
+          const categoryDoc = this.categoryCache.find(c => c._id.toString() === categoryIdStr);
+          if (categoryDoc) p.category = categoryDoc;
+        }
+      }
+    }
+
+    return plainProducts;
   }
 
   async getProductById(id: string) {
