@@ -992,9 +992,19 @@ export function classifyIntent(message: string): IntentMatch {
   }
 
   // Robust fallback logic:
-  // 1. If we couldn't classify, but the message contains a brand, category, or product type, classify as SEARCH_PRODUCT or BROWSE_CATEGORY
+  // 1. If we couldn't classify, but the message contains a brand, category, or product type, or search qualifiers/filters, classify as SEARCH_PRODUCT or BROWSE_CATEGORY
   if (topIntent === 'UNKNOWN' || topScore < 3) {
-    if (entities.productType || entities.brand) {
+    if (
+      entities.productType ||
+      entities.brand ||
+      entities.maxPrice ||
+      entities.minPrice ||
+      entities.color ||
+      entities.size ||
+      entities.sort ||
+      entities.ram ||
+      entities.storage
+    ) {
       topIntent = 'SEARCH_PRODUCT';
       topScore = 6;
     } else if (entities.category) {

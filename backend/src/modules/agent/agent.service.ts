@@ -3128,8 +3128,21 @@ Enhanced Reply:`;
       }
 
       case 'SEARCH_PRODUCT': {
+        let mergedProductType = entities.productType;
+        let mergedBrand = entities.brand;
+        let mergedCategory = entities.category;
+
+        if (!mergedProductType && !mergedBrand && !mergedCategory) {
+          const intelContext = this.chatbotIntelligenceService.getContext(sessionId);
+          if (intelContext) {
+            mergedProductType = intelContext.productType || intelContext.product || '';
+            mergedBrand = intelContext.brand || '';
+            mergedCategory = intelContext.category || '';
+          }
+        }
+
         const query =
-          entities.productType || entities.brand || entities.category || '';
+          mergedProductType || mergedBrand || mergedCategory || '';
         let searchQuery =
           query ||
           message
@@ -3154,8 +3167,9 @@ Enhanced Reply:`;
         try {
           const results = await this.catalogService.getProducts({
             search: searchQuery,
-            category: entities.category,
-            brand: entities.brand,
+            category: mergedCategory || entities.category,
+            brand: mergedBrand || entities.brand,
+            ...entities,
           });
 
           if (!results || !results.length) {
@@ -3204,7 +3218,7 @@ Enhanced Reply:`;
             await this.memory.updateUserSearchHistory(userId, searchQuery);
 
           return {
-            reply: `🔍 **Found ${filtered.length} products** for "${searchQuery}":\n\n${list}\n\nType the **product name** to see details, or **"add [name] to cart"** to purchase!`,
+            reply: `🔍 **Found ${filtered.length} products** for "${searchQuery}"${entities.maxPrice ? ` under $${parseFloat(entities.maxPrice).toFixed(2)}` : ''}:\n\n${list}\n\nType the **product name** to see details, or **"add [name] to cart"** to purchase!`,
             intent,
             confidence: 8,
             actions: [],

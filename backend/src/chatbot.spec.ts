@@ -420,6 +420,48 @@ describe('Chatbot Conversational Flows (e2e)', () => {
     });
   });
 
+  describe('Contextual Follow-up Search Flows', () => {
+    beforeAll(async () => {
+      await catalogService.createProduct({
+        title: 'Super Phone A',
+        description: 'An advanced smartphone',
+        price: 15000,
+        sku: 'SKU-PH-A',
+        variants: { color: ['Black'] },
+      });
+      await catalogService.createProduct({
+        title: 'Premium Phone B',
+        description: 'Flagship phone',
+        price: 25000,
+        sku: 'SKU-PH-B',
+        variants: { color: ['White'] },
+      });
+    });
+
+    it('should merge search context on follow-up questions', async () => {
+      const sessionId = 'follow-up-session';
+
+      // 1. Search for phone
+      const res1 = await agentService.processMessage({
+        message: 'I want to buy phone',
+        sessionId,
+      });
+      expect(res1.reply).toContain('Found 2 products');
+      expect(res1.reply).toContain('for "phone"');
+
+      // 2. Follow up with price constraint
+      const res2 = await agentService.processMessage({
+        message: 'under 20000',
+        sessionId,
+      });
+      expect(res2.reply).toContain('Found 1 products');
+      expect(res2.reply).toContain('for "phone"');
+      expect(res2.reply).toContain('under $20000.00');
+      expect(res2.reply).toContain('Super Phone A');
+      expect(res2.reply).not.toContain('Premium Phone B');
+    });
+  });
+
   describe('Advanced E-Commerce Flows (Cart, Checkout, Alerts & Modifications)', () => {
     let testUser: any;
     let testProduct: any;

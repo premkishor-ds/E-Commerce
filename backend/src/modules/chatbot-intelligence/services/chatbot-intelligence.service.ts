@@ -99,4 +99,8 @@ export class ChatbotIntelligenceService {
   clearMemory(sessionId: string) {
     this.memory.clearContext(sessionId);
   }
+
+  getContext(sessionId: string): Record<string, any> {
+    return this.memory.getContext(sessionId);
+  }
 }
