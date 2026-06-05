@@ -130,10 +130,19 @@ export class User extends Document {
   backupCodes: string[];
 
   @Prop({ type: [Object], default: [] })
-  priceAlerts: Array<{ productId: string; targetPrice: number; notified: boolean; type?: string }>;
+  priceAlerts: Array<{
+    productId: string;
+    targetPrice: number;
+    notified: boolean;
+    type?: string;
+  }>;
 
   @Prop({ type: [Object], default: [] })
-  savedCart: Array<{ productId: string; quantity: number; variantKey?: string }>;
+  savedCart: Array<{
+    productId: string;
+    quantity: number;
+    variantKey?: string;
+  }>;
 }
 export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.index({ email: 1 });
@@ -179,7 +188,22 @@ export class Inventory extends Document {
   sku: string;
 
   @Prop({ required: true, default: 0 })
-  stock: number;
+  stock: number; // Available stock
+
+  @Prop({ required: true, default: 0 })
+  reservedStock: number;
+
+  @Prop({ required: true, default: 0 })
+  incomingStock: number;
+
+  @Prop({ required: true, default: 0 })
+  damagedStock: number;
+
+  @Prop({ required: true, default: 0 })
+  preorderStock: number;
+
+  @Prop({ type: Object, default: { 'Primary Warehouse': 0 } })
+  warehouseStock: Record<string, number>;
 
   @Prop({ required: true, default: 5 })
   lowStockThreshold: number;
@@ -188,7 +212,12 @@ export class Inventory extends Document {
   warehouseName: string;
 
   @Prop({ type: [Object], default: [] })
-  logs: Array<{ quantityChanged: number; reason: string; timestamp: Date }>;
+  logs: Array<{
+    quantityChanged: number;
+    reason: string;
+    timestamp: Date;
+    warehouse?: string;
+  }>;
 
   @Prop({ type: Date, default: null })
   restockDate: Date | null;
@@ -248,6 +277,12 @@ export class Product extends Document {
 
   @Prop({ type: Types.ObjectId, ref: 'User', default: null })
   vendorId: Types.ObjectId;
+
+  @Prop({ default: false })
+  isApproved: boolean;
+
+  @Prop({ default: true })
+  isActive: boolean;
 }
 export const ProductSchema = SchemaFactory.createForClass(Product);
 ProductSchema.index({ title: 'text', description: 'text', tags: 'text' });
@@ -410,7 +445,43 @@ export class Review extends Document {
   verifiedPurchase: boolean;
 
   @Prop({ default: 'Approved' })
-  status: string; // Pending, Approved, Rejected
+  status: string; // Pending, Approved, Rejected, Flagged
+
+  @Prop({ type: [String], default: [] })
+  images: string[];
+
+  @Prop({ type: [String], default: [] })
+  videos: string[];
+
+  @Prop({ default: 0 })
+  likesCount: number;
+
+  @Prop({ type: [Types.ObjectId], default: [] })
+  likedBy: Types.ObjectId[];
+
+  @Prop({
+    type: [
+      {
+        senderId: { type: Types.ObjectId, ref: 'User', required: true },
+        reply: { type: String, required: true },
+        repliedAt: { type: Date, default: Date.now },
+      },
+    ],
+    default: [],
+  })
+  replies: Array<{ senderId: Types.ObjectId; reply: string; repliedAt: Date }>;
+
+  @Prop({ default: 0 })
+  reportsCount: number;
+
+  @Prop({ default: 'Neutral' })
+  sentiment: string; // Positive, Negative, Neutral
+
+  @Prop({ default: 0 })
+  fakeScore: number; // 0 to 100 percentage likelihood of being fake
+
+  @Prop({ default: '' })
+  summary: string;
 }
 export const ReviewSchema = SchemaFactory.createForClass(Review);
 ReviewSchema.index({ productId: 1, rating: -1 });
@@ -581,7 +652,10 @@ export class Address extends Document {
   @Prop({ required: true })
   pincode: string;
 
-  @Prop({ required: true, enum: ['Home', 'Office', 'Billing', 'Shipping', 'Other'] })
+  @Prop({
+    required: true,
+    enum: ['Home', 'Office', 'Billing', 'Shipping', 'Other'],
+  })
   addressType: string;
 
   @Prop({ default: false })
@@ -631,7 +705,10 @@ export class WalletTransaction extends Document {
   @Prop({ required: true })
   amount: number;
 
-  @Prop({ required: true, enum: ['Credit', 'Debit', 'Refund', 'Cashback', 'Bonus'] })
+  @Prop({
+    required: true,
+    enum: ['Credit', 'Debit', 'Refund', 'Cashback', 'Bonus'],
+  })
   transactionType: string;
 
   @Prop({ required: true })
@@ -640,7 +717,8 @@ export class WalletTransaction extends Document {
   @Prop({ default: 'Completed' })
   status: string;
 }
-export const WalletTransactionSchema = SchemaFactory.createForClass(WalletTransaction);
+export const WalletTransactionSchema =
+  SchemaFactory.createForClass(WalletTransaction);
 
 // --- REFERRAL ---
 @Schema({ timestamps: true })
@@ -658,3 +736,134 @@ export class Referral extends Document {
   status: string; // Pending, Completed
 }
 export const ReferralSchema = SchemaFactory.createForClass(Referral);
+
+// --- REFUND TRANSACTION ---
+@Schema({ timestamps: true })
+export class RefundTransaction extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'Order', required: true, index: true })
+  orderId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Payment', required: true, index: true })
+  paymentId: Types.ObjectId;
+
+  @Prop({ required: true })
+  amount: number;
+
+  @Prop({ required: true, default: 'Stripe' })
+  provider: string; // Stripe, Razorpay, Wallet
+
+  @Prop({ required: true })
+  refundTransactionId: string;
+
+  @Prop({ required: true, default: 'Completed' })
+  status: string; // Pending, Completed, Failed
+
+  @Prop({ default: '' })
+  reason: string;
+}
+export const RefundTransactionSchema =
+  SchemaFactory.createForClass(RefundTransaction);
+
+// --- PAYMENT AUDIT LOG ---
+@Schema({ timestamps: true })
+export class PaymentAuditLog extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  userId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Order', default: null })
+  orderId: Types.ObjectId;
+
+  @Prop({ required: true })
+  action: string; // IntentCreated, PaymentConfirmed, RefundInitiated, etc.
+
+  @Prop({ required: true })
+  status: string; // Success, Failed
+
+  @Prop({ type: Object, default: {} })
+  details: Record<string, any>;
+}
+export const PaymentAuditLogSchema =
+  SchemaFactory.createForClass(PaymentAuditLog);
+
+// --- PAYMENT WEBHOOK LOG ---
+@Schema({ timestamps: true })
+export class PaymentWebhookLog extends Document {
+  @Prop({ required: true })
+  provider: string; // Stripe, Razorpay
+
+  @Prop({ required: true })
+  eventType: string;
+
+  @Prop({ type: Object, required: true })
+  payload: Record<string, any>;
+
+  @Prop({ required: true, default: 'Processed' })
+  status: string; // Received, Processed, VerificationFailed
+
+  @Prop({ default: '' })
+  error: string;
+}
+export const PaymentWebhookLogSchema =
+  SchemaFactory.createForClass(PaymentWebhookLog);
+
+// --- AGENT STATUS ---
+@Schema({ timestamps: true })
+export class AgentStatus extends Document {
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+    required: true,
+    unique: true,
+    index: true,
+  })
+  agentId: Types.ObjectId;
+
+  @Prop({ required: true, default: 'Offline' })
+  status: string; // Online, Offline, Busy
+
+  @Prop({ default: 0 })
+  activeQueueCount: number;
+
+  @Prop({ type: [String], default: [] })
+  notes: string[];
+}
+export const AgentStatusSchema = SchemaFactory.createForClass(AgentStatus);
+
+// --- LIVE CHAT SESSION ---
+@Schema({ timestamps: true })
+export class LiveChatSession extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
+  userId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null, index: true })
+  assignedAgentId: Types.ObjectId;
+
+  @Prop({ required: true, default: 'Active' })
+  status: string; // Active, Closed, ForceClosed
+
+  @Prop({
+    type: [
+      {
+        senderId: { type: Types.ObjectId, ref: 'User', required: true },
+        senderName: { type: String, required: true },
+        message: { type: String, required: true },
+        sentAt: { type: Date, default: Date.now },
+      },
+    ],
+    default: [],
+  })
+  messages: Array<{
+    senderId: Types.ObjectId;
+    senderName: string;
+    message: string;
+    sentAt: Date;
+  }>;
+
+  @Prop({ default: 0 })
+  rating: number; // 1 to 5 stars
+
+  @Prop({ default: '' })
+  transcript: string;
+}
+export const LiveChatSessionSchema =
+  SchemaFactory.createForClass(LiveChatSession);

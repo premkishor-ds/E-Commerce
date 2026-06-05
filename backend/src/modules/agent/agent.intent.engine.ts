@@ -133,7 +133,14 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'what is',
     'describe',
   ],
-  COMPARE: ['compare', 'vs', 'versus', 'difference between', 'which is better', 'better between'],
+  COMPARE: [
+    'compare',
+    'vs',
+    'versus',
+    'difference between',
+    'which is better',
+    'better between',
+  ],
   SHOPPING_ASSISTANT: [
     'best phone under',
     'best laptop under',
@@ -266,12 +273,7 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'change order quantity',
     'update delivery',
   ],
-  RETURN_ORDER: [
-    'return',
-    'return order',
-    'send back',
-    'return request',
-  ],
+  RETURN_ORDER: ['return', 'return order', 'send back', 'return request'],
   EXCHANGE_ORDER: [
     'exchange',
     'exchange order',
@@ -298,7 +300,13 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'favorite',
     'heart',
   ],
-  WISHLIST_VIEW: ['my wishlist', 'view wishlist', 'saved items', 'favourites', 'show wishlist'],
+  WISHLIST_VIEW: [
+    'my wishlist',
+    'view wishlist',
+    'saved items',
+    'favourites',
+    'show wishlist',
+  ],
   WISHLIST_REMOVE: [
     'remove from wishlist',
     'unsave',
@@ -397,7 +405,13 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'fitness',
     'sports',
   ],
-  INVENTORY_CHECK: ['in stock', 'available', 'stock', 'availability', 'how many left'],
+  INVENTORY_CHECK: [
+    'in stock',
+    'available',
+    'stock',
+    'availability',
+    'how many left',
+  ],
   PRICE_ALERT: [
     'notify me when',
     'alert me when',
@@ -439,7 +453,12 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'role management',
     'permission management',
   ],
-  ADMIN_COUPONS: ['manage coupons', 'create coupon', 'coupon management', 'new coupon'],
+  ADMIN_COUPONS: [
+    'manage coupons',
+    'create coupon',
+    'coupon management',
+    'new coupon',
+  ],
   ADMIN_ANALYTICS: [
     'system analytics',
     'audit logs',
@@ -539,6 +558,29 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'perfect',
   ],
   BYE: ['bye', 'goodbye', 'see you', 'later'],
+  RETRY_PAYMENT: [
+    'retry payment',
+    'pay again',
+    'retry pay',
+    'try payment again',
+  ],
+  VIEW_PAYMENT_HISTORY: [
+    'show payment history',
+    'payment history',
+    'my payments',
+    'payment list',
+  ],
+  CHECK_PAYMENT_STATUS: [
+    'check payment status',
+    'payment status',
+    'is my payment successful',
+  ],
+  RECOVER_CART: [
+    'recover my cart',
+    'resume checkout',
+    'show abandoned cart',
+    'recover cart',
+  ],
 };
 
 // ─── ENTITY EXTRACTOR ─────────────────────────────────────────────────────────
@@ -548,29 +590,37 @@ export function extractEntities(text: string): Record<string, string> {
   const lower = text.toLowerCase();
 
   // ── Price constraints ────────────────────────────────────────────────────
-  const priceMatch = lower.match(/under\s+[\$₹£€]?\s*(\d[\d,]*)/);
+  const priceMatch = lower.match(/under\s+[$₹£€]?\s*(\d[\d,]*)/);
   if (priceMatch) entities.maxPrice = priceMatch[1].replace(/,/g, '');
 
-  const minPriceMatch = lower.match(/above\s+[\$₹£€]?\s*(\d[\d,]*)/);
+  const minPriceMatch = lower.match(/above\s+[$₹£€]?\s*(\d[\d,]*)/);
   if (minPriceMatch) entities.minPrice = minPriceMatch[1].replace(/,/g, '');
 
   // Between price range: "between X and Y" / "X to Y"
-  const betweenMatch = lower.match(/between\s+[\$₹£€]?\s*(\d[\d,]*)\s+and\s+[\$₹£€]?\s*(\d[\d,]*)/);
+  const betweenMatch = lower.match(
+    /between\s+[$₹£€]?\s*(\d[\d,]*)\s+and\s+[$₹£€]?\s*(\d[\d,]*)/,
+  );
   if (betweenMatch) {
     entities.minPrice = betweenMatch[1].replace(/,/g, '');
     entities.maxPrice = betweenMatch[2].replace(/,/g, '');
   }
-  const rangeMatch = lower.match(/[\$₹£€]?\s*(\d[\d,]*)\s+to\s+[\$₹£€]?\s*(\d[\d,]*)/);
+  const rangeMatch = lower.match(
+    /[$₹£€]?\s*(\d[\d,]*)\s+to\s+[$₹£€]?\s*(\d[\d,]*)/,
+  );
   if (rangeMatch && !betweenMatch) {
     entities.minPrice = rangeMatch[1].replace(/,/g, '');
     entities.maxPrice = rangeMatch[2].replace(/,/g, '');
   }
 
   // Rating filter: "above 4 stars", "4+ rating", "minimum 4 stars"
-  const minRatingMatch = lower.match(/(?:above|minimum|at least|\+)\s*(\d)\s*(?:star|stars|rating)?/);
+  const minRatingMatch = lower.match(
+    /(?:above|minimum|at least|\+)\s*(\d)\s*(?:star|stars|rating)?/,
+  );
   if (minRatingMatch) entities.minRating = minRatingMatch[1];
   // Exact rating filter for review listing: "1 star reviews"
-  const exactRatingMatch = lower.match(/\b([1-5])\s*(?:star|stars)\s*(?:review|reviews)?\b/);
+  const exactRatingMatch = lower.match(
+    /\b([1-5])\s*(?:star|stars)\s*(?:review|reviews)?\b/,
+  );
   if (exactRatingMatch) entities.rating = exactRatingMatch[1];
 
   // ── Coupon code ──────────────────────────────────────────────────────────
@@ -582,98 +632,252 @@ export function extractEntities(text: string): Record<string, string> {
   if (orderIdMatch) entities.orderId = 'ORD-' + orderIdMatch[1].toUpperCase();
 
   // ── Email ─────────────────────────────────────────────────────────────────
-  const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  const emailMatch = text.match(
+    /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/,
+  );
   if (emailMatch) entities.email = emailMatch[0];
 
   // ── Quantity ──────────────────────────────────────────────────────────────
   const qtyMatch = lower.match(/(\d+)\s*(item|piece|unit|qty|quantity|x)/);
   if (qtyMatch) entities.quantity = qtyMatch[1];
   // "set to 3", "change to 5", "quantity to 2"
-  const qtyToMatch = lower.match(/(?:set|change|update|quantity)\s+(?:to|=)\s*(\d+)/);
+  const qtyToMatch = lower.match(
+    /(?:set|change|update|quantity)\s+(?:to|=)\s*(\d+)/,
+  );
   if (qtyToMatch) entities.quantity = qtyToMatch[1];
 
   // ── Target price for alerts ───────────────────────────────────────────────
-  const alertPriceMatch = lower.match(/(?:below|under|at|drops to|reaches)\s+[\$₹£€]?\s*(\d[\d,]*)/);
-  if (alertPriceMatch) entities.alertPrice = alertPriceMatch[1].replace(/,/g, '');
+  const alertPriceMatch = lower.match(
+    /(?:below|under|at|drops to|reaches)\s+[$₹£€]?\s*(\d[\d,]*)/,
+  );
+  if (alertPriceMatch)
+    entities.alertPrice = alertPriceMatch[1].replace(/,/g, '');
 
   // ── Variant attributes ───────────────────────────────────────────────────
-  const colors = ['red', 'blue', 'black', 'white', 'gold', 'silver', 'green', 'yellow', 'pink', 'gray', 'grey', 'purple', 'orange'];
+  const colors = [
+    'red',
+    'blue',
+    'black',
+    'white',
+    'gold',
+    'silver',
+    'green',
+    'yellow',
+    'pink',
+    'gray',
+    'grey',
+    'purple',
+    'orange',
+  ];
   for (const c of colors) {
-    if (lower.includes(c)) { entities.color = c; break; }
+    if (lower.includes(c)) {
+      entities.color = c;
+      break;
+    }
   }
-  const sizes = ['xxl', 'xl', 'xs', 'small', 'medium', 'large', 'size 6', 'size 7', 'size 8', 'size 9', 'size 10', 'size 11', 'size 12'];
-  const sizeAliases: Record<string, string> = { small: 'S', medium: 'M', large: 'L', xl: 'XL', xxl: 'XXL', xs: 'XS' };
+  const sizes = [
+    'xxl',
+    'xl',
+    'xs',
+    'small',
+    'medium',
+    'large',
+    'size 6',
+    'size 7',
+    'size 8',
+    'size 9',
+    'size 10',
+    'size 11',
+    'size 12',
+  ];
+  const sizeAliases: Record<string, string> = {
+    small: 'S',
+    medium: 'M',
+    large: 'L',
+    xl: 'XL',
+    xxl: 'XXL',
+    xs: 'XS',
+  };
   for (const s of sizes) {
-    if (lower.includes(s)) { entities.size = sizeAliases[s] || s.replace('size ', ''); break; }
+    if (lower.includes(s)) {
+      entities.size = sizeAliases[s] || s.replace('size ', '');
+      break;
+    }
   }
   const ramMatch = lower.match(/(\d+)\s*gb\s*ram/);
   if (ramMatch) entities.ram = ramMatch[1] + 'GB';
-  const storageMatch = lower.match(/(\d+)\s*(?:gb|tb)\s*(?:storage|ssd|rom|disk)?/);
-  if (storageMatch && !ramMatch) entities.storage = storageMatch[0].replace(/\s+/g, '').toUpperCase();
+  const storageMatch = lower.match(
+    /(\d+)\s*(?:gb|tb)\s*(?:storage|ssd|rom|disk)?/,
+  );
+  if (storageMatch && !ramMatch)
+    entities.storage = storageMatch[0].replace(/\s+/g, '').toUpperCase();
 
   // ── Product name from comparison queries ─────────────────────────────────
   // "compare A vs B" / "compare A versus B"
-  const compareMatch = text.match(/compare\s+(.+?)\s+(?:vs|versus|or|against)\s+(.+)/i);
+  const compareMatch = text.match(
+    /compare\s+(.+?)\s+(?:vs|versus|or|against)\s+(.+)/i,
+  );
   if (compareMatch) {
     entities.compareProductA = compareMatch[1].trim();
     entities.compareProductB = compareMatch[2].trim();
   }
 
   // ── Category keywords ────────────────────────────────────────────────────
-  const categories = ['electronics', 'fashion', 'kitchen', 'fitness', 'sports', 'apparel', 'home', 'beauty', 'books', 'toys'];
+  const categories = [
+    'electronics',
+    'fashion',
+    'kitchen',
+    'fitness',
+    'sports',
+    'apparel',
+    'home',
+    'beauty',
+    'books',
+    'toys',
+  ];
   for (const cat of categories) {
-    if (lower.includes(cat)) { entities.category = cat; break; }
+    if (lower.includes(cat)) {
+      entities.category = cat;
+      break;
+    }
   }
 
   // ── Product type keywords ─────────────────────────────────────────────────
   const productTypes = [
-    'multi-cooker', 'smartwatch', 'treadmill', 'laptop', 'phone', 'headphone', 'earphone',
-    'earbud', 'speaker', 'watch', 'camera', 'tablet', 'shirt', 'shoes', 'jacket',
-    'bag', 'cooker', 'bicycle', 'keyboard', 'mouse', 'monitor', 'television', 'tv',
-    'refrigerator', 'washing machine', 'microwave', 'blender', 'air purifier',
+    'multi-cooker',
+    'smartwatch',
+    'treadmill',
+    'laptop',
+    'phone',
+    'headphone',
+    'earphone',
+    'earbud',
+    'speaker',
+    'watch',
+    'camera',
+    'tablet',
+    'shirt',
+    'shoes',
+    'jacket',
+    'bag',
+    'cooker',
+    'bicycle',
+    'keyboard',
+    'mouse',
+    'monitor',
+    'television',
+    'tv',
+    'refrigerator',
+    'washing machine',
+    'microwave',
+    'blender',
+    'air purifier',
   ];
-  const sortedProductTypes = [...productTypes].sort((a, b) => b.length - a.length);
+  const sortedProductTypes = [...productTypes].sort(
+    (a, b) => b.length - a.length,
+  );
   for (const pt of sortedProductTypes) {
-    if (lower.includes(pt)) { entities.productType = pt; break; }
+    if (lower.includes(pt)) {
+      entities.productType = pt;
+      break;
+    }
   }
 
   // ── Brand keywords ────────────────────────────────────────────────────────
   const brands = [
-    'apple', 'samsung', 'sony', 'lg', 'dell', 'hp', 'lenovo', 'asus', 'acer',
-    'oneplus', 'realme', 'oppo', 'vivo', 'xiaomi', 'redmi', 'motorola',
-    'nike', 'adidas', 'puma', 'reebok',
-    'apextech', 'nexahome', 'aurawear', 'velosport',
+    'apple',
+    'samsung',
+    'sony',
+    'lg',
+    'dell',
+    'hp',
+    'lenovo',
+    'asus',
+    'acer',
+    'oneplus',
+    'realme',
+    'oppo',
+    'vivo',
+    'xiaomi',
+    'redmi',
+    'motorola',
+    'nike',
+    'adidas',
+    'puma',
+    'reebok',
+    'apextech',
+    'nexahome',
+    'aurawear',
+    'velosport',
   ];
   for (const brand of brands) {
-    if (lower.includes(brand)) { entities.brand = brand; break; }
+    if (lower.includes(brand)) {
+      entities.brand = brand;
+      break;
+    }
   }
 
   // ── Sort preference ───────────────────────────────────────────────────────
-  if (lower.includes('cheapest') || lower.includes('lowest price') || lower.includes('low to high'))
+  if (
+    lower.includes('cheapest') ||
+    lower.includes('lowest price') ||
+    lower.includes('low to high')
+  )
     entities.sort = 'price_asc';
-  if (lower.includes('expensive') || lower.includes('highest price') || lower.includes('high to low'))
+  if (
+    lower.includes('expensive') ||
+    lower.includes('highest price') ||
+    lower.includes('high to low')
+  )
     entities.sort = 'price_desc';
-  if (lower.includes('best rated') || lower.includes('top rated') || lower.includes('highest rating'))
+  if (
+    lower.includes('best rated') ||
+    lower.includes('top rated') ||
+    lower.includes('highest rating')
+  )
     entities.sort = 'rating_desc';
-  if (lower.includes('newest') || lower.includes('latest') || lower.includes('new arrival'))
+  if (
+    lower.includes('newest') ||
+    lower.includes('latest') ||
+    lower.includes('new arrival')
+  )
     entities.sort = 'newest';
-  if (lower.includes('best selling') || lower.includes('most popular') || lower.includes('trending'))
+  if (
+    lower.includes('best selling') ||
+    lower.includes('most popular') ||
+    lower.includes('trending')
+  )
     entities.sort = 'sales_desc';
 
   // ── Address label ─────────────────────────────────────────────────────────
-  if (lower.includes('home address') || lower.includes('home')) entities.addressLabel = 'Home';
-  if (lower.includes('office address') || lower.includes('office') || lower.includes('work')) entities.addressLabel = 'Office';
+  if (lower.includes('home address') || lower.includes('home'))
+    entities.addressLabel = 'Home';
+  if (
+    lower.includes('office address') ||
+    lower.includes('office') ||
+    lower.includes('work')
+  )
+    entities.addressLabel = 'Office';
 
   // ── Payment type ──────────────────────────────────────────────────────────
   if (lower.includes('upi')) entities.paymentType = 'upi';
-  else if (lower.includes('card') || lower.includes('credit') || lower.includes('debit')) entities.paymentType = 'card';
+  else if (
+    lower.includes('card') ||
+    lower.includes('credit') ||
+    lower.includes('debit')
+  )
+    entities.paymentType = 'card';
   else if (lower.includes('wallet')) entities.paymentType = 'wallet';
-  else if (lower.includes('cod') || lower.includes('cash on delivery')) entities.paymentType = 'cod';
-  else if (lower.includes('net banking') || lower.includes('netbanking')) entities.paymentType = 'netbanking';
+  else if (lower.includes('cod') || lower.includes('cash on delivery'))
+    entities.paymentType = 'cod';
+  else if (lower.includes('net banking') || lower.includes('netbanking'))
+    entities.paymentType = 'netbanking';
 
   // ── Review section filter ─────────────────────────────────────────────────
-  if (lower.includes('positive') || lower.includes('good reviews')) entities.reviewFilter = 'positive';
-  if (lower.includes('negative') || lower.includes('bad reviews')) entities.reviewFilter = 'negative';
+  if (lower.includes('positive') || lower.includes('good reviews'))
+    entities.reviewFilter = 'positive';
+  if (lower.includes('negative') || lower.includes('bad reviews'))
+    entities.reviewFilter = 'negative';
   if (lower.includes('verified')) entities.reviewFilter = 'verified';
 
   return entities;
@@ -754,16 +958,40 @@ export const INTENT_PERMISSIONS: Record<string, string[]> = {
   MOVE_TO_CART: ['Customer', 'Admin', 'Super Admin'],
   CLEAR_WISHLIST: ['Customer', 'Admin', 'Super Admin'],
   PRICE_ALERT: ['Customer', 'Admin', 'Super Admin'],
-  GDPR_EXPORT: ['Customer', 'Admin', 'Super Admin', 'Vendor', 'Customer Support'],
-  GDPR_DELETE: ['Customer', 'Admin', 'Super Admin', 'Vendor', 'Customer Support'],
+  GDPR_EXPORT: [
+    'Customer',
+    'Admin',
+    'Super Admin',
+    'Vendor',
+    'Customer Support',
+  ],
+  GDPR_DELETE: [
+    'Customer',
+    'Admin',
+    'Super Admin',
+    'Vendor',
+    'Customer Support',
+  ],
   CREATE_TICKET: ['Customer', 'Admin', 'Super Admin', 'Customer Support'],
   VIEW_TICKETS: ['Customer', 'Admin', 'Super Admin', 'Customer Support'],
   ESCALATE: ['Customer', 'Admin', 'Super Admin'],
   LIVE_AGENT: ['Customer', 'Admin', 'Super Admin'],
   REVIEW_PRODUCT: ['Customer', 'Admin', 'Super Admin'],
   VIEW_REVIEWS: [],
-  UPDATE_PROFILE: ['Customer', 'Admin', 'Super Admin', 'Vendor', 'Customer Support'],
-  ADDRESS_MANAGE: ['Customer', 'Admin', 'Super Admin', 'Vendor', 'Customer Support'],
+  UPDATE_PROFILE: [
+    'Customer',
+    'Admin',
+    'Super Admin',
+    'Vendor',
+    'Customer Support',
+  ],
+  ADDRESS_MANAGE: [
+    'Customer',
+    'Admin',
+    'Super Admin',
+    'Vendor',
+    'Customer Support',
+  ],
   ADD_ADDRESS: ['Customer', 'Admin', 'Super Admin', 'Vendor'],
   UPDATE_ADDRESS: ['Customer', 'Admin', 'Super Admin', 'Vendor'],
   DELETE_ADDRESS: ['Customer', 'Admin', 'Super Admin', 'Vendor'],
@@ -773,7 +1001,13 @@ export const INTENT_PERMISSIONS: Record<string, string[]> = {
   DELETE_PAYMENT_METHOD: ['Customer', 'Admin', 'Super Admin'],
   VIEW_LOYALTY: ['Customer', 'Admin', 'Super Admin'],
   VIEW_WALLET: ['Customer', 'Admin', 'Super Admin'],
-  NOTIFICATION_PREF: ['Customer', 'Admin', 'Super Admin', 'Vendor', 'Customer Support'],
+  NOTIFICATION_PREF: [
+    'Customer',
+    'Admin',
+    'Super Admin',
+    'Vendor',
+    'Customer Support',
+  ],
   ADMIN_PRODUCTS: ['Admin', 'Super Admin'],
   ADMIN_ORDERS: ['Admin', 'Super Admin', 'Customer Support'],
   ADMIN_USERS: ['Admin', 'Super Admin'],
@@ -784,6 +1018,10 @@ export const INTENT_PERMISSIONS: Record<string, string[]> = {
   VENDOR_SETTLEMENTS: ['Vendor', 'Seller', 'Admin', 'Super Admin'],
   SAVE_CART_FOR_LATER: ['Customer', 'Admin', 'Super Admin'],
   RESTORE_SAVED_CART: ['Customer', 'Admin', 'Super Admin'],
+  RETRY_PAYMENT: ['Customer', 'Admin', 'Super Admin'],
+  VIEW_PAYMENT_HISTORY: ['Customer', 'Admin', 'Super Admin'],
+  CHECK_PAYMENT_STATUS: ['Customer', 'Admin', 'Super Admin'],
+  RECOVER_CART: ['Customer', 'Admin', 'Super Admin'],
 };
 
 export function hasPermission(intent: string, userRoles: string[]): boolean {

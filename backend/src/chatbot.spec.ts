@@ -30,18 +30,30 @@ import {
   ReferralRepository,
   TicketRepository,
   LogRepository,
+  RefundTransactionRepository,
+  PaymentAuditLogRepository,
+  PaymentWebhookLogRepository,
+  AgentStatusRepository,
+  LiveChatSessionRepository,
 } from './repositories/concrete.repositories';
+
+import { PaymentService } from './modules/payment/payment.service';
+import { RecoveryService } from './modules/sales/recovery.service';
+import { VoiceService } from './modules/voice/voice.service';
+import { NotificationService } from './modules/notification/notification.service';
 
 function createQuery(result: any) {
   const query = {
     exec: async () => result,
-    sort: function() { return this; },
-    then: function(resolve: any, reject: any) {
+    sort: function () {
+      return this;
+    },
+    then: function (resolve: any, reject: any) {
       return Promise.resolve(result).then(resolve, reject);
     },
-    catch: function(reject: any) {
+    catch: function (reject: any) {
       return Promise.resolve(result).catch(reject);
-    }
+    },
   };
   return query;
 }
@@ -60,7 +72,9 @@ function createMockModel() {
     }
 
     save() {
-      const existingIdx = (this.constructor as any).list.findIndex((i: any) => String(i._id) === String(this._id));
+      const existingIdx = (this.constructor as any).list.findIndex(
+        (i: any) => String(i._id) === String(this._id),
+      );
       if (existingIdx > -1) {
         (this.constructor as any).list[existingIdx] = this;
       } else {
@@ -72,13 +86,14 @@ function createMockModel() {
     markModified() {}
 
     static find(filter: any = {}) {
-      const items = this.list.filter(item => {
+      const items = this.list.filter((item) => {
         for (const key of Object.keys(filter)) {
           if (key === '$text') {
             const searchVal = filter.$text.$search.toLowerCase();
-            const matchesSearch = 
+            const matchesSearch =
               (item.title && item.title.toLowerCase().includes(searchVal)) ||
-              (item.description && item.description.toLowerCase().includes(searchVal)) ||
+              (item.description &&
+                item.description.toLowerCase().includes(searchVal)) ||
               (item.sku && item.sku.toLowerCase().includes(searchVal));
             if (!matchesSearch) return false;
             continue;
@@ -87,7 +102,13 @@ function createMockModel() {
             const parts = key.split('.');
             const val = item[parts[0]];
             if (Array.isArray(val)) {
-              if (!val.some(subItem => String(subItem[parts[1]]) === String(filter[key]))) return false;
+              if (
+                !val.some(
+                  (subItem) =>
+                    String(subItem[parts[1]]) === String(filter[key]),
+                )
+              )
+                return false;
             } else {
               return false;
             }
@@ -101,13 +122,14 @@ function createMockModel() {
     }
 
     static findOne(filter: any = {}) {
-      const item = this.list.find(i => {
+      const item = this.list.find((i) => {
         for (const key of Object.keys(filter)) {
           if (key === '$text') {
             const searchVal = filter.$text.$search.toLowerCase();
-            const matchesSearch = 
+            const matchesSearch =
               (i.title && i.title.toLowerCase().includes(searchVal)) ||
-              (i.description && i.description.toLowerCase().includes(searchVal)) ||
+              (i.description &&
+                i.description.toLowerCase().includes(searchVal)) ||
               (i.sku && i.sku.toLowerCase().includes(searchVal));
             if (!matchesSearch) return false;
             continue;
@@ -116,7 +138,9 @@ function createMockModel() {
             const parts = key.split('.');
             const val = i[parts[0]];
             if (Array.isArray(val)) {
-              return val.some(subItem => String(subItem[parts[1]]) === String(filter[key]));
+              return val.some(
+                (subItem) => String(subItem[parts[1]]) === String(filter[key]),
+              );
             }
             return false;
           }
@@ -128,7 +152,7 @@ function createMockModel() {
     }
 
     static findById(id: any) {
-      const item = this.list.find(i => String(i._id) === String(id));
+      const item = this.list.find((i) => String(i._id) === String(id));
       return createQuery(item || null);
     }
 
@@ -139,7 +163,7 @@ function createMockModel() {
     }
 
     static findByIdAndUpdate(id: any, update: any) {
-      const item = this.list.find(i => String(i._id) === String(id));
+      const item = this.list.find((i) => String(i._id) === String(id));
       if (item) {
         Object.assign(item, update);
       }
@@ -147,7 +171,7 @@ function createMockModel() {
     }
 
     static findOneAndUpdate(filter: any, update: any) {
-      let item = this.list.find(i => {
+      let item = this.list.find((i) => {
         for (const key of Object.keys(filter)) {
           if (String(i[key]) !== String(filter[key])) return false;
         }
@@ -186,10 +210,35 @@ describe('Chatbot Conversational Flows (e2e)', () => {
     // Generate mock model classes for Mongoose tokens
     const mockModels: Record<string, any> = {};
     const schemas = [
-      'User', 'Category', 'Brand', 'Inventory', 'Product', 'Cart', 'Wishlist',
-      'Coupon', 'Order', 'Payment', 'Review', 'Ticket', 'Notification', 'Log',
-      'Vendor', 'Settlement', 'Analytics', 'Address', 'PaymentMethod',
-      'WalletTransaction', 'Referral', 'ChatSession', 'GuestProfile', 'UserMemory'
+      'User',
+      'Category',
+      'Brand',
+      'Inventory',
+      'Product',
+      'Cart',
+      'Wishlist',
+      'Coupon',
+      'Order',
+      'Payment',
+      'Review',
+      'Ticket',
+      'Notification',
+      'Log',
+      'Vendor',
+      'Settlement',
+      'Analytics',
+      'Address',
+      'PaymentMethod',
+      'WalletTransaction',
+      'Referral',
+      'ChatSession',
+      'GuestProfile',
+      'UserMemory',
+      'RefundTransaction',
+      'PaymentAuditLog',
+      'PaymentWebhookLog',
+      'AgentStatus',
+      'LiveChatSession',
     ];
 
     const providers: any[] = [
@@ -200,6 +249,10 @@ describe('Chatbot Conversational Flows (e2e)', () => {
       AuthService,
       SupportService,
       AgentMemoryService,
+      PaymentService,
+      RecoveryService,
+      VoiceService,
+      NotificationService,
       UserRepository,
       ProductRepository,
       InventoryRepository,
@@ -220,6 +273,11 @@ describe('Chatbot Conversational Flows (e2e)', () => {
       ReferralRepository,
       TicketRepository,
       LogRepository,
+      RefundTransactionRepository,
+      PaymentAuditLogRepository,
+      PaymentWebhookLogRepository,
+      AgentStatusRepository,
+      LiveChatSessionRepository,
     ];
 
     for (const schema of schemas) {
@@ -291,7 +349,6 @@ describe('Chatbot Conversational Flows (e2e)', () => {
   describe('Advanced E-Commerce Flows (Cart, Checkout, Alerts & Modifications)', () => {
     let testUser: any;
     let testProduct: any;
-    let token: string;
     let userId: string;
 
     beforeAll(async () => {
@@ -299,10 +356,11 @@ describe('Chatbot Conversational Flows (e2e)', () => {
       const pass = 'password123';
       const registerRes = await authService.register({ email, password: pass });
       testUser = registerRes.user;
-      token = registerRes.accessToken;
       userId = String(testUser.id);
 
-      const userDoc = await (authService as any).userRepository.findById(userId);
+      const userDoc = await (authService as any).userRepository.findById(
+        userId,
+      );
       userDoc.walletBalance = 1000;
       userDoc.rewardPoints = 500;
       await userDoc.save();
@@ -327,7 +385,9 @@ describe('Chatbot Conversational Flows (e2e)', () => {
         },
       });
 
-      const inv = await salesService.getInventoryByProductId(String(testProduct._id));
+      const inv = await salesService.getInventoryByProductId(
+        String(testProduct._id),
+      );
       if (inv) {
         inv.stock = 10;
         (inv as any).allowPreorder = true;
@@ -344,7 +404,9 @@ describe('Chatbot Conversational Flows (e2e)', () => {
         userRoles: ['Customer'],
       });
       expect(res.nextStep).toBe('VARIANT_SELECT');
-      expect(res.reply).toContain('Which variant of Apex Gaming Mouse would you like?');
+      expect(res.reply).toContain(
+        'Which variant of Apex Gaming Mouse would you like?',
+      );
     });
 
     it('should add to cart when variant is selected', async () => {
@@ -354,7 +416,10 @@ describe('Chatbot Conversational Flows (e2e)', () => {
         userId,
         userRoles: ['Customer'],
         activeStep: 'VARIANT_SELECT',
-        stepData: { productId: String(testProduct._id), combos: ['Black', 'White'] },
+        stepData: {
+          productId: String(testProduct._id),
+          combos: ['Black', 'White'],
+        },
       });
       expect(res.reply).toContain('Added to Cart!');
       expect(res.reply).toContain('Apex Gaming Mouse (Black)');
@@ -409,15 +474,25 @@ describe('Chatbot Conversational Flows (e2e)', () => {
       });
       expect(alertRes.reply).toContain('Price Alert Set!');
 
-      const userDoc = await (authService as any).userRepository.findById(userId);
-      const matchingAlert = userDoc.priceAlerts.find((a: any) => a.productId === String(testProduct._id));
+      const userDoc = await (authService as any).userRepository.findById(
+        userId,
+      );
+      const matchingAlert = userDoc.priceAlerts.find(
+        (a: any) => a.productId === String(testProduct._id),
+      );
       expect(matchingAlert).toBeDefined();
       expect(matchingAlert?.targetPrice).toBe(50);
 
-      await catalogService.updateProduct(String(testProduct._id), { price: 45 });
-      
-      const notifications = await (salesService as any).notificationRepository.find({ userId: testUser.id });
-      const alertNotification = notifications.find((n: any) => n.type === 'Alert');
+      await catalogService.updateProduct(String(testProduct._id), {
+        price: 45,
+      });
+
+      const notifications = await (
+        salesService as any
+      ).notificationRepository.find({ userId: testUser.id });
+      const alertNotification = notifications.find(
+        (n: any) => n.type === 'Alert',
+      );
       expect(alertNotification).toBeDefined();
       expect(alertNotification.message).toContain('Price Drop!');
     });

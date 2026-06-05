@@ -43,6 +43,16 @@ import {
   WalletTransactionSchema,
   Referral,
   ReferralSchema,
+  RefundTransaction,
+  RefundTransactionSchema,
+  PaymentAuditLog,
+  PaymentAuditLogSchema,
+  PaymentWebhookLog,
+  PaymentWebhookLogSchema,
+  AgentStatus,
+  AgentStatusSchema,
+  LiveChatSession,
+  LiveChatSessionSchema,
 } from './schemas';
 
 @Module({
@@ -69,6 +79,11 @@ import {
       { name: PaymentMethod.name, schema: PaymentMethodSchema },
       { name: WalletTransaction.name, schema: WalletTransactionSchema },
       { name: Referral.name, schema: ReferralSchema },
+      { name: RefundTransaction.name, schema: RefundTransactionSchema },
+      { name: PaymentAuditLog.name, schema: PaymentAuditLogSchema },
+      { name: PaymentWebhookLog.name, schema: PaymentWebhookLogSchema },
+      { name: AgentStatus.name, schema: AgentStatusSchema },
+      { name: LiveChatSession.name, schema: LiveChatSessionSchema },
     ]),
   ],
   exports: [MongooseModule],

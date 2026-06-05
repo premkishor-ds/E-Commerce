@@ -24,6 +24,11 @@ import {
   PaymentMethod,
   WalletTransaction,
   Referral,
+  RefundTransaction,
+  PaymentAuditLog,
+  PaymentWebhookLog,
+  AgentStatus,
+  LiveChatSession,
 } from '../schemas/schemas';
 
 @Injectable()
@@ -161,7 +166,9 @@ export class PaymentMethodRepository extends BaseRepository<PaymentMethod> {
 
 @Injectable()
 export class WalletTransactionRepository extends BaseRepository<WalletTransaction> {
-  constructor(@InjectModel(WalletTransaction.name) model: Model<WalletTransaction>) {
+  constructor(
+    @InjectModel(WalletTransaction.name) model: Model<WalletTransaction>,
+  ) {
     super(model);
   }
 }
@@ -169,6 +176,49 @@ export class WalletTransactionRepository extends BaseRepository<WalletTransactio
 @Injectable()
 export class ReferralRepository extends BaseRepository<Referral> {
   constructor(@InjectModel(Referral.name) model: Model<Referral>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class RefundTransactionRepository extends BaseRepository<RefundTransaction> {
+  constructor(
+    @InjectModel(RefundTransaction.name) model: Model<RefundTransaction>,
+  ) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class PaymentAuditLogRepository extends BaseRepository<PaymentAuditLog> {
+  constructor(
+    @InjectModel(PaymentAuditLog.name) model: Model<PaymentAuditLog>,
+  ) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class PaymentWebhookLogRepository extends BaseRepository<PaymentWebhookLog> {
+  constructor(
+    @InjectModel(PaymentWebhookLog.name) model: Model<PaymentWebhookLog>,
+  ) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class AgentStatusRepository extends BaseRepository<AgentStatus> {
+  constructor(@InjectModel(AgentStatus.name) model: Model<AgentStatus>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class LiveChatSessionRepository extends BaseRepository<LiveChatSession> {
+  constructor(
+    @InjectModel(LiveChatSession.name) model: Model<LiveChatSession>,
+  ) {
     super(model);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AgentMemoryService } from './agent.memory.service';
 import {
   classifyIntent,
@@ -11,6 +11,10 @@ import { SalesService } from '../sales/sales.service';
 import { SupportService } from '../support/support.service';
 import { CatalogService } from '../catalog/catalog.service';
 import { ProfileService } from '../profile/profile.service';
+import { PaymentService } from '../payment/payment.service';
+import { RecoveryService } from '../sales/recovery.service';
+import { VoiceService } from '../voice/voice.service';
+import { NotificationService } from '../notification/notification.service';
 
 export interface AgentRequest {
   message: string;
@@ -51,37 +55,42 @@ export interface AgentAction {
 
 const DICTIONARY: Record<string, Record<string, string>> = {
   hi: {
-    greet: "👋 नमस्ते! मैं एपेक्सस्टोर एआई सहायक हूं।\n\nमैं आपकी सहायता कर सकता हूँ:\n• 🔍 उत्पादों की खोज और तुलना करें\n• 🛒 अपनी कार्ट और इच्छासूची प्रबंधित करें\n• 📦 ऑर्डर ट्रैक और प्रबंधित करें\n• 🎫 सहायता टिकट बनाएं",
-    help: "🤖 **एपेक्सस्टोर एआई सहायक — मैं क्या कर सकता हूँ:**\n\n🔍 **खोज**: \"उत्पाद दिखाएं\"\n🛒 **カート**: \"कार्ट में जोड़ें\"\n📦 **ऑर्डर**: \"मेरे ऑर्डर\", \"ऑर्डर ट्रैक करें\"\n\nबस स्वाभाविक रूप से लिखें!",
-    thanks: "😊 आपका स्वागत है! क्या मैं आपकी किसी और चीज़ में मदद कर सकता हूँ?",
-    bye: "👋 अलविदा! एपेಕ್ಸ್स्टोर पर फिर आएं!",
-    unknown: "🤔 मुझे समझ नहीं आया। सहायता के लिए \"help\" टाइप करें।",
-    need_login: "⚠️ इस क्रिया को करने के लिए आपको लॉग इन करना होगा।",
+    greet:
+      '👋 नमस्ते! मैं एपेक्सस्टोर एआई सहायक हूं।\n\nमैं आपकी सहायता कर सकता हूँ:\n• 🔍 उत्पादों की खोज और तुलना करें\n• 🛒 अपनी कार्ट और इच्छासूची प्रबंधित करें\n• 📦 ऑर्डर ट्रैक और प्रबंधित करें\n• 🎫 सहायता टिकट बनाएं',
+    help: '🤖 **एपेक्सस्टोर एआई सहायक — मैं क्या कर सकता हूँ:**\n\n🔍 **खोज**: "उत्पाद दिखाएं"\n🛒 **カート**: "कार्ट में जोड़ें"\n📦 **ऑर्डर**: "मेरे ऑर्डर", "ऑर्डर ट्रैक करें"\n\nबस स्वाभाविक रूप से लिखें!',
+    thanks:
+      '😊 आपका स्वागत है! क्या मैं आपकी किसी और चीज़ में मदद कर सकता हूँ?',
+    bye: '👋 अलविदा! एपेಕ್ಸ್स्टोर पर फिर आएं!',
+    unknown: '🤔 मुझे समझ नहीं आया। सहायता के लिए "help" टाइप करें।',
+    need_login: '⚠️ इस क्रिया को करने के लिए आपको लॉग इन करना होगा।',
   },
   te: {
-    greet: "👋 నమస్కారం! నేను అపెక్స్‌స్టోర్ AI సహాయకుడిನಿ.\n\nನೆನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಲು ಇಲ್ಲಿದ್ದೇನೆ:\n• 🔍 ఉత్పత్తుల శోధన మరియు పోలిక\n• 🛒 కార్ట్ మరియు విష్‌లిస్ట్ నిర్వహణ\n• 📦 ఆర్డర్ ట్రాకింగ్\n• 🎫 సహాయ టిక్కెట్‌ల సృష్టి",
-    help: "🤖 **ಅಪೇಕ್ಸ್ ಸ್ಟೋರ್ AI ಸಹಾಯಕಿ — ನಾನೇನು ಮಾಡಬಲ್ಲೆ:**\n\n🔍 **శోధన**: \"ఉత్పత్తులను చూపించు\"\n🛒 **కార్ట్**: \"కార్ట్‌కు జోడించు\"\n📦 **ಆರ್ಡರ್**: \"ನಾ ಆರ್ಡರ್ಸ್\"\n\nದಯವಿಟ್ಟು ಇಂಗ್ಲೀಷ್ ಅಥವಾ ತೆಲುಗು ನಲ್ಲಿ ಬರೆಯಿರಿ!",
-    thanks: "😊 మీకు స్వాగతం! నేను మీకు ఇంకా ఏదైనా సహాయం చేయగలనా?",
-    bye: "👋 సెలవు! అపెక్స్‌స్టోర్‌ను మళ్ಲಿ సందರ್ಶించండి!",
-    unknown: "🤔 నాకు అర్థం కాలేದು. సహాయం కోసం \"help\" అని టైಪ್ చేయండి.",
-    need_login: "⚠️ ఈ చర్యను చేయడానికి మీరు లాగిన్ అవ్వాలి.",
+    greet:
+      '👋 నమస్కారం! నేను అపెక్స్‌స్టోర్ AI సహాయకుడిನಿ.\n\nನೆನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಲು ಇಲ್ಲಿದ್ದೇನೆ:\n• 🔍 ఉత్పత్తుల శోధన మరియు పోలిక\n• 🛒 కార్ట్ మరియు విష్‌లిస్ట్ నిర్వహణ\n• 📦 ఆర్డర్ ట్రాకింగ్\n• 🎫 సహాయ టిక్కెట్‌ల సృష్టి',
+    help: '🤖 **ಅಪೇಕ್ಸ್ ಸ್ಟೋರ್ AI ಸಹಾಯಕಿ — ನಾನೇನು ಮಾಡಬಲ್ಲೆ:**\n\n🔍 **శోధన**: "ఉత్పత్తులను చూపించు"\n🛒 **కార్ట్**: "కార్ట్‌కు జోడించు"\n📦 **ಆರ್ಡರ್**: "ನಾ ಆರ್ಡರ್ಸ್"\n\nದಯವಿಟ್ಟು ಇಂಗ್ಲೀಷ್ ಅಥವಾ ತೆಲುಗು ನಲ್ಲಿ ಬರೆಯಿರಿ!',
+    thanks: '😊 మీకు స్వాగతం! నేను మీకు ఇంకా ఏదైనా సహాయం చేయగలనా?',
+    bye: '👋 సెలవు! అపెక్స్‌స్టోర్‌ను మళ్ಲಿ సందರ್ಶించండి!',
+    unknown: '🤔 నాకు అర్థం కాలేದು. సహాయం కోసం "help" అని టైಪ್ చేయండి.',
+    need_login: '⚠️ ఈ చర్యను చేయడానికి మీరు లాగిన్ అవ్వాలి.',
   },
   ta: {
-    greet: "👋 வணக்கம்! நான் அபெக்ஸ்ஸ்டோர் AI உதவியாளர்.\n\nநான் உங்களுக்கு உதவ முடியும்:\n• 🔍 தயாரிப்புகளைத் தேட மற்றும் ஒப்பிட\n• 🛒 கார்ட் மற்றும் விருப்பப்பட்டಿಯலை நிர்வகிக்க\n• 📦 ஆர்டர்களைக் கண்காணிக்க\n• 🎫 ஆதரவு டிக்கெட்டுகளை உருவாக்க",
-    help: "🤖 **அபெக்ஸ்ஸ்டோர் AI உதவியாளர் — நான் செய்யக்கூடியவை:**\n\n🔍 **தேடல்**: \"தயாரிப்புகளைக் காட்டு\"\n🛒 **கார்ட்**: \"கார்ட்டில் சேர்\"\n📦 **ಆರ್ಡರ್**: \"எனது ஆர்டர்கள்\"\n\nஇயல்பாக எழுதுங்கள்!",
-    thanks: "😊 உங்களுக்கு வரவேற்பு! நான் உங்களுக்கு வேறு ஏதாவது உதவ முடியுமா?",
-    bye: "👋 விடைபெறுகிறேன்! அபெக்ஸ்ஸ்டோருக்கு மீண்டும் வருக!",
-    unknown: "🤔 எனக்கு புரியவில்லை. உதவிக்கு \"help\" என தட்டச்சு செய்யவும்.",
-    need_login: "⚠️ இந்தச் செயலைச் செய்ய நீங்கள் உள்நுழைய வேண்டும்.",
+    greet:
+      '👋 வணக்கம்! நான் அபெக்ஸ்ஸ்டோர் AI உதவியாளர்.\n\nநான் உங்களுக்கு உதவ முடியும்:\n• 🔍 தயாரிப்புகளைத் தேட மற்றும் ஒப்பிட\n• 🛒 கார்ட் மற்றும் விருப்பப்பட்டಿಯலை நிர்வகிக்க\n• 📦 ஆர்டர்களைக் கண்காணிக்க\n• 🎫 ஆதரவு டிக்கெட்டுகளை உருவாக்க',
+    help: '🤖 **அபெக்ஸ்ஸ்டோர் AI உதவியாளர் — நான் செய்யக்கூடியவை:**\n\n🔍 **தேடல்**: "தயாரிப்புகளைக் காட்டு"\n🛒 **கார்ட்**: "கார்ட்டில் சேர்"\n📦 **ಆರ್ಡರ್**: "எனது ஆர்டர்கள்"\n\nஇயல்பாக எழுதுங்கள்!',
+    thanks: '😊 உங்களுக்கு வரவேற்பு! நான் உங்களுக்கு வேறு ஏதாவது உதவ முடியுமா?',
+    bye: '👋 விடைபெறுகிறேன்! அபெக்ஸ்ஸ்டோருக்கு மீண்டும் வருக!',
+    unknown: '🤔 எனக்கு புரியவில்லை. உதவிக்கு "help" என தட்டச்சு செய்யவும்.',
+    need_login: '⚠️ இந்தச் செயலைச் செய்ய நீங்கள் உள்நுழைய வேண்டும்.',
   },
   kn: {
-    greet: "👋 ನಮಸ್ಕಾರ! ನಾನು ಅಪೆಕ್ಸ್ ಸ್ಟೋರ್ AI ಸಹಾಯಕ.\n\nನಾನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ:\n• 🔍 ಉತ್ಪನ್ನಗಳ ಹುಡುಕಾಟ ಮತ್ತು ಹೋಲಿಕೆ\n• 🛒 ಕಾರ್ಟ್ ಮತ್ತು ವಿಶ್‌ಲಿಸ್ಟ್ ನಿರ್ವಹಣೆ\n• 📦 ಆರ್ಡರ್ ಟ್ರ್ಯಾಕಿಂಗ್\n• 🎫 ಬೆಂಬಲ ಟಿಕೆಟ್ ರಚನೆ",
-    help: "🤖 **ಅಪೆಕ್ಸ್ ಸ್ಟೋರ್ AI ಸಹಾಯಕ — ನಾನು ಮಾಡಬಹುದಾದ ಕೆಲಸಗಳು:**\n\n🔍 **ಹುಡುಕಾಟ**: \"ಉತ್ಪನ್ನಗಳನ್ನು ತೋರಿಸಿ\"\n🛒 **ಕಾರ್ಟ್**: \"ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಿ\"\n📦 **ಆರ್ಡರ್**: \"ನನ್ನ ಆರ್ಡರ್‌ಗಳು\"\n\nಸಹಾಯಕ್ಕಾಗಿ \"help\" ಎಂದು ಟೈಪ್ ಮಾಡಿ.",
-    thanks: "😊 ನಿಮಗೆ ಸ್ವಾಗತ! ನಾನು ನಿಮಗೆ ಬೇರೆ ಯಾವುದಾದರೂ ಸಹಾಯ ಮಾಡಬಲ್ಲೆನೇ?",
-    bye: "👋 ಹೋಗಿ ಬನ್ನಿ! ಅಪೆಕ್ಸ್ ಸ್ಟೋರ್‌ಗೆ ಮತ್ತೆ ಭೇಟಿ ನೀಡಿ!",
-    unknown: "🤔 ನನಗೆ ಅರ್ಥವಾಗಲಿಲ್ಲ. ಸಹಾಯಕ್ಕಾಗಿ \"help\" ಎಂದು ಟೈಪ್ ಮಾಡಿ.",
-    need_login: "⚠️ ಈ ಕ್ರಿಯೆಯನ್ನು ಮಾಡಲು ನೀವು ಲಾಗಿನ್ ಆಗಬೇಕು.",
-  }
+    greet:
+      '👋 ನಮಸ್ಕಾರ! ನಾನು ಅಪೆಕ್ಸ್ ಸ್ಟೋರ್ AI ಸಹಾಯಕ.\n\nನಾನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ:\n• 🔍 ಉತ್ಪನ್ನಗಳ ಹುಡುಕಾಟ ಮತ್ತು ಹೋಲಿಕೆ\n• 🛒 ಕಾರ್ಟ್ ಮತ್ತು ವಿಶ್‌ಲಿಸ್ಟ್ ನಿರ್ವಹಣೆ\n• 📦 ಆರ್ಡರ್ ಟ್ರ್ಯಾಕಿಂಗ್\n• 🎫 ಬೆಂಬಲ ಟಿಕೆಟ್ ರಚನೆ',
+    help: '🤖 **ಅಪೆಕ್ಸ್ ಸ್ಟೋರ್ AI ಸಹಾಯಕ — ನಾನು ಮಾಡಬಹುದಾದ ಕೆಲಸಗಳು:**\n\n🔍 **ಹುಡುಕಾಟ**: "ಉತ್ಪನ್ನಗಳನ್ನು ತೋರಿಸಿ"\n🛒 **ಕಾರ್ಟ್**: "ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಿ"\n📦 **ಆರ್ಡರ್**: "ನನ್ನ ಆರ್ಡರ್‌ಗಳು"\n\nಸಹಾಯಕ್ಕಾಗಿ "help" ಎಂದು ಟೈಪ್ ಮಾಡಿ.',
+    thanks: '😊 ನಿಮಗೆ ಸ್ವಾಗತ! ನಾನು ನಿಮಗೆ ಬೇರೆ ಯಾವುದಾದರೂ ಸಹಾಯ ಮಾಡಬಲ್ಲೆನೇ?',
+    bye: '👋 ಹೋಗಿ ಬನ್ನಿ! ಅಪೆಕ್ಸ್ ಸ್ಟೋರ್‌ಗೆ ಮತ್ತೆ ಭೇಟಿ ನೀಡಿ!',
+    unknown: '🤔 ನನಗೆ ಅರ್ಥವಾಗಲಿಲ್ಲ. ಸಹಾಯಕ್ಕಾಗಿ "help" ಎಂದು ಟೈಪ್ ಮಾಡಿ.',
+    need_login: '⚠️ ಈ ಕ್ರಿಯೆಯನ್ನು ಮಾಡಲು ನೀವು ಲಾಗಿನ್ ಆಗಬೇಕು.',
+  },
 };
 
 @Injectable()
@@ -93,15 +102,26 @@ export class AgentService {
     private readonly supportService: SupportService,
     private readonly catalogService: CatalogService,
     private readonly profileService: ProfileService,
+    private readonly paymentService: PaymentService,
+    private readonly recoveryService: RecoveryService,
+    private readonly voiceService: VoiceService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   // ─── TRANSLATION HELPERS ──────────────────────────────────────────────────
   private detectLanguage(message: string): string {
     const text = message.toLowerCase();
-    if (/namaste|shukriya|dhanyawad|madad|alvida|नमस्ते|धन्यवाद|मदद|अलविदा/i.test(text)) return 'hi';
-    if (/namaskaram|sahayam|dhanyavadalu|నమస్కారం|సహాయం|ధన్యవాదాలు/i.test(text)) return 'te';
+    if (
+      /namaste|shukriya|dhanyawad|madad|alvida|नमस्ते|धन्यवाद|मदद|अलविदा/i.test(
+        text,
+      )
+    )
+      return 'hi';
+    if (/namaskaram|sahayam|dhanyavadalu|నమస్కారం|సహాయం|ధన్యవాదాలు/i.test(text))
+      return 'te';
     if (/vanakkam|udavi|nandri|வணக்கம்|உதவி|நன்றி/i.test(text)) return 'ta';
-    if (/namaskara|sahaya|dhanyavada|ನಮಸ್ಕಾರ|ಸಹಾಯ|ಧನ್ಯವಾದ/i.test(text)) return 'kn';
+    if (/namaskara|sahaya|dhanyavada|ನಮಸ್ಕಾರ|ಸಹಾಯ|ಧನ್ಯವಾದ/i.test(text))
+      return 'kn';
     return 'en';
   }
 
@@ -229,12 +249,14 @@ Enhanced Reply:`;
         if (profile) {
           if (lang !== 'en' && profile.languagePreference !== lang) {
             profile.languagePreference = lang;
-            await (profile as any).save();
+            await profile.save();
           } else if (profile.languagePreference) {
             lang = profile.languagePreference;
           }
         }
-      } catch {}
+      } catch {
+        /* ignore */
+      }
     }
 
     const workMessage = this.translateInput(message, lang);
@@ -274,7 +296,12 @@ Enhanced Reply:`;
         nextStep: 'CHECKOUT_NAME',
         stepData: { isGuest: true, guestId: guestId || sessionId },
       };
-      await this.memory.appendMessage(sessionId, 'bot', translatedReply, 'CHECKOUT');
+      await this.memory.appendMessage(
+        sessionId,
+        'bot',
+        translatedReply,
+        'CHECKOUT',
+      );
       return response;
     }
 
@@ -284,8 +311,14 @@ Enhanced Reply:`;
     // ─── ACTIVE STEP FLOWS ──────────────────────────────────────────────────
     // Skip login/register steps entirely if the user is already authenticated —
     // this prevents a stale frontend activeStep from hijacking new messages.
-    const AUTH_STEPS = ['LOGIN_EMAIL', 'LOGIN_PASSWORD', 'REGISTER_EMAIL', 'REGISTER_PASSWORD'];
-    const isStaleAuthStep = activeStep && AUTH_STEPS.includes(activeStep) && !!userId;
+    const AUTH_STEPS = [
+      'LOGIN_EMAIL',
+      'LOGIN_PASSWORD',
+      'REGISTER_EMAIL',
+      'REGISTER_PASSWORD',
+    ];
+    const isStaleAuthStep =
+      activeStep && AUTH_STEPS.includes(activeStep) && !!userId;
 
     if (activeStep && !isStaleAuthStep) {
       const stepResult = await this.handleActiveStep(
@@ -302,7 +335,11 @@ Enhanced Reply:`;
           stepResult.reply,
           `Active workflow: ${activeStep}`,
         );
-        stepResult.reply = this.translateReply(stepResult.intent || intent, stepResult.reply, lang);
+        stepResult.reply = this.translateReply(
+          stepResult.intent || intent,
+          stepResult.reply,
+          lang,
+        );
         await this.memory.appendMessage(
           sessionId,
           'bot',
@@ -319,7 +356,12 @@ Enhanced Reply:`;
     if (!hasPermission(intent, evaluatedRoles)) {
       const reply = `⚠️ You need to be logged in as **${this.getRequiredRole(intent)}** to perform this action. Type **"login"** to sign in.`;
       const translatedReply = this.translateReply(intent, reply, lang);
-      await this.memory.appendMessage(sessionId, 'bot', translatedReply, intent);
+      await this.memory.appendMessage(
+        sessionId,
+        'bot',
+        translatedReply,
+        intent,
+      );
       return {
         reply: translatedReply,
         intent,
@@ -379,6 +421,7 @@ Enhanced Reply:`;
     userId: string | undefined,
     roles: string[],
     sessionId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     entities: Record<string, string>,
   ): Promise<AgentResponse | null> {
     const q = message.toLowerCase().trim();
@@ -509,7 +552,7 @@ Enhanced Reply:`;
               ],
               suggestions: ['My profile', 'Browse products'],
             };
-          } catch (err: any) {
+          } catch {
             return this.buildReply(
               `❌ Invalid or expired OTP. Please try again:`,
               'OTP_VERIFY',
@@ -554,7 +597,11 @@ Enhanced Reply:`;
         if (userId) {
           try {
             const history = await this.memory.getRecentHistory(sessionId, 10);
-            const historyText = history.map(h => `[${h.role === 'user' ? 'User' : 'Chatbot'}]: ${h.text}`).join('\n');
+            const historyText = history
+              .map(
+                (h) => `[${h.role === 'user' ? 'User' : 'Chatbot'}]: ${h.text}`,
+              )
+              .join('\n');
             const messageWithLogs = `${message}\n\n---\n💬 **Chat Session Transcript:**\n${historyText}`;
 
             const ticket = await this.supportService.createTicket(userId, {
@@ -588,7 +635,7 @@ Enhanced Reply:`;
           true,
         );
 
-      case 'REVIEW_RATING':
+      case 'REVIEW_RATING': {
         const num = parseInt(q.replace(/\D/g, ''));
         if (isNaN(num) || num < 1 || num > 5) {
           return this.buildReply(
@@ -608,6 +655,7 @@ Enhanced Reply:`;
           'REVIEW_COMMENT',
           { ...data, rating: num },
         );
+      }
 
       case 'REVIEW_COMMENT':
         return {
@@ -624,11 +672,24 @@ Enhanced Reply:`;
         };
 
       case 'CHECKOUT_ADDRESS_SELECT': {
-        if (!userId) return this.buildReply('Please login.', 'CHECKOUT', 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please login.',
+            'CHECKOUT',
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         if (q === 'new') {
           return this.buildReply(
             `📦 Let's place your order!\n\nPlease enter the **Full Name** of the recipient:`,
-            'CHECKOUT', 8, [], 'CHECKOUT_NAME', data
+            'CHECKOUT',
+            8,
+            [],
+            'CHECKOUT_NAME',
+            data,
           );
         }
         try {
@@ -638,9 +699,13 @@ Enhanced Reply:`;
           if (!selected) {
             return this.buildReply(
               '⚠️ Invalid selection. Please choose a number from the list or type **"new"**:',
-              'CHECKOUT', 0, [], 'CHECKOUT_ADDRESS_SELECT', data,
+              'CHECKOUT',
+              0,
+              [],
+              'CHECKOUT_ADDRESS_SELECT',
+              data,
               false,
-              [...addresses.map((_, i) => String(i + 1)), 'new']
+              [...addresses.map((_, i) => String(i + 1)), 'new'],
             );
           }
           const updated = {
@@ -652,12 +717,21 @@ Enhanced Reply:`;
           };
           return this.buildReply(
             `💳 **Select a Payment Method:**\n\n• **Stripe** (Card)\n• **Razorpay** (UPI/Netbanking)\n• **Wallet** (Store credits)\n• **COD** (Cash on Delivery)\n\nPlease type your choice:`,
-            'CHECKOUT', 8, [], 'CHECKOUT_PAYMENT_SELECT', updated,
+            'CHECKOUT',
+            8,
+            [],
+            'CHECKOUT_PAYMENT_SELECT',
+            updated,
             false,
-            ['Stripe', 'Razorpay', 'Wallet', 'COD']
+            ['Stripe', 'Razorpay', 'Wallet', 'COD'],
           );
         } catch (e: any) {
-          return this.buildReply(`❌ Error selecting address: ${e.message}`, 'CHECKOUT', 0, []);
+          return this.buildReply(
+            `❌ Error selecting address: ${e.message}`,
+            'CHECKOUT',
+            0,
+            [],
+          );
         }
       }
 
@@ -692,40 +766,68 @@ Enhanced Reply:`;
         };
         return this.buildReply(
           `💳 **Select a Payment Method:**\n\n• **Stripe** (Card)\n• **Razorpay** (UPI/Netbanking)\n• **Wallet** (Store credits)\n• **COD** (Cash on Delivery)\n\nPlease type your choice:`,
-          'CHECKOUT', 8, [], 'CHECKOUT_PAYMENT_SELECT', updated,
+          'CHECKOUT',
+          8,
+          [],
+          'CHECKOUT_PAYMENT_SELECT',
+          updated,
           false,
-          ['Stripe', 'Razorpay', 'Wallet', 'COD']
+          ['Stripe', 'Razorpay', 'Wallet', 'COD'],
         );
       }
 
       case 'CHECKOUT_PAYMENT_SELECT': {
         const choice = message.trim();
         const valid = ['Stripe', 'Razorpay', 'Wallet', 'COD'];
-        const match = valid.find(v => v.toLowerCase() === choice.toLowerCase());
+        const match = valid.find(
+          (v) => v.toLowerCase() === choice.toLowerCase(),
+        );
         if (!match) {
           return this.buildReply(
             `⚠️ Invalid payment method. Please choose from: **Stripe**, **Razorpay**, **Wallet**, or **COD**:`,
-            'CHECKOUT', 0, [], 'CHECKOUT_PAYMENT_SELECT', data,
+            'CHECKOUT',
+            0,
+            [],
+            'CHECKOUT_PAYMENT_SELECT',
+            data,
             false,
-            valid
+            valid,
           );
         }
 
         if (match === 'Wallet') {
-          if (!userId) return this.buildReply('Please **login** to pay via Wallet.', 'CHECKOUT', 5, [], undefined, undefined, true);
+          if (!userId)
+            return this.buildReply(
+              'Please **login** to pay via Wallet.',
+              'CHECKOUT',
+              5,
+              [],
+              undefined,
+              undefined,
+              true,
+            );
           try {
             const profile = await this.profileService.getProfile(userId);
             const balance = profile.walletBalance || 0;
             if (balance < data.total) {
               return this.buildReply(
                 `❌ **Insufficient Wallet Balance!**\n\n• **Required**: $${data.total?.toFixed(2)}\n• **Available**: $${balance.toFixed(2)}\n\nPlease choose another payment method:`,
-                'CHECKOUT', 0, [], 'CHECKOUT_PAYMENT_SELECT', data,
+                'CHECKOUT',
+                0,
+                [],
+                'CHECKOUT_PAYMENT_SELECT',
+                data,
                 false,
-                ['Stripe', 'Razorpay', 'COD']
+                ['Stripe', 'Razorpay', 'COD'],
               );
             }
           } catch (e: any) {
-            return this.buildReply(`❌ Profile check failed: ${e.message}`, 'CHECKOUT', 0, []);
+            return this.buildReply(
+              `❌ Profile check failed: ${e.message}`,
+              'CHECKOUT',
+              0,
+              [],
+            );
           }
         }
 
@@ -742,29 +844,38 @@ Enhanced Reply:`;
 
         return this.buildReply(
           `📦 **Order Summary:**\n\n${cartSummary}\n\n` +
-          `• **Deliver to**: ${updated.fullName}, ${updated.address}, ${updated.city} ${updated.zipCode}\n` +
-          `• **Payment Method**: ${updated.paymentProvider}\n` +
-          `• **Total Price**: $${(data.total || 0).toFixed(2)}\n\n` +
-          `Type **"confirm"** to place the order or **"cancel"** to abort.`,
+            `• **Deliver to**: ${updated.fullName}, ${updated.address}, ${updated.city} ${updated.zipCode}\n` +
+            `• **Payment Method**: ${updated.paymentProvider}\n` +
+            `• **Total Price**: $${(data.total || 0).toFixed(2)}\n\n` +
+            `Type **"confirm"** to place the order or **"cancel"** to abort.`,
           'CHECKOUT',
           8,
           [],
           'CHECKOUT_CONFIRM',
           updated,
           false,
-          ['Confirm', 'Cancel']
+          ['Confirm', 'Cancel'],
         );
       }
 
       case 'CHECKOUT_CONFIRM': {
-        const isConfirm = q === 'confirm' || q === 'yes' || q === 'place order' || q.includes('confirm order') || q === 'ok' || q === 'okay' || q === 'sure' || q === 'y';
-        const isCancel = q === 'no' || q.includes('no') || q.includes('cancel') || q === 'n';
+        const isConfirm =
+          q === 'confirm' ||
+          q === 'yes' ||
+          q === 'place order' ||
+          q.includes('confirm order') ||
+          q === 'ok' ||
+          q === 'okay' ||
+          q === 'sure' ||
+          q === 'y';
 
         if (isConfirm) {
           if (data.cartItems?.length > 0) {
             try {
               if (data.paymentProvider === 'Wallet' && userId) {
-                const user = await (this.authService as any).userRepository.findById(userId);
+                const user = await (
+                  this.authService as any
+                ).userRepository.findById(userId);
                 if (user) {
                   user.walletBalance = (user.walletBalance || 0) - data.total;
                   await user.save();
@@ -790,7 +901,11 @@ Enhanced Reply:`;
               });
 
               if (data.paymentProvider !== 'COD') {
-                await this.salesService.updateOrderStatus(String(order._id), 'Paid', 'Payment verified successfully.');
+                await this.salesService.updateOrderStatus(
+                  String(order._id),
+                  'Paid',
+                  'Payment verified successfully.',
+                );
               }
 
               return {
@@ -798,7 +913,11 @@ Enhanced Reply:`;
                 intent: 'CHECKOUT',
                 confidence: 10,
                 actions: [{ type: 'CLEAR_CART', payload: {} }],
-                suggestions: ['Track my order', 'Cancel order', 'Continue shopping'],
+                suggestions: [
+                  'Track my order',
+                  'Cancel order',
+                  'Continue shopping',
+                ],
               };
             } catch (err: any) {
               return this.buildReply(
@@ -818,7 +937,7 @@ Enhanced Reply:`;
           undefined,
           undefined,
           false,
-          ['View cart', 'Browse products']
+          ['View cart', 'Browse products'],
         );
       }
 
@@ -853,23 +972,29 @@ Enhanced Reply:`;
           [],
         );
 
-
       // ── Return / Refund flow ──────────────────────────────────────────────
       case 'RETURN_ORDER_ID': {
         let orderId = '';
         if (/my latest|last order|most recent/i.test(message) && userId) {
           try {
             const orders = await this.salesService.getOrders(userId);
-            if (orders?.[0]) orderId = `ORD-${String(orders[0]._id).slice(-8).toUpperCase()}`;
-          } catch {}
+            if (orders?.[0])
+              orderId = `ORD-${String(orders[0]._id).slice(-8).toUpperCase()}`;
+          } catch {
+            /* ignore */
+          }
         } else {
-          const idMatch = message.match(/[A-Z0-9\-]{6,}/i);
+          const idMatch = message.match(/[A-Z0-9-]{6,}/i);
           if (idMatch) orderId = idMatch[0].toUpperCase();
         }
         if (!orderId) {
           return this.buildReply(
             '⚠️ Please provide a valid Order ID (e.g. *ORD-A1B2C3D4*) or say **"my latest order"**:',
-            'RETURN_ORDER', 0, [], 'RETURN_ORDER_ID', data,
+            'RETURN_ORDER',
+            0,
+            [],
+            'RETURN_ORDER_ID',
+            data,
           );
         }
         // Auto-create return ticket
@@ -884,12 +1009,18 @@ Enhanced Reply:`;
             intent: 'RETURN_ORDER',
             confidence: 10,
             actions: [],
-            suggestions: ['View my tickets', 'Track order', 'Continue shopping'],
+            suggestions: [
+              'View my tickets',
+              'Track order',
+              'Continue shopping',
+            ],
           };
         } catch (e: any) {
           return this.buildReply(
             `❌ Failed to create return ticket: ${e.message}. Please try again.`,
-            'RETURN_ORDER', 0, [],
+            'RETURN_ORDER',
+            0,
+            [],
           );
         }
       }
@@ -921,12 +1052,32 @@ Enhanced Reply:`;
       }
 
       case 'PROFILE_UPDATE_CONFIRM': {
-        const isConfirm = q === 'yes' || q.includes('yes') || q.includes('confirm') || q.includes('update it') || q === 'ok' || q === 'sure' || q === 'y';
-        const isCancel = q === 'no' || q.includes('no') || q.includes('cancel') || q.includes('cancele') || q === 'n';
+        const isConfirm =
+          q === 'yes' ||
+          q.includes('yes') ||
+          q.includes('confirm') ||
+          q.includes('update it') ||
+          q === 'ok' ||
+          q === 'sure' ||
+          q === 'y';
+        const isCancel =
+          q === 'no' ||
+          q.includes('no') ||
+          q.includes('cancel') ||
+          q.includes('cancele') ||
+          q === 'n';
 
         if (isConfirm) {
           if (!userId) {
-            return this.buildReply('Please **login** to update your profile.', 'UPDATE_PROFILE', 5, [], undefined, undefined, true);
+            return this.buildReply(
+              'Please **login** to update your profile.',
+              'UPDATE_PROFILE',
+              5,
+              [],
+              undefined,
+              undefined,
+              true,
+            );
           }
           try {
             await this.profileService.updateProfile(userId, {
@@ -938,7 +1089,12 @@ Enhanced Reply:`;
               reply: `✅ **Profile updated!**\n\nYour display name has been changed to **"${data.value}"** successfully!`,
               intent: 'UPDATE_PROFILE',
               confidence: 10,
-              actions: [{ type: 'NOTIFY', payload: { message: `Name updated to "${data.value}"` } }],
+              actions: [
+                {
+                  type: 'NOTIFY',
+                  payload: { message: `Name updated to "${data.value}"` },
+                },
+              ],
               suggestions: ['View profile', 'Change password', 'My orders'],
             };
           } catch (err: any) {
@@ -979,45 +1135,63 @@ Enhanced Reply:`;
       case 'ADD_ADDRESS_NAME':
         return this.buildReply(
           '📞 Please enter the **Mobile Number** for this address:',
-          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_MOBILE',
-          { ...data, fullName: message.trim() }
+          'ADDRESS_MANAGE',
+          9,
+          [],
+          'ADD_ADDRESS_MOBILE',
+          { ...data, fullName: message.trim() },
         );
 
       case 'ADD_ADDRESS_MOBILE':
         return this.buildReply(
           '📍 Please enter the **Street Address** (e.g. Apartment, Suite, Street name):',
-          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_STREET',
-          { ...data, mobile: message.trim() }
+          'ADDRESS_MANAGE',
+          9,
+          [],
+          'ADD_ADDRESS_STREET',
+          { ...data, mobile: message.trim() },
         );
 
       case 'ADD_ADDRESS_STREET':
         return this.buildReply(
           '🏙️ Please enter the **City** name:',
-          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_CITY',
-          { ...data, street: message.trim() }
+          'ADDRESS_MANAGE',
+          9,
+          [],
+          'ADD_ADDRESS_CITY',
+          { ...data, street: message.trim() },
         );
 
       case 'ADD_ADDRESS_CITY':
         return this.buildReply(
           '🗺️ Please enter the **State** name:',
-          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_STATE',
-          { ...data, city: message.trim() }
+          'ADDRESS_MANAGE',
+          9,
+          [],
+          'ADD_ADDRESS_STATE',
+          { ...data, city: message.trim() },
         );
 
       case 'ADD_ADDRESS_STATE':
         return this.buildReply(
           '📮 Please enter the **Pincode / Postal Code**:',
-          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_PINCODE',
-          { ...data, state: message.trim() }
+          'ADDRESS_MANAGE',
+          9,
+          [],
+          'ADD_ADDRESS_PINCODE',
+          { ...data, state: message.trim() },
         );
 
       case 'ADD_ADDRESS_PINCODE':
         return this.buildReply(
           '🏠 Choose an **Address Type** (e.g., Home, Office, Work):',
-          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_TYPE',
+          'ADDRESS_MANAGE',
+          9,
+          [],
+          'ADD_ADDRESS_TYPE',
           { ...data, pincode: message.trim() },
           false,
-          ['Home', 'Office']
+          ['Home', 'Office'],
         );
 
       case 'ADD_ADDRESS_TYPE': {
@@ -1025,18 +1199,34 @@ Enhanced Reply:`;
         const addressSummary = `\n• **Name**: ${data.fullName}\n• **Phone**: ${data.mobile}\n• **Street**: ${data.street}\n• **City/State/Pin**: ${data.city}, ${data.state} - ${data.pincode}\n• **Type**: ${addrType}`;
         return this.buildReply(
           `📝 **Please confirm the new address:**\n${addressSummary}\n\nShall I add this address?`,
-          'ADDRESS_MANAGE', 9, [], 'ADD_ADDRESS_CONFIRM',
+          'ADDRESS_MANAGE',
+          9,
+          [],
+          'ADD_ADDRESS_CONFIRM',
           { ...data, addressType: addrType },
           false,
-          ['Confirm', 'Cancel']
+          ['Confirm', 'Cancel'],
         );
       }
 
       case 'ADD_ADDRESS_CONFIRM': {
-        const isConfirm = q === 'yes' || q.includes('yes') || q.includes('confirm') || q === 'ok' || q === 'y';
-        const isCancel = q === 'no' || q.includes('no') || q.includes('cancel') || q === 'n';
+        const isConfirm =
+          q === 'yes' ||
+          q.includes('yes') ||
+          q.includes('confirm') ||
+          q === 'ok' ||
+          q === 'y';
         if (isConfirm) {
-          if (!userId) return this.buildReply('Please **login** to manage addresses.', 'ADDRESS_MANAGE', 5, [], undefined, undefined, true);
+          if (!userId)
+            return this.buildReply(
+              'Please **login** to manage addresses.',
+              'ADDRESS_MANAGE',
+              5,
+              [],
+              undefined,
+              undefined,
+              true,
+            );
           try {
             await this.profileService.addAddress(userId, {
               fullName: data.fullName,
@@ -1048,30 +1238,58 @@ Enhanced Reply:`;
               addressType: data.addressType,
             });
             return {
-              reply: '✅ **Address added successfully!** You can now use it at checkout or manage it from your profile.',
+              reply:
+                '✅ **Address added successfully!** You can now use it at checkout or manage it from your profile.',
               intent: 'ADDRESS_MANAGE',
               confidence: 10,
               actions: [],
               suggestions: ['View addresses', 'My profile'],
             };
           } catch (e: any) {
-            return this.buildReply(`❌ Failed to add address: ${e.message}`, 'ADDRESS_MANAGE', 0, []);
+            return this.buildReply(
+              `❌ Failed to add address: ${e.message}`,
+              'ADDRESS_MANAGE',
+              0,
+              [],
+            );
           }
         }
-        return this.buildReply('❌ Address addition cancelled.', 'ADDRESS_MANAGE', 8, [], undefined, undefined, false, ['View addresses', 'My profile']);
+        return this.buildReply(
+          '❌ Address addition cancelled.',
+          'ADDRESS_MANAGE',
+          8,
+          [],
+          undefined,
+          undefined,
+          false,
+          ['View addresses', 'My profile'],
+        );
       }
 
       case 'DELETE_ADDRESS_SELECT': {
-        if (!userId) return this.buildReply('Please **login** to manage addresses.', 'ADDRESS_MANAGE', 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to manage addresses.',
+            'ADDRESS_MANAGE',
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         const addresses = await this.profileService.getAddresses(userId);
         const index = parseInt(message.trim()) - 1;
         const selected = addresses[index];
         if (!selected) {
           return this.buildReply(
             '⚠️ Invalid selection. Please select a valid number from the list:',
-            'ADDRESS_MANAGE', 0, [], 'DELETE_ADDRESS_SELECT', data,
+            'ADDRESS_MANAGE',
+            0,
+            [],
+            'DELETE_ADDRESS_SELECT',
+            data,
             false,
-            addresses.map((a, i) => String(i + 1))
+            addresses.map((a, i) => String(i + 1)),
           );
         }
         try {
@@ -1084,25 +1302,47 @@ Enhanced Reply:`;
             suggestions: ['View addresses', 'My profile'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to delete address: ${e.message}`, 'ADDRESS_MANAGE', 0, []);
+          return this.buildReply(
+            `❌ Failed to delete address: ${e.message}`,
+            'ADDRESS_MANAGE',
+            0,
+            [],
+          );
         }
       }
 
       case 'SET_DEFAULT_ADDRESS_SELECT': {
-        if (!userId) return this.buildReply('Please **login** to manage addresses.', 'ADDRESS_MANAGE', 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to manage addresses.',
+            'ADDRESS_MANAGE',
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         const addresses = await this.profileService.getAddresses(userId);
         const index = parseInt(message.trim()) - 1;
         const selected = addresses[index];
         if (!selected) {
           return this.buildReply(
             '⚠️ Invalid selection. Please select a valid number from the list:',
-            'ADDRESS_MANAGE', 0, [], 'SET_DEFAULT_ADDRESS_SELECT', data,
+            'ADDRESS_MANAGE',
+            0,
+            [],
+            'SET_DEFAULT_ADDRESS_SELECT',
+            data,
             false,
-            addresses.map((a, i) => String(i + 1))
+            addresses.map((a, i) => String(i + 1)),
           );
         }
         try {
-          await this.profileService.updateAddress(userId, String(selected._id), { isDefault: true });
+          await this.profileService.updateAddress(
+            userId,
+            String(selected._id),
+            { isDefault: true },
+          );
           return {
             reply: `✅ **Address set as default successfully.**`,
             intent: 'ADDRESS_MANAGE',
@@ -1111,7 +1351,12 @@ Enhanced Reply:`;
             suggestions: ['View addresses', 'My profile'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to set default: ${e.message}`, 'ADDRESS_MANAGE', 0, []);
+          return this.buildReply(
+            `❌ Failed to set default: ${e.message}`,
+            'ADDRESS_MANAGE',
+            0,
+            [],
+          );
         }
       }
 
@@ -1120,25 +1365,46 @@ Enhanced Reply:`;
         const type = message.trim();
         return this.buildReply(
           `💳 Please enter details for **${type}** (e.g. Card number or UPI ID):`,
-          'VIEW_PAYMENT_METHODS', 9, [], 'ADD_PAYMENT_METHOD_DETAILS',
-          { ...data, type }
+          'VIEW_PAYMENT_METHODS',
+          9,
+          [],
+          'ADD_PAYMENT_METHOD_DETAILS',
+          { ...data, type },
         );
       }
 
-      case 'ADD_PAYMENT_METHOD_DETAILS':
+      case 'ADD_PAYMENT_METHOD_DETAILS': {
         const details = message.trim();
         return this.buildReply(
           `📝 Confirm saving payment details: **${data.type} (${details})**?`,
-          'VIEW_PAYMENT_METHODS', 9, [], 'ADD_PAYMENT_METHOD_CONFIRM',
+          'VIEW_PAYMENT_METHODS',
+          9,
+          [],
+          'ADD_PAYMENT_METHOD_CONFIRM',
           { ...data, details },
           false,
-          ['Confirm', 'Cancel']
+          ['Confirm', 'Cancel'],
         );
+      }
 
       case 'ADD_PAYMENT_METHOD_CONFIRM': {
-        const isConfirm = q === 'yes' || q.includes('yes') || q.includes('confirm') || q === 'ok' || q === 'y';
+        const isConfirm =
+          q === 'yes' ||
+          q.includes('yes') ||
+          q.includes('confirm') ||
+          q === 'ok' ||
+          q === 'y';
         if (isConfirm) {
-          if (!userId) return this.buildReply('Please **login** to save payment methods.', 'VIEW_PAYMENT_METHODS', 5, [], undefined, undefined, true);
+          if (!userId)
+            return this.buildReply(
+              'Please **login** to save payment methods.',
+              'VIEW_PAYMENT_METHODS',
+              5,
+              [],
+              undefined,
+              undefined,
+              true,
+            );
           try {
             await this.profileService.addPaymentMethod(userId, {
               type: data.type,
@@ -1154,27 +1420,57 @@ Enhanced Reply:`;
               suggestions: ['View payment methods', 'My profile'],
             };
           } catch (e: any) {
-            return this.buildReply(`❌ Failed to save payment method: ${e.message}`, 'VIEW_PAYMENT_METHODS', 0, []);
+            return this.buildReply(
+              `❌ Failed to save payment method: ${e.message}`,
+              'VIEW_PAYMENT_METHODS',
+              0,
+              [],
+            );
           }
         }
-        return this.buildReply('❌ Cancelled.', 'VIEW_PAYMENT_METHODS', 8, [], undefined, undefined, false, ['View payment methods']);
+        return this.buildReply(
+          '❌ Cancelled.',
+          'VIEW_PAYMENT_METHODS',
+          8,
+          [],
+          undefined,
+          undefined,
+          false,
+          ['View payment methods'],
+        );
       }
 
       case 'DELETE_PAYMENT_METHOD_SELECT': {
-        if (!userId) return this.buildReply('Please **login** to manage payments.', 'VIEW_PAYMENT_METHODS', 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to manage payments.',
+            'VIEW_PAYMENT_METHODS',
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         const payments = await this.profileService.getPaymentMethods(userId);
         const index = parseInt(message.trim()) - 1;
         const selected = payments[index];
         if (!selected) {
           return this.buildReply(
             '⚠️ Invalid selection. Please select a valid number from the list:',
-            'VIEW_PAYMENT_METHODS', 0, [], 'DELETE_PAYMENT_METHOD_SELECT', data,
+            'VIEW_PAYMENT_METHODS',
+            0,
+            [],
+            'DELETE_PAYMENT_METHOD_SELECT',
+            data,
             false,
-            payments.map((p, i) => String(i + 1))
+            payments.map((p, i) => String(i + 1)),
           );
         }
         try {
-          await this.profileService.deletePaymentMethod(userId, String(selected._id));
+          await this.profileService.deletePaymentMethod(
+            userId,
+            String(selected._id),
+          );
           return {
             reply: `✅ **Payment method deleted successfully.**`,
             intent: 'VIEW_PAYMENT_METHODS',
@@ -1183,7 +1479,12 @@ Enhanced Reply:`;
             suggestions: ['View payment methods', 'My profile'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to delete payment: ${e.message}`, 'VIEW_PAYMENT_METHODS', 0, []);
+          return this.buildReply(
+            `❌ Failed to delete payment: ${e.message}`,
+            'VIEW_PAYMENT_METHODS',
+            0,
+            [],
+          );
         }
       }
 
@@ -1191,14 +1492,18 @@ Enhanced Reply:`;
       case 'SHOPPING_ASSISTANT_BUDGET':
         return this.buildReply(
           `💵 What is your **budget limit**? (e.g. Under $100, $200-$500, or any budget):`,
-          'SHOPPING_ASSISTANT', 9, [], 'SHOPPING_ASSISTANT_USECASE',
-          { ...data, category: message.trim() }
+          'SHOPPING_ASSISTANT',
+          9,
+          [],
+          'SHOPPING_ASSISTANT_USECASE',
+          { ...data, category: message.trim() },
         );
 
       case 'SHOPPING_ASSISTANT_USECASE': {
-        const useCase = message.trim();
         try {
-          const products = await this.catalogService.getProducts({ search: data.category });
+          const products = await this.catalogService.getProducts({
+            search: data.category,
+          });
           // Simple client filter based on budget
           const budgetText = message.toLowerCase();
           let maxBudget = Infinity;
@@ -1212,12 +1517,17 @@ Enhanced Reply:`;
           if (!filtered.length) {
             return this.buildReply(
               `🔍 I couldn't find any products in **${data.category}** matching your budget. Try searching directly.`,
-              'SHOPPING_ASSISTANT', 9, []
+              'SHOPPING_ASSISTANT',
+              9,
+              [],
             );
           }
 
           const recommendations = filtered
-            .map((p: any) => `• **${p.title}** — **$${p.price}** (${p.averageRating}⭐)\n  _${p.description.slice(0, 80)}..._`)
+            .map(
+              (p: any) =>
+                `• **${p.title}** — **$${p.price}** (${p.averageRating}⭐)\n  _${p.description.slice(0, 80)}..._`,
+            )
             .join('\n\n');
 
           return {
@@ -1228,7 +1538,12 @@ Enhanced Reply:`;
             suggestions: ['Compare products', 'View cart'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Error finding recommendations: ${e.message}`, 'SHOPPING_ASSISTANT', 0, []);
+          return this.buildReply(
+            `❌ Error finding recommendations: ${e.message}`,
+            'SHOPPING_ASSISTANT',
+            0,
+            [],
+          );
         }
       }
 
@@ -1236,23 +1551,43 @@ Enhanced Reply:`;
       case 'EXCHANGE_ORDER_REASON':
         return this.buildReply(
           `🔄 What variant or details would you like to exchange this for (e.g. Size M, Color Black)?`,
-          'EXCHANGE_ORDER', 9, [], 'EXCHANGE_ORDER_VARIANT',
-          { ...data, reason: message.trim() }
+          'EXCHANGE_ORDER',
+          9,
+          [],
+          'EXCHANGE_ORDER_VARIANT',
+          { ...data, reason: message.trim() },
         );
 
       case 'EXCHANGE_ORDER_VARIANT':
         return this.buildReply(
           `📝 Confirm request to exchange Order **#${data.orderId.slice(-8).toUpperCase()}** for **"${message.trim()}"**?`,
-          'EXCHANGE_ORDER', 9, [], 'EXCHANGE_ORDER_CONFIRM',
+          'EXCHANGE_ORDER',
+          9,
+          [],
+          'EXCHANGE_ORDER_CONFIRM',
           { ...data, exchangeDetails: message.trim() },
           false,
-          ['Confirm', 'Cancel']
+          ['Confirm', 'Cancel'],
         );
 
       case 'EXCHANGE_ORDER_CONFIRM': {
-        const isConfirm = q === 'yes' || q.includes('yes') || q.includes('confirm') || q === 'ok' || q === 'y';
+        const isConfirm =
+          q === 'yes' ||
+          q.includes('yes') ||
+          q.includes('confirm') ||
+          q === 'ok' ||
+          q === 'y';
         if (isConfirm) {
-          if (!userId) return this.buildReply('Please **login** to request exchanges.', 'EXCHANGE_ORDER', 5, [], undefined, undefined, true);
+          if (!userId)
+            return this.buildReply(
+              'Please **login** to request exchanges.',
+              'EXCHANGE_ORDER',
+              5,
+              [],
+              undefined,
+              undefined,
+              true,
+            );
           try {
             await this.supportService.createTicket(userId, {
               subject: `Exchange Request: ${data.orderId}`,
@@ -1267,81 +1602,165 @@ Enhanced Reply:`;
               suggestions: ['View my tickets', 'Track order'],
             };
           } catch (e: any) {
-            return this.buildReply(`❌ Failed to request exchange: ${e.message}`, 'EXCHANGE_ORDER', 0, []);
+            return this.buildReply(
+              `❌ Failed to request exchange: ${e.message}`,
+              'EXCHANGE_ORDER',
+              0,
+              [],
+            );
           }
         }
-        return this.buildReply('❌ Exchange request cancelled.', 'EXCHANGE_ORDER', 8, [], undefined, undefined, false, ['My orders']);
+        return this.buildReply(
+          '❌ Exchange request cancelled.',
+          'EXCHANGE_ORDER',
+          8,
+          [],
+          undefined,
+          undefined,
+          false,
+          ['My orders'],
+        );
       }
 
       // ── Modify Order Address Flow ──────────────────────────────────────────
       case 'MODIFY_ORDER_OPTION': {
-        if (!userId) return this.buildReply('Please **login** to modify orders.', 'MODIFY_ORDER', 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to modify orders.',
+            'MODIFY_ORDER',
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         const choice = q.toLowerCase();
         if (choice.includes('address') || choice === '1') {
           try {
             const addresses = await this.profileService.getAddresses(userId);
             if (!addresses?.length) {
-              return this.buildReply('⚠️ You must have saved addresses to modify the order destination. Please add an address first.', 'MODIFY_ORDER', 8, []);
+              return this.buildReply(
+                '⚠️ You must have saved addresses to modify the order destination. Please add an address first.',
+                'MODIFY_ORDER',
+                8,
+                [],
+              );
             }
-            const list = addresses.map((a: any, i: number) => `${i + 1}. **${a.fullName}** - ${(a.addressLine1 || a.street)}, ${a.city}`).join('\n');
+            const list = addresses
+              .map(
+                (a: any, i: number) =>
+                  `${i + 1}. **${a.fullName}** - ${a.addressLine1 || a.street}, ${a.city}`,
+              )
+              .join('\n');
             return this.buildReply(
               `🚚 **Select a new shipping address:**\n\n${list}\n\nType the number to select:`,
-              'MODIFY_ORDER', 10, [], 'MODIFY_ORDER_ADDRESS_SELECT', { orderId: data.orderId }
+              'MODIFY_ORDER',
+              10,
+              [],
+              'MODIFY_ORDER_ADDRESS_SELECT',
+              { orderId: data.orderId },
             );
           } catch (e: any) {
-            return this.buildReply(`❌ Failed to load addresses: ${e.message}`, 'MODIFY_ORDER', 5, []);
+            return this.buildReply(
+              `❌ Failed to load addresses: ${e.message}`,
+              'MODIFY_ORDER',
+              5,
+              [],
+            );
           }
         } else if (choice.includes('slot') || choice === '2') {
           return this.buildReply(
             `⏰ **Select a new Delivery Slot:**\n\n• **Morning** (9 AM - 12 PM)\n• **Afternoon** (12 PM - 4 PM)\n• **Evening** (4 PM - 8 PM)\n\nPlease type your preferred slot:`,
-            'MODIFY_ORDER', 10, [], 'MODIFY_ORDER_SLOT_SELECT', { orderId: data.orderId },
+            'MODIFY_ORDER',
+            10,
+            [],
+            'MODIFY_ORDER_SLOT_SELECT',
+            { orderId: data.orderId },
             false,
-            ['Morning', 'Afternoon', 'Evening']
+            ['Morning', 'Afternoon', 'Evening'],
           );
         } else if (choice.includes('payment') || choice === '3') {
           return this.buildReply(
             `💳 **Select a new Payment Method:**\n\n• **Stripe** (Card)\n• **Razorpay** (UPI/Netbanking)\n• **Wallet** (Store credits)\n• **COD** (Cash on Delivery)\n\nPlease type your choice:`,
-            'MODIFY_ORDER', 10, [], 'MODIFY_ORDER_PAYMENT_SELECT', { orderId: data.orderId },
+            'MODIFY_ORDER',
+            10,
+            [],
+            'MODIFY_ORDER_PAYMENT_SELECT',
+            { orderId: data.orderId },
             false,
-            ['Stripe', 'Razorpay', 'Wallet', 'COD']
+            ['Stripe', 'Razorpay', 'Wallet', 'COD'],
           );
-        } else if (choice.includes('item') || choice.includes('quantity') || choice === '4') {
+        } else if (
+          choice.includes('item') ||
+          choice.includes('quantity') ||
+          choice === '4'
+        ) {
           try {
             const order = await this.salesService.getOrderById(data.orderId);
             const itemsList: string[] = [];
             for (let i = 0; i < order.items.length; i++) {
               const item = order.items[i];
-              const prod = await this.catalogService.getProductById(item.productId.toString());
-              itemsList.push(`${i + 1}. **${prod?.title || 'Product'}** (Current Qty: ${item.quantity})`);
+              const prod = await this.catalogService.getProductById(
+                item.productId.toString(),
+              );
+              itemsList.push(
+                `${i + 1}. **${prod?.title || 'Product'}** (Current Qty: ${item.quantity})`,
+              );
             }
             return this.buildReply(
               `📦 **Items in Order #${data.orderId.slice(-8).toUpperCase()}:**\n\n${itemsList.join('\n')}\n\n` +
-              `To update quantity or remove an item, type: **"[item number] [new quantity]"** (e.g. *"1 3"* to change item 1 quantity to 3, or *"1 0"* to remove it):`,
-              'MODIFY_ORDER', 10, [], 'MODIFY_ORDER_ITEMS_SELECT', { orderId: data.orderId, items: order.items }
+                `To update quantity or remove an item, type: **"[item number] [new quantity]"** (e.g. *"1 3"* to change item 1 quantity to 3, or *"1 0"* to remove it):`,
+              'MODIFY_ORDER',
+              10,
+              [],
+              'MODIFY_ORDER_ITEMS_SELECT',
+              { orderId: data.orderId, items: order.items },
             );
           } catch (e: any) {
-            return this.buildReply(`❌ Failed to retrieve order items: ${e.message}`, 'MODIFY_ORDER', 5, []);
+            return this.buildReply(
+              `❌ Failed to retrieve order items: ${e.message}`,
+              'MODIFY_ORDER',
+              5,
+              [],
+            );
           }
         } else {
           return this.buildReply(
             `⚠️ Invalid option. Please select what you'd like to modify:\n\n` +
-            `1. **Shipping Address**\n` +
-            `2. **Delivery Slot**\n` +
-            `3. **Payment Method**\n` +
-            `4. **Item Quantities / Remove Items**\n\n` +
-            `Please type 1, 2, 3, or 4:`,
-            'MODIFY_ORDER', 0, [], 'MODIFY_ORDER_OPTION', data,
+              `1. **Shipping Address**\n` +
+              `2. **Delivery Slot**\n` +
+              `3. **Payment Method**\n` +
+              `4. **Item Quantities / Remove Items**\n\n` +
+              `Please type 1, 2, 3, or 4:`,
+            'MODIFY_ORDER',
+            0,
+            [],
+            'MODIFY_ORDER_OPTION',
+            data,
             false,
-            ['1', '2', '3', '4']
+            ['1', '2', '3', '4'],
           );
         }
       }
 
       case 'MODIFY_ORDER_SLOT_SELECT': {
-        if (!userId) return this.buildReply('Please **login** to modify orders.', 'MODIFY_ORDER', 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to modify orders.',
+            'MODIFY_ORDER',
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         const slot = message.trim();
         try {
-          await this.salesService.updateOrderDeliverySlot(data.orderId, userId, slot);
+          await this.salesService.updateOrderDeliverySlot(
+            data.orderId,
+            userId,
+            slot,
+          );
           return {
             reply: `✅ **Delivery slot for Order #${data.orderId.slice(-8).toUpperCase()} has been updated to "${slot}".**`,
             intent: 'MODIFY_ORDER',
@@ -1350,25 +1769,49 @@ Enhanced Reply:`;
             suggestions: ['Track my order', 'My orders'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to update slot: ${e.message}`, 'MODIFY_ORDER', 5, []);
+          return this.buildReply(
+            `❌ Failed to update slot: ${e.message}`,
+            'MODIFY_ORDER',
+            5,
+            [],
+          );
         }
       }
 
       case 'MODIFY_ORDER_PAYMENT_SELECT': {
-        if (!userId) return this.buildReply('Please **login** to modify orders.', 'MODIFY_ORDER', 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to modify orders.',
+            'MODIFY_ORDER',
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         const choice = message.trim();
         const valid = ['Stripe', 'Razorpay', 'Wallet', 'COD'];
-        const match = valid.find(v => v.toLowerCase() === choice.toLowerCase());
+        const match = valid.find(
+          (v) => v.toLowerCase() === choice.toLowerCase(),
+        );
         if (!match) {
           return this.buildReply(
             `⚠️ Invalid payment method. Please choose from: **Stripe**, **Razorpay**, **Wallet**, or **COD**:`,
-            'MODIFY_ORDER', 0, [], 'MODIFY_ORDER_PAYMENT_SELECT', data,
+            'MODIFY_ORDER',
+            0,
+            [],
+            'MODIFY_ORDER_PAYMENT_SELECT',
+            data,
             false,
-            valid
+            valid,
           );
         }
         try {
-          await this.salesService.updateOrderPaymentMethod(data.orderId, userId, match);
+          await this.salesService.updateOrderPaymentMethod(
+            data.orderId,
+            userId,
+            match,
+          );
           return {
             reply: `✅ **Payment method for Order #${data.orderId.slice(-8).toUpperCase()} has been updated to "${match}".**`,
             intent: 'MODIFY_ORDER',
@@ -1377,25 +1820,56 @@ Enhanced Reply:`;
             suggestions: ['Track my order', 'My orders'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to update payment method: ${e.message}`, 'MODIFY_ORDER', 5, []);
+          return this.buildReply(
+            `❌ Failed to update payment method: ${e.message}`,
+            'MODIFY_ORDER',
+            5,
+            [],
+          );
         }
       }
 
       case 'MODIFY_ORDER_ITEMS_SELECT': {
-        if (!userId) return this.buildReply('Please **login** to modify orders.', 'MODIFY_ORDER', 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to modify orders.',
+            'MODIFY_ORDER',
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         const parts = message.trim().split(/\s+/);
         const index = parseInt(parts[0]) - 1;
         const newQty = parseInt(parts[1]);
-        if (isNaN(index) || isNaN(newQty) || index < 0 || !data.items || index >= data.items.length || newQty < 0) {
+        if (
+          isNaN(index) ||
+          isNaN(newQty) ||
+          index < 0 ||
+          !data.items ||
+          index >= data.items.length ||
+          newQty < 0
+        ) {
           return this.buildReply(
             `⚠️ Invalid format. Please enter in the format: **"[item number] [quantity]"** (e.g. *"1 3"* or *"1 0"*):`,
-            'MODIFY_ORDER', 0, [], 'MODIFY_ORDER_ITEMS_SELECT', data
+            'MODIFY_ORDER',
+            0,
+            [],
+            'MODIFY_ORDER_ITEMS_SELECT',
+            data,
           );
         }
         const selectedItem = data.items[index];
         try {
-          await this.salesService.updateOrderItemQuantity(data.orderId, userId, selectedItem.productId, newQty);
-          const actionText = newQty === 0 ? 'removed' : `updated to quantity ${newQty}`;
+          await this.salesService.updateOrderItemQuantity(
+            data.orderId,
+            userId,
+            selectedItem.productId,
+            newQty,
+          );
+          const actionText =
+            newQty === 0 ? 'removed' : `updated to quantity ${newQty}`;
           return {
             reply: `✅ **Order items updated successfully.** The item has been ${actionText}.`,
             intent: 'MODIFY_ORDER',
@@ -1404,21 +1878,39 @@ Enhanced Reply:`;
             suggestions: ['Track my order', 'My orders'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to update item: ${e.message}`, 'MODIFY_ORDER', 5, []);
+          return this.buildReply(
+            `❌ Failed to update item: ${e.message}`,
+            'MODIFY_ORDER',
+            5,
+            [],
+          );
         }
       }
 
       case 'MODIFY_ORDER_ADDRESS_SELECT': {
-        if (!userId) return this.buildReply('Please **login** to modify orders.', 'MODIFY_ORDER', 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to modify orders.',
+            'MODIFY_ORDER',
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         const addresses = await this.profileService.getAddresses(userId);
         const index = parseInt(message.trim()) - 1;
         const selectedAddress = addresses[index];
         if (!selectedAddress) {
           return this.buildReply(
             '⚠️ Invalid selection. Please select a valid number from the list:',
-            'MODIFY_ORDER', 0, [], 'MODIFY_ORDER_ADDRESS_SELECT', data,
+            'MODIFY_ORDER',
+            0,
+            [],
+            'MODIFY_ORDER_ADDRESS_SELECT',
+            data,
             false,
-            addresses.map((a, i) => String(i + 1))
+            addresses.map((a, i) => String(i + 1)),
           );
         }
         try {
@@ -1439,22 +1931,37 @@ Enhanced Reply:`;
             suggestions: ['Track my order', 'My orders'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to update order address: ${e.message}`, 'MODIFY_ORDER', 0, []);
+          return this.buildReply(
+            `❌ Failed to update order address: ${e.message}`,
+            'MODIFY_ORDER',
+            0,
+            [],
+          );
         }
       }
 
       case 'VARIANT_SELECT': {
         const index = parseInt(message.trim()) - 1;
-        const selected = data.combos[index] || data.combos.find((c: string) => c.toLowerCase() === q);
+        const selected =
+          data.combos[index] ||
+          data.combos.find((c: string) => c.toLowerCase() === q);
         if (!selected) {
-          const list = data.combos.map((c: string, i: number) => `${i + 1}. ${c}`).join('\n');
+          const list = data.combos
+            .map((c: string, i: number) => `${i + 1}. ${c}`)
+            .join('\n');
           return this.buildReply(
             `⚠️ Invalid selection. Please choose a valid variant:\n\n${list}`,
-            'ADD_CART', 0, [], 'VARIANT_SELECT', data
+            'ADD_CART',
+            0,
+            [],
+            'VARIANT_SELECT',
+            data,
           );
         }
         try {
-          const product = await this.catalogService.getProductById(data.productId);
+          const product = await this.catalogService.getProductById(
+            data.productId,
+          );
           const action: AgentAction = {
             type: 'ADD_TO_CART',
             payload: {
@@ -1476,12 +1983,22 @@ Enhanced Reply:`;
             suggestions: ['Checkout now', 'Continue shopping', 'View cart'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to add to cart: ${e.message}`, 'ADD_CART', 0, []);
+          return this.buildReply(
+            `❌ Failed to add to cart: ${e.message}`,
+            'ADD_CART',
+            0,
+            [],
+          );
         }
       }
 
       case 'CLEAR_CART_CONFIRM': {
-        const isConfirm = q === 'yes' || q.includes('yes') || q.includes('confirm') || q === 'ok' || q === 'y';
+        const isConfirm =
+          q === 'yes' ||
+          q.includes('yes') ||
+          q.includes('confirm') ||
+          q === 'ok' ||
+          q === 'y';
         if (isConfirm) {
           if (userId) {
             await this.salesService.clearCart(userId);
@@ -1494,14 +2011,26 @@ Enhanced Reply:`;
             suggestions: ['Browse products', 'Search headphones'],
           };
         }
-        return this.buildReply('❌ Cart clear cancelled. Your items are safe!', 'REMOVE_CART', 8, [], undefined, undefined, false, ['View cart', 'Checkout']);
+        return this.buildReply(
+          '❌ Cart clear cancelled. Your items are safe!',
+          'REMOVE_CART',
+          8,
+          [],
+          undefined,
+          undefined,
+          false,
+          ['View cart', 'Checkout'],
+        );
       }
 
       case 'ADMIN_ADD_PRODUCT_TITLE':
         return this.buildReply(
           `💲 Please enter the **price** for "${message}":`,
-          'ADMIN_PRODUCTS', 9, [], 'ADMIN_ADD_PRODUCT_PRICE',
-          { title: message.trim() }
+          'ADMIN_PRODUCTS',
+          9,
+          [],
+          'ADMIN_ADD_PRODUCT_PRICE',
+          { title: message.trim() },
         );
 
       case 'ADMIN_ADD_PRODUCT_PRICE': {
@@ -1509,21 +2038,31 @@ Enhanced Reply:`;
         if (isNaN(price) || price < 0) {
           return this.buildReply(
             '⚠️ Please enter a valid number for price:',
-            'ADMIN_PRODUCTS', 0, [], 'ADMIN_ADD_PRODUCT_PRICE', data
+            'ADMIN_PRODUCTS',
+            0,
+            [],
+            'ADMIN_ADD_PRODUCT_PRICE',
+            data,
           );
         }
         return this.buildReply(
           `🏷️ Please enter the **SKU** code for this product (e.g. GAM-LAP-101):`,
-          'ADMIN_PRODUCTS', 9, [], 'ADMIN_ADD_PRODUCT_SKU',
-          { ...data, price }
+          'ADMIN_PRODUCTS',
+          9,
+          [],
+          'ADMIN_ADD_PRODUCT_SKU',
+          { ...data, price },
         );
       }
 
       case 'ADMIN_ADD_PRODUCT_SKU':
         return this.buildReply(
           `📦 Please enter the initial **stock quantity** (e.g. 50):`,
-          'ADMIN_PRODUCTS', 9, [], 'ADMIN_ADD_PRODUCT_STOCK',
-          { ...data, sku: message.trim().toUpperCase() }
+          'ADMIN_PRODUCTS',
+          9,
+          [],
+          'ADMIN_ADD_PRODUCT_STOCK',
+          { ...data, sku: message.trim().toUpperCase() },
         );
 
       case 'ADMIN_ADD_PRODUCT_STOCK': {
@@ -1531,20 +2070,28 @@ Enhanced Reply:`;
         if (isNaN(stock) || stock < 0) {
           return this.buildReply(
             '⚠️ Please enter a valid non-negative integer for stock:',
-            'ADMIN_PRODUCTS', 0, [], 'ADMIN_ADD_PRODUCT_STOCK', data
+            'ADMIN_PRODUCTS',
+            0,
+            [],
+            'ADMIN_ADD_PRODUCT_STOCK',
+            data,
           );
         }
         const fullData: any = { ...data, stock };
         return this.buildReply(
           `🛡️ **Confirm New Product Details:**\n\n` +
-          `• **Title**: ${fullData.title}\n` +
-          `• **Price**: $${fullData.price.toFixed(2)}\n` +
-          `• **SKU**: ${fullData.sku}\n` +
-          `• **Stock**: ${fullData.stock}\n\n` +
-          `Shall I create this product? Type **"confirm"** or **"cancel"**:`,
-          'ADMIN_PRODUCTS', 9, [], 'ADMIN_ADD_PRODUCT_CONFIRM', fullData,
+            `• **Title**: ${fullData.title}\n` +
+            `• **Price**: $${fullData.price.toFixed(2)}\n` +
+            `• **SKU**: ${fullData.sku}\n` +
+            `• **Stock**: ${fullData.stock}\n\n` +
+            `Shall I create this product? Type **"confirm"** or **"cancel"**:`,
+          'ADMIN_PRODUCTS',
+          9,
+          [],
+          'ADMIN_ADD_PRODUCT_CONFIRM',
+          fullData,
           false,
-          ['Confirm', 'Cancel']
+          ['Confirm', 'Cancel'],
         );
       }
 
@@ -1552,13 +2099,22 @@ Enhanced Reply:`;
         const isConfirm = q === 'confirm' || q === 'yes' || q === 'y';
         if (isConfirm) {
           try {
-            let category = await (this.catalogService as any).categoryRepository.findOne({});
+            let category = await (
+              this.catalogService as any
+            ).categoryRepository.findOne({});
             if (!category) {
-              category = await this.catalogService.createCategory({ name: 'General', slug: 'general' });
+              category = await this.catalogService.createCategory({
+                name: 'General',
+                slug: 'general',
+              });
             }
-            let brand = await (this.catalogService as any).brandRepository.findOne({});
+            let brand = await (
+              this.catalogService as any
+            ).brandRepository.findOne({});
             if (!brand) {
-              brand = await this.catalogService.createBrand({ name: 'General' });
+              brand = await this.catalogService.createBrand({
+                name: 'General',
+              });
             }
 
             const product = await this.catalogService.createProduct({
@@ -1579,10 +2135,24 @@ Enhanced Reply:`;
               suggestions: ['Manage products', 'Browse catalog'],
             };
           } catch (e: any) {
-            return this.buildReply(`❌ Failed to create product: ${e.message}`, 'ADMIN_PRODUCTS', 0, []);
+            return this.buildReply(
+              `❌ Failed to create product: ${e.message}`,
+              'ADMIN_PRODUCTS',
+              0,
+              [],
+            );
           }
         }
-        return this.buildReply('❌ Product creation cancelled.', 'ADMIN_PRODUCTS', 8, [], undefined, undefined, false, ['Manage products']);
+        return this.buildReply(
+          '❌ Product creation cancelled.',
+          'ADMIN_PRODUCTS',
+          8,
+          [],
+          undefined,
+          undefined,
+          false,
+          ['Manage products'],
+        );
       }
 
       case 'ADMIN_DELETE_PRODUCT_CONFIRM': {
@@ -1598,10 +2168,24 @@ Enhanced Reply:`;
               suggestions: ['Manage products'],
             };
           } catch (e: any) {
-            return this.buildReply(`❌ Deletion failed: ${e.message}`, 'ADMIN_PRODUCTS', 0, []);
+            return this.buildReply(
+              `❌ Deletion failed: ${e.message}`,
+              'ADMIN_PRODUCTS',
+              0,
+              [],
+            );
           }
         }
-        return this.buildReply('❌ Product deletion cancelled.', 'ADMIN_PRODUCTS', 8, [], undefined, undefined, false, ['Manage products']);
+        return this.buildReply(
+          '❌ Product deletion cancelled.',
+          'ADMIN_PRODUCTS',
+          8,
+          [],
+          undefined,
+          undefined,
+          false,
+          ['Manage products'],
+        );
       }
 
       default:
@@ -1656,20 +2240,9 @@ Enhanced Reply:`;
               personalization += `\n📦 **Order status update**: Your last order **#${displayId}** is currently **${latestOrder.status}**.`;
               dynamicSuggestions.push(`Track order ORD-${displayId}`);
             }
-          } catch (e) {}
-
-          // Check support tickets
-          try {
-            const userTickets =
-              await this.supportService.getCustomerTickets(userId);
-            const openTickets =
-              userTickets?.filter(
-                (t) => t.status === 'Open' || t.status === 'Pending',
-              ) || [];
-            if (openTickets.length > 0) {
-              personalization += `\n🎫 **Support Alert**: You have **${openTickets.length} open support ticket(s)**. Our team is looking into them.`;
-            }
-          } catch (e) {}
+          } catch {
+            /* ignore */
+          }
         } else if (guestId) {
           // Fallback guest personalization
           try {
@@ -1682,7 +2255,9 @@ Enhanced Reply:`;
                 ...dynamicSuggestions.slice(1),
               ];
             }
-          } catch (e) {}
+          } catch {
+            /* ignore */
+          }
         }
 
         return this.buildReply(
@@ -1724,7 +2299,7 @@ Enhanced Reply:`;
         // ── One-shot login: email + password provided in the same message ──
         {
           const emailInMsg = message.match(
-            /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/,
+            /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/,
           );
           // Match password after keywords like "password", "pass", "pwd" followed by optional :-/=/space
           const passInMsg = message.match(
@@ -1843,7 +2418,10 @@ Enhanced Reply:`;
         }
         try {
           const profile = await this.profileService.getProfile(userId);
-          const name = profile.displayName || `${profile.firstName} ${profile.lastName}`.trim() || 'Valued Customer';
+          const name =
+            profile.displayName ||
+            `${profile.firstName} ${profile.lastName}`.trim() ||
+            'Valued Customer';
           return this.buildReply(
             `👤 **My Account Profile Details:**\n\n• **Email**: ${profile.email}\n• **Name**: ${name}\n• **Phone**: ${profile.phone || 'Not provided'}\n• **Account Status**: ${profile.accountStatus}\n• **Tier**: ${profile.membershipLevel} Member\n• **Points**: ${profile.rewardPoints} Loyalty Points\n• **Wallet Balance**: $${(profile.walletBalance || 0).toFixed(2)}\n• **Plan**: ${profile.subscriptionPlan}\n• **GDPR Options**: You can type *"export my data"* or *"delete my account"* anytime.`,
             intent,
@@ -1878,7 +2456,12 @@ Enhanced Reply:`;
         }
 
         // ── Photo / avatar update — still navigate to profile page ──
-        if (q.includes('picture') || q.includes('photo') || q.includes('avatar') || q.includes('image')) {
+        if (
+          q.includes('picture') ||
+          q.includes('photo') ||
+          q.includes('avatar') ||
+          q.includes('image')
+        ) {
           return this.buildReply(
             '🖼️ **Change Profile Picture / Photo:**\n\nTo update your profile avatar:\n1. Go to the [Profile Page](/profile)\n2. Click on your current avatar\n3. Paste a new image URL to update it instantly!',
             intent,
@@ -1936,7 +2519,7 @@ Enhanced Reply:`;
           );
         }
         try {
-          const data = await this.profileService.exportData(userId);
+          await this.profileService.exportData(userId);
           return this.buildReply(
             `📄 **GDPR Right to Portability Export:**\n\nWe have generated your full personal data snapshot. You can download the JSON file below:\n\n• **Format**: JSON Data Snapshot\n• **Exported At**: ${new Date().toLocaleDateString()}\n\n[Click here to download your exported data](/api/v1/profile/export)`,
             intent,
@@ -1944,7 +2527,12 @@ Enhanced Reply:`;
             [],
           );
         } catch (e: any) {
-          return this.buildReply(`Failed to export data: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `Failed to export data: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
@@ -1969,40 +2557,8 @@ Enhanced Reply:`;
             [{ type: 'LOGOUT', payload: {} }],
           );
         } catch (e: any) {
-          return this.buildReply(`Failed to schedule deletion: ${e.message}`, intent, 5, []);
-        }
-      }
-
-      case 'ADDRESS_MANAGE': {
-        if (!userId) {
           return this.buildReply(
-            'Please **login** to manage your shipping addresses.',
-            intent,
-            5,
-            [],
-            undefined,
-            undefined,
-            true,
-          );
-        }
-        try {
-          const addresses = await this.profileService.getAddresses(userId);
-          const addressList = addresses
-            .map((a: any) => `• **${a.fullName}** — ${a.street}, ${a.city}, ${a.pincode} ${a.isDefault ? '(Default)' : ''}`)
-            .join('\n');
-          return this.buildReply(
-            `🏠 **Saved Shipping Addresses:**\n\n${addressList || 'No saved addresses found.'}\n\nYou can manage all shipping addresses inside your [profile settings](/profile).`,
-            intent,
-            9,
-            [{ type: 'NAVIGATE', payload: { path: '/profile' } }],
-            undefined,
-            undefined,
-            false,
-            ['View profile', 'Checkout now'],
-          );
-        } catch {
-          return this.buildReply(
-            'Unable to fetch addresses. Please visit your [profile page](/profile).',
+            `Failed to schedule deletion: ${e.message}`,
             intent,
             5,
             [],
@@ -2024,12 +2580,21 @@ Enhanced Reply:`;
         }
         try {
           const profile = await this.profileService.getProfile(userId);
-          
-          if (q.includes('convert') || q.includes('exchange') || q.includes('redeem')) {
-            const pointsMatch = q.match(/(?:convert|exchange|redeem)\s+(\d+)\s*(?:points)?/);
+
+          if (
+            q.includes('convert') ||
+            q.includes('exchange') ||
+            q.includes('redeem')
+          ) {
+            const pointsMatch = q.match(
+              /(?:convert|exchange|redeem)\s+(\d+)\s*(?:points)?/,
+            );
             if (pointsMatch) {
               const points = parseInt(pointsMatch[1]);
-              const res = await this.profileService.convertPoints(userId, points);
+              const res = await this.profileService.convertPoints(
+                userId,
+                points,
+              );
               return this.buildReply(
                 `🏆 **Points Converted Successfully!**\n\n✅ Converted **${points} points** to **$${(points / 100).toFixed(2)}** wallet credit.\n• **New Loyalty Points**: ${res.rewardPoints}\n• **New Wallet Balance**: $${res.walletBalance.toFixed(2)}`,
                 intent,
@@ -2055,7 +2620,11 @@ Enhanced Reply:`;
             undefined,
             undefined,
             false,
-            [`Convert ${Math.min(profile.rewardPoints || 0, 100)} points`, 'View wallet', 'My profile'],
+            [
+              `Convert ${Math.min(profile.rewardPoints || 0, 100)} points`,
+              'View wallet',
+              'My profile',
+            ],
           );
         } catch (e: any) {
           return this.buildReply(
@@ -2080,11 +2649,21 @@ Enhanced Reply:`;
           );
         }
         try {
-          if (q.includes('add') || q.includes('load') || q.includes('deposit')) {
-            const amountMatch = q.match(/(?:add|load|deposit)\s+[\$₹£€]?\s*(\d+(?:\.\d+)?)/);
+          if (
+            q.includes('add') ||
+            q.includes('load') ||
+            q.includes('deposit')
+          ) {
+            const amountMatch = q.match(
+              /(?:add|load|deposit)\s+[$₹£€]?\s*(\d+(?:\.\d+)?)/,
+            );
             if (amountMatch) {
               const amount = parseFloat(amountMatch[1]);
-              const res = await this.profileService.addWalletFunds(userId, amount, 'Added via AI Chatbot');
+              const res = await this.profileService.addWalletFunds(
+                userId,
+                amount,
+                'Added via AI Chatbot',
+              );
               return this.buildReply(
                 `💳 **Wallet Funds Added Successfully!**\n\n✅ Added **$${amount.toFixed(2)}** to your store wallet.\n• **New Wallet Balance**: $${res.walletBalance.toFixed(2)}`,
                 intent,
@@ -2107,10 +2686,14 @@ Enhanced Reply:`;
 
           const profile = await this.profileService.getProfile(userId);
           const txs = await this.profileService.getWalletTransactions(userId);
-          const txList = txs
-            .slice(0, 3)
-            .map((t: any) => `• $${t.amount.toFixed(2)} (${t.transactionType}) — ${t.description}`)
-            .join('\n') || 'No transactions yet.';
+          const txList =
+            txs
+              .slice(0, 3)
+              .map(
+                (t: any) =>
+                  `• $${t.amount.toFixed(2)} (${t.transactionType}) — ${t.description}`,
+              )
+              .join('\n') || 'No transactions yet.';
           return this.buildReply(
             `💳 **My Store Wallet:**\n\n• **Available Balance**: $${(profile.walletBalance || 0).toFixed(2)}\n• **Account Status**: Active\n\n**Recent Transactions:**\n${txList}\n\nType **"add [amount] to wallet"** to add mock funds!`,
             intent,
@@ -2301,7 +2884,8 @@ Enhanced Reply:`;
         const isContextual =
           CONTEXTUAL_PATTERN.test(productName.trim()) ||
           !productName.trim() ||
-          productName.trim().split(/\s+/).length <= 2 && CONTEXTUAL_PATTERN.test(productName.trim());
+          (productName.trim().split(/\s+/).length <= 2 &&
+            CONTEXTUAL_PATTERN.test(productName.trim()));
 
         if (isContextual && ctx && ctx.recentMessages) {
           // Strategy 1: scan recent BOT messages for the last ADD_CART reply and extract the product title.
@@ -2309,7 +2893,9 @@ Enhanced Reply:`;
           for (let i = ctx.recentMessages.length - 1; i >= 0; i--) {
             const msg = ctx.recentMessages[i];
             if (msg.role === 'bot' && msg.text.includes('Added to Cart')) {
-              const titleMatch = msg.text.match(/\*\*([^*]+)\*\*\s*\(\$[\d.]+\)/);
+              const titleMatch = msg.text.match(
+                /\*\*([^*]+)\*\*\s*\(\$[\d.]+\)/,
+              );
               if (titleMatch && titleMatch[1]) {
                 productName = titleMatch[1].trim();
                 break;
@@ -2322,7 +2908,10 @@ Enhanced Reply:`;
           if (isContextual && CONTEXTUAL_PATTERN.test(productName.trim())) {
             for (let i = ctx.recentMessages.length - 1; i >= 0; i--) {
               const msg = ctx.recentMessages[i];
-              if (msg.role === 'bot' && (msg.text.includes('Found') || msg.text.includes('products'))) {
+              if (
+                msg.role === 'bot' &&
+                (msg.text.includes('Found') || msg.text.includes('products'))
+              ) {
                 const listMatch = msg.text.match(/•\s+\*\*([^*]+)\*\*/);
                 if (listMatch && listMatch[1]) {
                   productName = listMatch[1].trim();
@@ -2336,15 +2925,24 @@ Enhanced Reply:`;
           if (isContextual && CONTEXTUAL_PATTERN.test(productName.trim())) {
             for (let i = ctx.recentMessages.length - 1; i >= 0; i--) {
               const msg = ctx.recentMessages[i];
-              if (msg.role === 'user' && msg.text.toLowerCase().trim() !== message.toLowerCase().trim()) {
+              if (
+                msg.role === 'user' &&
+                msg.text.toLowerCase().trim() !== message.toLowerCase().trim()
+              ) {
                 const prevEntities = extractEntities(msg.text);
-                const prevProduct = prevEntities.productType || prevEntities.brand || prevEntities.category;
+                const prevProduct =
+                  prevEntities.productType ||
+                  prevEntities.brand ||
+                  prevEntities.category;
                 if (prevProduct) {
                   productName = prevProduct;
                   break;
                 }
                 const cleanPrev = msg.text
-                  .replace(/add|to cart|buy|purchase|get|i'll take|i want|show me|search for/gi, '')
+                  .replace(
+                    /add|to cart|buy|purchase|get|i'll take|i want|show me|search for/gi,
+                    '',
+                  )
                   .trim();
                 if (cleanPrev && !CONTEXTUAL_PATTERN.test(cleanPrev)) {
                   productName = cleanPrev;
@@ -2375,11 +2973,18 @@ Enhanced Reply:`;
           }
 
           // Generate combinations and check variant selection
-          const combos = this.generateVariantCombinations((product as any).variants || {});
+          const combos = this.generateVariantCombinations(
+            (product as any).variants || {},
+          );
           let selectedVariant = '';
           for (const combo of combos) {
-            const words = combo.split(' ').map(w => w.toLowerCase().trim()).filter(Boolean);
-            const matchesAll = words.every(word => message.toLowerCase().includes(word));
+            const words = combo
+              .split(' ')
+              .map((w) => w.toLowerCase().trim())
+              .filter(Boolean);
+            const matchesAll = words.every((word) =>
+              message.toLowerCase().includes(word),
+            );
             if (matchesAll && words.length > 0) {
               selectedVariant = combo;
               break;
@@ -2394,11 +2999,13 @@ Enhanced Reply:`;
               10,
               [],
               'VARIANT_SELECT',
-              { productId: String(product._id), combos }
+              { productId: String(product._id), combos },
             );
           }
 
-          const actionTitle = selectedVariant ? `${product.title} (${selectedVariant})` : product.title;
+          const actionTitle = selectedVariant
+            ? `${product.title} (${selectedVariant})`
+            : product.title;
           const action: AgentAction = {
             type: 'ADD_TO_CART',
             payload: {
@@ -2411,7 +3018,11 @@ Enhanced Reply:`;
           };
 
           if (userId) {
-            await this.salesService.addToCart(userId, String((product as any)._id), 1);
+            await this.salesService.addToCart(
+              userId,
+              String((product as any)._id),
+              1,
+            );
           }
 
           return {
@@ -2433,7 +3044,16 @@ Enhanced Reply:`;
       }
 
       case 'REMOVE_CART': {
-        if (!userId) return this.buildReply('Please **login** to manage your cart.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to manage your cart.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         const productName =
           entities.productType ||
           message.replace(/remove|from cart|delete|clear/gi, '').trim();
@@ -2447,25 +3067,37 @@ Enhanced Reply:`;
             'CLEAR_CART_CONFIRM',
             {},
             false,
-            ['Confirm', 'Cancel']
+            ['Confirm', 'Cancel'],
           );
         }
 
         if (productName && productName.length > 1) {
           try {
-            const results = await this.catalogService.getProducts({ search: productName });
+            const results = await this.catalogService.getProducts({
+              search: productName,
+            });
             const product = results?.[0];
             if (product) {
-              await this.salesService.removeFromCart(userId, String((product as any)._id));
+              await this.salesService.removeFromCart(
+                userId,
+                String((product as any)._id),
+              );
               return {
                 reply: `🗑️ **Removed from Cart!**\n\n❌ **${product.title}** has been removed from your cart.`,
                 intent,
                 confidence: 9,
-                actions: [{ type: 'REMOVE_FROM_CART', payload: { id: String((product as any)._id) } }],
+                actions: [
+                  {
+                    type: 'REMOVE_FROM_CART',
+                    payload: { id: String((product as any)._id) },
+                  },
+                ],
                 suggestions: ['View cart', 'Checkout', 'Continue shopping'],
               };
             }
-          } catch {}
+          } catch {
+            /* ignore */
+          }
         }
 
         return this.buildReply(
@@ -2481,13 +3113,36 @@ Enhanced Reply:`;
       }
 
       case 'VIEW_CART': {
-        if (!userId) return this.buildReply('Please **login** to view your cart.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to view your cart.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         try {
           const cart = await this.salesService.getCartWithProducts(userId);
           if (!cart.items || cart.items.length === 0) {
-            return this.buildReply('🛒 Your cart is empty.', intent, 10, [], undefined, undefined, false, ['Browse products']);
+            return this.buildReply(
+              '🛒 Your cart is empty.',
+              intent,
+              10,
+              [],
+              undefined,
+              undefined,
+              false,
+              ['Browse products'],
+            );
           }
-          const list = cart.items.map(item => `• **${item.title}** x ${item.quantity} — $${item.subtotal.toFixed(2)}`).join('\n');
+          const list = cart.items
+            .map(
+              (item) =>
+                `• **${item.title}** x ${item.quantity} — $${item.subtotal.toFixed(2)}`,
+            )
+            .join('\n');
           return this.buildReply(
             `🛒 **Your Shopping Cart:**\n\n${list}\n\n💵 **Total**: $${cart.total.toFixed(2)}`,
             intent,
@@ -2496,42 +3151,77 @@ Enhanced Reply:`;
             undefined,
             undefined,
             false,
-            ['Checkout now', 'Clear cart', 'Save cart for later']
+            ['Checkout now', 'Clear cart', 'Save cart for later'],
           );
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to load cart: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Failed to load cart: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
       case 'SAVE_CART_FOR_LATER': {
-        if (!userId) return this.buildReply('Please **login** to save your cart.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to save your cart.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         try {
           await this.salesService.saveCartForLater(userId);
           return {
-            reply: '💾 **Cart saved for later!** Your shopping cart is now saved in your profile and can be restored anytime by saying **"restore my cart"**.',
+            reply:
+              '💾 **Cart saved for later!** Your shopping cart is now saved in your profile and can be restored anytime by saying **"restore my cart"**.',
             intent,
             confidence: 10,
             actions: [{ type: 'CLEAR_CART', payload: {} }],
             suggestions: ['Restore saved cart', 'Browse products'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to save cart: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Failed to save cart: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
       case 'RESTORE_SAVED_CART': {
-        if (!userId) return this.buildReply('Please **login** to restore your cart.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to restore your cart.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         try {
           await this.salesService.restoreSavedCart(userId);
           return {
-            reply: '🛒 **Cart restored successfully!** Your saved items have been added back to your shopping cart.',
+            reply:
+              '🛒 **Cart restored successfully!** Your saved items have been added back to your shopping cart.',
             intent,
             confidence: 10,
             actions: [],
             suggestions: ['View cart', 'Checkout now'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to restore cart: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Failed to restore cart: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
@@ -2559,7 +3249,7 @@ Enhanced Reply:`;
             data: { coupon: result },
             suggestions: ['Checkout now', 'View cart'],
           };
-        } catch (err: any) {
+        } catch {
           return this.buildReply(
             `❌ Coupon **"${code}"** is invalid or expired.\n\nTry **SAVE20** for 20% off!`,
             intent,
@@ -2578,7 +3268,9 @@ Enhanced Reply:`;
         );
 
       case 'CHECKOUT': {
-        const cart = userId ? await this.salesService.getCartWithProducts(userId) : { items: [], total: 0 };
+        const cart = userId
+          ? await this.salesService.getCartWithProducts(userId)
+          : { items: [], total: 0 };
         if (!userId) {
           return this.buildReply(
             `🛒 **Checkout options:**\n\nYou are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?`,
@@ -2592,24 +3284,34 @@ Enhanced Reply:`;
           );
         }
         if (!cart.items || cart.items.length === 0) {
-          return this.buildReply('🛒 Your cart is empty. Add items before checking out!', intent, 8, []);
+          return this.buildReply(
+            '🛒 Your cart is empty. Add items before checking out!',
+            intent,
+            8,
+            [],
+          );
         }
         try {
           const addresses = await this.profileService.getAddresses(userId);
           if (addresses && addresses.length > 0) {
-            const list = addresses.map((a: any, i: number) => 
-              `${i + 1}. **${a.fullName}** - ${(a.addressLine1 || a.street)}, ${a.city} (${a.addressType})`
-            ).join('\n');
+            const list = addresses
+              .map(
+                (a: any, i: number) =>
+                  `${i + 1}. **${a.fullName}** - ${a.addressLine1 || a.street}, ${a.city} (${a.addressType})`,
+              )
+              .join('\n');
             return this.buildReply(
               `🚚 **Select a Shipping Address:**\n\n${list}\n\nType the number to select, or type **"new"** to use a new address:`,
               intent,
               10,
               [],
               'CHECKOUT_ADDRESS_SELECT',
-              { cartItems: cart.items, total: cart.total }
+              { cartItems: cart.items, total: cart.total },
             );
           }
-        } catch {}
+        } catch {
+          /* ignore */
+        }
 
         return this.buildReply(
           `📦 Let's place your order!\n\nPlease enter the **Full Name** of the recipient:`,
@@ -2800,7 +3502,15 @@ Enhanced Reply:`;
       case 'RETURN_ORDER':
       case 'REFUND': {
         if (!userId) {
-          return this.buildReply('Please **login** to request a return or refund.', intent, 5, [], undefined, undefined, true);
+          return this.buildReply(
+            'Please **login** to request a return or refund.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         }
         // Auto-create a return ticket via the multi-step flow
         return this.buildReply(
@@ -2872,46 +3582,90 @@ Enhanced Reply:`;
       case 'WISHLIST_ADD': {
         const productName =
           entities.productType ||
-          message.replace(/add|to wishlist|save|favourite|wishlist/gi, '').trim();
+          message
+            .replace(/add|to wishlist|save|favourite|wishlist/gi, '')
+            .trim();
 
         if (!userId) {
-          return this.buildReply('Please **login** to save items to your wishlist.', intent, 5, [], undefined, undefined, true);
+          return this.buildReply(
+            'Please **login** to save items to your wishlist.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         }
 
         if (productName && productName.length > 1) {
           try {
-            const results = await this.catalogService.getProducts({ search: productName });
+            const results = await this.catalogService.getProducts({
+              search: productName,
+            });
             const product = results?.[0];
             if (product) {
               return {
                 reply: `💜 **Added to Wishlist!**\n\n❤️ **${product.title}** ($${product.price.toFixed(2)}) has been saved to your wishlist.`,
                 intent,
                 confidence: 9,
-                actions: [{ type: 'UPDATE_WISHLIST', payload: { productId: String((product as any)._id), action: 'add' } }],
-                suggestions: ['View my wishlist', 'Add to cart', 'Continue shopping'],
+                actions: [
+                  {
+                    type: 'UPDATE_WISHLIST',
+                    payload: {
+                      productId: String((product as any)._id),
+                      action: 'add',
+                    },
+                  },
+                ],
+                suggestions: [
+                  'View my wishlist',
+                  'Add to cart',
+                  'Continue shopping',
+                ],
               };
             }
-          } catch {}
+          } catch {
+            /* ignore */
+          }
         }
 
         return this.buildReply(
           `💜 Which product would you like to add to your wishlist? Tell me the product name!`,
-          intent, 6, [], undefined, undefined, false,
+          intent,
+          6,
+          [],
+          undefined,
+          undefined,
+          false,
           ['View my wishlist', 'Browse products'],
         );
       }
 
       case 'WISHLIST_VIEW': {
         if (!userId) {
-          return this.buildReply('Please **login** to view your wishlist.', intent, 5, [], undefined, undefined, true);
+          return this.buildReply(
+            'Please **login** to view your wishlist.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         }
         try {
           const profile = await this.profileService.getProfile(userId);
-          const wishlistIds: string[] = (profile as any).wishlist || [];
+          const wishlistIds: string[] = profile.wishlist || [];
           if (!wishlistIds.length) {
             return this.buildReply(
               `💜 Your **Wishlist** is empty!\n\nBrowse products and add items by saying **"add [product] to wishlist"**.`,
-              intent, 8, [], undefined, undefined, false,
+              intent,
+              8,
+              [],
+              undefined,
+              undefined,
+              false,
               ['Browse products', 'Search headphones'],
             );
           }
@@ -2920,21 +3674,34 @@ Enhanced Reply:`;
           for (const id of wishlistIds.slice(0, 5)) {
             try {
               const res = await this.catalogService.getProducts({ search: id });
-              if (res?.[0]) items.push(`• **${res[0].title}** — $${res[0].price.toFixed(2)}`);
-            } catch {}
+              if (res?.[0])
+                items.push(
+                  `• **${res[0].title}** — $${res[0].price.toFixed(2)}`,
+                );
+            } catch {
+              /* ignore */
+            }
           }
-          const list = items.length > 0 ? items.join('\n') : wishlistIds.map(id => `• Product ID: ${id}`).join('\n');
+          const list =
+            items.length > 0
+              ? items.join('\n')
+              : wishlistIds.map((id) => `• Product ID: ${id}`).join('\n');
           return this.buildReply(
             `💜 **Your Wishlist** (${wishlistIds.length} items):\n\n${list}\n\nType **"add [product] to cart"** to purchase any item!`,
-            intent, 9,
+            intent,
+            9,
             [{ type: 'NAVIGATE', payload: { path: '/wishlist' } }],
-            undefined, undefined, false,
+            undefined,
+            undefined,
+            false,
             ['Add to cart', 'Clear wishlist'],
           );
         } catch {
           return this.buildReply(
             `💜 Your **Wishlist** is at [/wishlist](/wishlist).`,
-            intent, 7, [{ type: 'NAVIGATE', payload: { path: '/wishlist' } }],
+            intent,
+            7,
+            [{ type: 'NAVIGATE', payload: { path: '/wishlist' } }],
           );
         }
       }
@@ -3008,6 +3775,7 @@ Enhanced Reply:`;
       }
 
       case 'ESCALATE':
+      case 'LIVE_AGENT':
         if (!userId)
           return this.buildReply(
             'Please **login** to connect with a support agent.',
@@ -3078,17 +3846,41 @@ Enhanced Reply:`;
           message.replace(/in stock|available|stock|check stock/gi, '').trim();
 
         if (!productName || productName.length < 2) {
-          return this.buildReply('🔍 Which product stock would you like to check? Type the product name.',
-            intent, 6, [], undefined, undefined, false, ['Search headphones', 'Browse electronics']);
+          return this.buildReply(
+            '🔍 Which product stock would you like to check? Type the product name.',
+            intent,
+            6,
+            [],
+            undefined,
+            undefined,
+            false,
+            ['Search headphones', 'Browse electronics'],
+          );
         }
 
         try {
-          const results = await this.catalogService.getProducts({ search: productName });
+          const results = await this.catalogService.getProducts({
+            search: productName,
+          });
           const product = results?.[0] as any;
-          if (!product) return this.buildReply(`❌ Product **"${productName}"** not found.`, intent, 5, []);
+          if (!product)
+            return this.buildReply(
+              `❌ Product **"${productName}"** not found.`,
+              intent,
+              5,
+              [],
+            );
 
-          const inv = await this.salesService.getInventoryByProductId(String(product._id));
-          if (!inv) return this.buildReply(`❌ Inventory details not found for **${product.title}**.`, intent, 5, []);
+          const inv = await this.salesService.getInventoryByProductId(
+            String(product._id),
+          );
+          if (!inv)
+            return this.buildReply(
+              `❌ Inventory details not found for **${product.title}**.`,
+              intent,
+              5,
+              [],
+            );
 
           let reply = `📦 **Inventory Status for ${product.title}:**\n\n`;
           let statusText = '';
@@ -3112,7 +3904,11 @@ Enhanced Reply:`;
           reply += `${statusText}\n\n• **SKU**: ${product.sku}\n• **Warehouse**: ${inv.warehouseName || 'Primary Warehouse'}`;
 
           const suggestions = [];
-          if (inv.stock > 0 || (inv as any).allowPreorder || (inv as any).allowBackorder) {
+          if (
+            inv.stock > 0 ||
+            (inv as any).allowPreorder ||
+            (inv as any).allowBackorder
+          ) {
             suggestions.push(`Add ${product.title} to cart`);
           }
           suggestions.push(`View reviews`);
@@ -3125,10 +3921,15 @@ Enhanced Reply:`;
             undefined,
             undefined,
             false,
-            suggestions
+            suggestions,
           );
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to check inventory: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Failed to check inventory: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
@@ -3144,24 +3945,38 @@ Enhanced Reply:`;
 
         const msgLower = message.toLowerCase();
 
-        if (msgLower.includes('add product') || msgLower.includes('create product')) {
+        if (
+          msgLower.includes('add product') ||
+          msgLower.includes('create product')
+        ) {
           return this.buildReply(
             '📝 **Create Product Wizard**\n\nPlease enter the **Title** of the new product:',
             intent,
             10,
             [],
             'ADMIN_ADD_PRODUCT_TITLE',
-            {}
+            {},
           );
         }
 
         if (msgLower.includes('delete product')) {
-          const skuMatch = message.match(/sku\s+(\S+)/i) || message.match(/product\s+(\S+)/i);
-          const nameQuery = skuMatch ? skuMatch[1] : message.replace(/delete product/gi, '').trim();
+          const skuMatch =
+            message.match(/sku\s+(\S+)/i) || message.match(/product\s+(\S+)/i);
+          const nameQuery = skuMatch
+            ? skuMatch[1]
+            : message.replace(/delete product/gi, '').trim();
           try {
-            const results = await this.catalogService.getProducts({ search: nameQuery });
+            const results = await this.catalogService.getProducts({
+              search: nameQuery,
+            });
             const product = results?.[0];
-            if (!product) return this.buildReply(`❌ Product matching **"${nameQuery}"** not found.`, intent, 5, []);
+            if (!product)
+              return this.buildReply(
+                `❌ Product matching **"${nameQuery}"** not found.`,
+                intent,
+                5,
+                [],
+              );
 
             return this.buildReply(
               `⚠️ **Are you sure you want to delete "${product.title}" (SKU: ${product.sku})?**\n\nType **"confirm"** or **"cancel"**:`,
@@ -3171,24 +3986,47 @@ Enhanced Reply:`;
               'ADMIN_DELETE_PRODUCT_CONFIRM',
               { productId: String(product._id) },
               false,
-              ['Confirm', 'Cancel']
+              ['Confirm', 'Cancel'],
             );
           } catch (e: any) {
-            return this.buildReply(`❌ Failed to initiate deletion: ${e.message}`, intent, 5, []);
+            return this.buildReply(
+              `❌ Failed to initiate deletion: ${e.message}`,
+              intent,
+              5,
+              [],
+            );
           }
         }
 
-        if (msgLower.includes('update price') || msgLower.includes('change price')) {
+        if (
+          msgLower.includes('update price') ||
+          msgLower.includes('change price')
+        ) {
           const priceMatch = message.match(/\b(\d+(?:\.\d+)?)\b/);
           if (priceMatch) {
             const newPrice = parseFloat(priceMatch[1]);
-            const nameQuery = message.replace(/update price|change price|to|for|\b\d+(?:\.\d+)?\b/gi, '').trim();
+            const nameQuery = message
+              .replace(
+                /update price|change price|to|for|\b\d+(?:\.\d+)?\b/gi,
+                '',
+              )
+              .trim();
             try {
-              const results = await this.catalogService.getProducts({ search: nameQuery });
+              const results = await this.catalogService.getProducts({
+                search: nameQuery,
+              });
               const product = results?.[0];
-              if (!product) return this.buildReply(`❌ Product matching **"${nameQuery}"** not found.`, intent, 5, []);
+              if (!product)
+                return this.buildReply(
+                  `❌ Product matching **"${nameQuery}"** not found.`,
+                  intent,
+                  5,
+                  [],
+                );
 
-              await this.catalogService.updateProduct(String(product._id), { price: newPrice });
+              await this.catalogService.updateProduct(String(product._id), {
+                price: newPrice,
+              });
               return {
                 reply: `✅ **Price updated successfully!**\n\n**${product.title}** price has been updated to **$${newPrice.toFixed(2)}**.`,
                 intent,
@@ -3197,22 +4035,45 @@ Enhanced Reply:`;
                 suggestions: ['Manage products'],
               };
             } catch (e: any) {
-              return this.buildReply(`❌ Price update failed: ${e.message}`, intent, 5, []);
+              return this.buildReply(
+                `❌ Price update failed: ${e.message}`,
+                intent,
+                5,
+                [],
+              );
             }
           } else {
-            return this.buildReply('⚠️ Please specify the new price, e.g. *"update price of headphones to 99.99"*', intent, 6, []);
+            return this.buildReply(
+              '⚠️ Please specify the new price, e.g. *"update price of headphones to 99.99"*',
+              intent,
+              6,
+              [],
+            );
           }
         }
 
-        if (msgLower.includes('update stock') || msgLower.includes('update inventory')) {
+        if (
+          msgLower.includes('update stock') ||
+          msgLower.includes('update inventory')
+        ) {
           const qtyMatch = message.match(/\b(\d+)\b/);
           if (qtyMatch) {
             const newStock = parseInt(qtyMatch[1]);
-            const nameQuery = message.replace(/update stock|update inventory|to|for|\b\d+\b/gi, '').trim();
+            const nameQuery = message
+              .replace(/update stock|update inventory|to|for|\b\d+\b/gi, '')
+              .trim();
             try {
-              const results = await this.catalogService.getProducts({ search: nameQuery });
+              const results = await this.catalogService.getProducts({
+                search: nameQuery,
+              });
               const product = results?.[0];
-              if (!product) return this.buildReply(`❌ Product matching **"${nameQuery}"** not found.`, intent, 5, []);
+              if (!product)
+                return this.buildReply(
+                  `❌ Product matching **"${nameQuery}"** not found.`,
+                  intent,
+                  5,
+                  [],
+                );
 
               await this.catalogService.updateStock(product.sku, newStock);
               return {
@@ -3223,10 +4084,20 @@ Enhanced Reply:`;
                 suggestions: ['Manage products'],
               };
             } catch (e: any) {
-              return this.buildReply(`❌ Stock update failed: ${e.message}`, intent, 5, []);
+              return this.buildReply(
+                `❌ Stock update failed: ${e.message}`,
+                intent,
+                5,
+                [],
+              );
             }
           } else {
-            return this.buildReply('⚠️ Please specify the new stock quantity, e.g. *"update stock of GAM-LAP-101 to 50"*', intent, 6, []);
+            return this.buildReply(
+              '⚠️ Please specify the new stock quantity, e.g. *"update stock of GAM-LAP-101 to 50"*',
+              intent,
+              6,
+              [],
+            );
           }
         }
 
@@ -3238,7 +4109,7 @@ Enhanced Reply:`;
           undefined,
           undefined,
           false,
-          ['Add product', 'View orders']
+          ['Add product', 'View orders'],
         );
       }
 
@@ -3275,8 +4146,11 @@ Enhanced Reply:`;
         }
         try {
           const stats = await this.salesService.getRecentAnalytics();
-          const pList = stats.topProducts?.length ? stats.topProducts.map(p => `  • ${p}`).join('\n') : '  • No sales data';
-          const reply = `🛡️ **Admin Real-Time Dashboard Summary:**\n\n` +
+          const pList = stats.topProducts?.length
+            ? stats.topProducts.map((p) => `  • ${p}`).join('\n')
+            : '  • No sales data';
+          const reply =
+            `🛡️ **Admin Real-Time Dashboard Summary:**\n\n` +
             `• **Today's Orders**: ${stats.todayOrderCount}\n` +
             `• **Today's Revenue**: $${stats.todayRevenue.toFixed(2)}\n` +
             `• **This Month's Revenue**: $${stats.monthRevenue.toFixed(2)}\n` +
@@ -3285,7 +4159,12 @@ Enhanced Reply:`;
             `Head to the [Admin Panel](/admin) for complete analytics.`;
           return this.buildReply(reply, intent, 10, []);
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to fetch admin analytics: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Failed to fetch admin analytics: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
@@ -3332,7 +4211,8 @@ Enhanced Reply:`;
           );
         }
         try {
-          const settlements = await this.salesService.getVendorSettlements(userId);
+          const settlements =
+            await this.salesService.getVendorSettlements(userId);
           return this.buildReply(
             `🏪 **Vendor Settlement Report:**\n\n` +
               `• **Total Earnings**: $${settlements.totalEarnings.toFixed(2)}\n` +
@@ -3343,7 +4223,7 @@ Enhanced Reply:`;
             10,
             [],
           );
-        } catch (e: any) {
+        } catch {
           return this.buildReply(
             `🏪 **Vendor Settlement Report:**\n\n• **Total Earnings**: $1,890.00\n• **Commission Deducted**: $210.00\n• **Pending Settlement**: $450.00\n• **Status**: Next payout scheduled for tomorrow.`,
             intent,
@@ -3356,29 +4236,61 @@ Enhanced Reply:`;
       // PHASE 1: GET_PRODUCT
       // ═══════════════════════════════════════════════════════════════════════
       case 'GET_PRODUCT': {
-        const nameQuery = entities.productType || entities.brand ||
-          message.replace(/tell me about|show details|about|info on|specifications?|features|warranty|product details|describe|what is/gi, '').trim();
+        const nameQuery =
+          entities.productType ||
+          entities.brand ||
+          message
+            .replace(
+              /tell me about|show details|about|info on|specifications?|features|warranty|product details|describe|what is/gi,
+              '',
+            )
+            .trim();
 
         if (!nameQuery || nameQuery.length < 2) {
-          return this.buildReply('🔍 Which product would you like details on? Type the product name.',
-            intent, 6, [], undefined, undefined, false, ['Search headphones', 'Browse electronics']);
+          return this.buildReply(
+            '🔍 Which product would you like details on? Type the product name.',
+            intent,
+            6,
+            [],
+            undefined,
+            undefined,
+            false,
+            ['Search headphones', 'Browse electronics'],
+          );
         }
         try {
-          const results = await this.catalogService.getProducts({ search: nameQuery });
+          const results = await this.catalogService.getProducts({
+            search: nameQuery,
+          });
           const product = results?.[0] as any;
-          if (!product) return this.buildReply(`❌ **"${nameQuery}"** not found. Try a different name.`, intent, 5, []);
+          if (!product)
+            return this.buildReply(
+              `❌ **"${nameQuery}"** not found. Try a different name.`,
+              intent,
+              5,
+              [],
+            );
 
           const showSpecs = /spec|specification|feature/i.test(message);
           const showWarranty = /warrant/i.test(message);
           const showVariants = /variant|color|size|ram|storage/i.test(message);
 
-          const specs = (product.specifications || []).map((s: any) => `• **${s.name}**: ${s.value}`).join('\n') || 'No specifications listed.';
-          const variants = Object.keys(product.variants || {}).length > 0
-            ? Object.entries(product.variants).map(([k, v]: any) => `• **${k}**: ${Array.isArray(v) ? v.join(', ') : v}`).join('\n')
-            : 'No variants available.';
+          const specs =
+            (product.specifications || [])
+              .map((s: any) => `• **${s.name}**: ${s.value}`)
+              .join('\n') || 'No specifications listed.';
+          const variants =
+            Object.keys(product.variants || {}).length > 0
+              ? Object.entries(product.variants)
+                  .map(
+                    ([k, v]: any) =>
+                      `• **${k}**: ${Array.isArray(v) ? v.join(', ') : v}`,
+                  )
+                  .join('\n')
+              : 'No variants available.';
 
           let reply = `📦 **Product Details: ${product.title}**\n\n${product.description}\n\n🏷️ **Price**: $${product.price}\n⭐ **Rating**: ${product.averageRating || 'N/A'} (${(product.reviews || []).length} reviews)\n📦 **SKU**: ${product.sku}`;
-          
+
           if (showSpecs) {
             reply = `⚙️ **Specifications for ${product.title}:**\n\n${specs}`;
           } else if (showWarranty) {
@@ -3397,7 +4309,11 @@ Enhanced Reply:`;
             undefined,
             undefined,
             false,
-            [`Add ${product.title} to cart`, `Add to wishlist`, 'Compare products']
+            [
+              `Add ${product.title} to cart`,
+              `Add to wishlist`,
+              'Compare products',
+            ],
           );
         } catch (e: any) {
           return this.buildReply(`❌ Error: ${e.message}`, intent, 5, []);
@@ -3409,18 +4325,28 @@ Enhanced Reply:`;
       // ═══════════════════════════════════════════════════════════════════════
       case 'COMPARE': {
         const cleanedMsg = message.replace(/compare/i, '').trim();
-        const parts = cleanedMsg.split(/\bvs\b|\bversus\b|\band\b|,/i).map(p => p.trim()).filter(Boolean);
+        const parts = cleanedMsg
+          .split(/\bvs\b|\bversus\b|\band\b|,/i)
+          .map((p) => p.trim())
+          .filter(Boolean);
         if (parts.length < 2) {
           return this.buildReply(
             '⚖️ Please specify at least two products to compare, e.g. **"Compare Laptop vs Phone"**:',
-            intent, 5, [], undefined, undefined, false
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            false,
           );
         }
 
         try {
           const products: any[] = [];
           for (const part of parts) {
-            const results = await this.catalogService.getProducts({ search: part });
+            const results = await this.catalogService.getProducts({
+              search: part,
+            });
             if (results && results[0]) {
               products.push(results[0]);
             }
@@ -3428,43 +4354,69 @@ Enhanced Reply:`;
 
           if (products.length < 2) {
             return this.buildReply(
-              `⚠️ I couldn't find enough matching products to compare. (Found: ${products.map(p => p.title).join(', ') || 'None'})`,
-              intent, 5, []
+              `⚠️ I couldn't find enough matching products to compare. (Found: ${products.map((p) => p.title).join(', ') || 'None'})`,
+              intent,
+              5,
+              [],
             );
           }
 
           let table = `⚖️ **Product Comparison Table:**\n\n`;
-          table += `| Feature | ` + products.map(p => p.title).join(' | ') + ` |\n`;
+          table +=
+            `| Feature | ` + products.map((p) => p.title).join(' | ') + ` |\n`;
           table += `|---|` + products.map(() => '---').join('|') + `|\n`;
-          table += `| **Price** | ` + products.map(p => `$${p.price}`).join(' | ') + ` |\n`;
-          table += `| **Rating** | ` + products.map(p => `${p.averageRating || 0}⭐`).join(' | ') + ` |\n`;
+          table +=
+            `| **Price** | ` +
+            products.map((p) => `$${p.price}`).join(' | ') +
+            ` |\n`;
+          table +=
+            `| **Rating** | ` +
+            products.map((p) => `${p.averageRating || 0}⭐`).join(' | ') +
+            ` |\n`;
 
           const stockStatus: string[] = [];
           const reviewsCount: number[] = [];
 
           for (const p of products) {
             try {
-              const inv = await this.salesService.getInventoryByProductId(String(p._id));
-              stockStatus.push(inv && inv.stock > 0 ? (inv.stock <= inv.lowStockThreshold ? 'Low Stock' : 'In Stock') : 'Out of Stock');
+              const inv = await this.salesService.getInventoryByProductId(
+                String(p._id),
+              );
+              stockStatus.push(
+                inv && inv.stock > 0
+                  ? inv.stock <= inv.lowStockThreshold
+                    ? 'Low Stock'
+                    : 'In Stock'
+                  : 'Out of Stock',
+              );
             } catch {
               stockStatus.push('Unknown');
             }
 
             try {
-              const revs = await this.salesService.getProductReviews(String(p._id), {});
+              const revs = await this.salesService.getProductReviews(
+                String(p._id),
+                {},
+              );
               reviewsCount.push(revs?.length || 0);
             } catch {
               reviewsCount.push(0);
             }
           }
 
-          table += `| **Reviews** | ` + reviewsCount.map(c => `${c} reviews`).join(' | ') + ` |\n`;
+          table +=
+            `| **Reviews** | ` +
+            reviewsCount.map((c) => `${c} reviews`).join(' | ') +
+            ` |\n`;
           table += `| **Stock** | ` + stockStatus.join(' | ') + ` |\n`;
 
           const bestValue = [...products].sort((a, b) => a.price - b.price)[0];
-          const bestRated = [...products].sort((a, b) => b.averageRating - a.averageRating)[0];
+          const bestRated = [...products].sort(
+            (a, b) => b.averageRating - a.averageRating,
+          )[0];
 
-          table += `\n\n💡 **ApexStore AI Recommendation:**\n` +
+          table +=
+            `\n\n💡 **ApexStore AI Recommendation:**\n` +
             `• **Best Value (Lowest Price)**: **${bestValue.title}** ($${bestValue.price})\n` +
             `• **Top Rated**: **${bestRated.title}** (${bestRated.averageRating}⭐)`;
 
@@ -3476,10 +4428,15 @@ Enhanced Reply:`;
             undefined,
             undefined,
             false,
-            products.map(p => `Add ${p.title} to cart`)
+            products.map((p) => `Add ${p.title} to cart`),
           );
         } catch (e: any) {
-          return this.buildReply(`❌ Comparison failed: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Comparison failed: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
@@ -3487,28 +4444,52 @@ Enhanced Reply:`;
       // PHASE 5: UPDATE_CART_QUANTITY
       // ═══════════════════════════════════════════════════════════════════════
       case 'UPDATE_CART_QUANTITY': {
-        if (!userId) return this.buildReply('Please **login** to manage your cart.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to manage your cart.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         const qtyMatch = message.match(/\b(\d+)\b/);
         const quantity = qtyMatch ? parseInt(qtyMatch[1]) : 1;
 
         try {
           const cart = await this.salesService.getCart(userId);
-          if (!cart.items?.length) return this.buildReply('🛒 Your cart is currently empty.', intent, 8, []);
+          if (!cart.items?.length)
+            return this.buildReply(
+              '🛒 Your cart is currently empty.',
+              intent,
+              8,
+              [],
+            );
 
           // Try to extract product by searching cart items' product titles
           let selectedItem = cart.items[0]; // fallback
           let foundTitle = '';
 
           for (const item of cart.items) {
-            const product = await this.catalogService.getProductById(String(item.productId));
-            if (product && new RegExp(product.title.split(' ')[0], 'i').test(message)) {
+            const product = await this.catalogService.getProductById(
+              String(item.productId),
+            );
+            if (
+              product &&
+              new RegExp(product.title.split(' ')[0], 'i').test(message)
+            ) {
               selectedItem = item;
               foundTitle = product.title;
               break;
             }
           }
 
-          await this.salesService.updateCartQuantity(userId, String(selectedItem.productId), quantity);
+          await this.salesService.updateCartQuantity(
+            userId,
+            String(selectedItem.productId),
+            quantity,
+          );
           return {
             reply: `✅ Updated quantity for **${foundTitle || 'item'}** to **${quantity}** in your cart.`,
             intent,
@@ -3517,7 +4498,12 @@ Enhanced Reply:`;
             suggestions: ['View cart', 'Checkout'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to update quantity: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Failed to update quantity: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
@@ -3525,14 +4511,23 @@ Enhanced Reply:`;
       // PHASE 6: ADDRESS CRUD INTENT HANDLERS
       // ═══════════════════════════════════════════════════════════════════════
       case 'ADD_ADDRESS': {
-        if (!userId) return this.buildReply('Please **login** to add addresses.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to add addresses.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         return this.buildReply(
-          '📝 Let\'s add a new address. Please enter the **Full Name** of the recipient:',
+          "📝 Let's add a new address. Please enter the **Full Name** of the recipient:",
           intent,
           10,
           [],
           'ADD_ADDRESS_NAME',
-          {}
+          {},
         );
       }
 
@@ -3540,18 +4535,36 @@ Enhanced Reply:`;
       case 'SET_DEFAULT_ADDRESS':
       case 'DELETE_ADDRESS':
       case 'ADDRESS_MANAGE': {
-        if (!userId) return this.buildReply('Please **login** to manage addresses.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to manage addresses.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         try {
           const addresses = await this.profileService.getAddresses(userId);
           if (!addresses?.length) {
             return this.buildReply(
               '🏠 You have no saved addresses. Would you like to add one?',
-              intent, 8, [], undefined, undefined, false, ['Add address']
+              intent,
+              8,
+              [],
+              undefined,
+              undefined,
+              false,
+              ['Add address'],
             );
           }
-          const list = addresses.map((a: any, i: number) => 
-            `${i + 1}. **${a.fullName}** - ${a.addressLine1}, ${a.city} (${a.addressType})${a.isDefault ? ' *Default*' : ''}`
-          ).join('\n');
+          const list = addresses
+            .map(
+              (a: any, i: number) =>
+                `${i + 1}. **${a.fullName}** - ${a.addressLine1}, ${a.city} (${a.addressType})${a.isDefault ? ' *Default*' : ''}`,
+            )
+            .join('\n');
 
           const isDel = q.includes('delete') || q.includes('remove');
           const isDef = q.includes('default') || q.includes('primary');
@@ -3559,12 +4572,20 @@ Enhanced Reply:`;
           if (isDel) {
             return this.buildReply(
               `🗑️ **Select which address to DELETE:**\n\n${list}\n\nType the number (1-${addresses.length}) to delete:`,
-              intent, 10, [], 'DELETE_ADDRESS_SELECT', {}
+              intent,
+              10,
+              [],
+              'DELETE_ADDRESS_SELECT',
+              {},
             );
           } else if (isDef) {
             return this.buildReply(
               `🏠 **Select which address to set as DEFAULT:**\n\n${list}\n\nType the number (1-${addresses.length}) to select:`,
-              intent, 10, [], 'SET_DEFAULT_ADDRESS_SELECT', {}
+              intent,
+              10,
+              [],
+              'SET_DEFAULT_ADDRESS_SELECT',
+              {},
             );
           }
 
@@ -3576,10 +4597,15 @@ Enhanced Reply:`;
             undefined,
             undefined,
             false,
-            ['Add address', 'Delete address', 'Set default address']
+            ['Add address', 'Delete address', 'Set default address'],
           );
         } catch (e: any) {
-          return this.buildReply(`❌ Address lookup failed: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Address lookup failed: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
@@ -3587,39 +4613,70 @@ Enhanced Reply:`;
       // PHASE 7: PAYMENT MANAGEMENT
       // ═══════════════════════════════════════════════════════════════════════
       case 'ADD_PAYMENT_METHOD': {
-        if (!userId) return this.buildReply('Please **login** to add payment methods.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to add payment methods.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         return this.buildReply(
-          '💳 Let\'s add a payment method. Choose the **Payment Type**:',
+          "💳 Let's add a payment method. Choose the **Payment Type**:",
           intent,
           10,
           [],
           'ADD_PAYMENT_METHOD_TYPE',
           {},
           false,
-          ['Credit Card', 'Debit Card', 'UPI', 'PayPal']
+          ['Credit Card', 'Debit Card', 'UPI', 'PayPal'],
         );
       }
 
       case 'DELETE_PAYMENT_METHOD':
       case 'VIEW_PAYMENT_METHODS': {
-        if (!userId) return this.buildReply('Please **login** to view payment methods.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to view payment methods.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         try {
           const payments = await this.profileService.getPaymentMethods(userId);
           if (!payments?.length) {
             return this.buildReply(
               '💳 You have no saved payment methods. Would you like to add one?',
-              intent, 8, [], undefined, undefined, false, ['Add payment method']
+              intent,
+              8,
+              [],
+              undefined,
+              undefined,
+              false,
+              ['Add payment method'],
             );
           }
-          const list = payments.map((p: any, i: number) => 
-            `${i + 1}. **${p.type}** card ending in **${p.last4}**`
-          ).join('\n');
+          const list = payments
+            .map(
+              (p: any, i: number) =>
+                `${i + 1}. **${p.type}** card ending in **${p.last4}**`,
+            )
+            .join('\n');
 
           const isDel = q.includes('delete') || q.includes('remove');
           if (isDel) {
             return this.buildReply(
               `🗑️ **Select which payment method to DELETE:**\n\n${list}\n\nType the number (1-${payments.length}) to delete:`,
-              intent, 10, [], 'DELETE_PAYMENT_METHOD_SELECT', {}
+              intent,
+              10,
+              [],
+              'DELETE_PAYMENT_METHOD_SELECT',
+              {},
             );
           }
 
@@ -3631,10 +4688,15 @@ Enhanced Reply:`;
             undefined,
             undefined,
             false,
-            ['Add payment method', 'Delete payment method']
+            ['Add payment method', 'Delete payment method'],
           );
         } catch (e: any) {
-          return this.buildReply(`❌ Payment lookup failed: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Payment lookup failed: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
@@ -3642,32 +4704,56 @@ Enhanced Reply:`;
       // PHASE 8: ORDER MODIFICATION
       // ═══════════════════════════════════════════════════════════════════════
       case 'MODIFY_ORDER': {
-        if (!userId) return this.buildReply('Please **login** to modify orders.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to modify orders.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         try {
           const orders = await this.salesService.getOrders(userId);
-          const pending = orders.filter(o => o.status === 'Pending');
+          const pending = orders.filter((o) => o.status === 'Pending');
           if (!pending?.length) {
-            return this.buildReply('📦 You have no pending orders that can be modified.', intent, 8, []);
+            return this.buildReply(
+              '📦 You have no pending orders that can be modified.',
+              intent,
+              8,
+              [],
+            );
           }
           const latest = pending[0];
           return this.buildReply(
             `📦 **Modifying Order #${String(latest._id).slice(-8).toUpperCase()}**\n\n` +
-            `What would you like to modify?\n\n` +
-            `1. **Shipping Address**\n` +
-            `2. **Delivery Slot**\n` +
-            `3. **Payment Method**\n` +
-            `4. **Item Quantities / Remove Items**\n\n` +
-            `Please type the number or option:`,
+              `What would you like to modify?\n\n` +
+              `1. **Shipping Address**\n` +
+              `2. **Delivery Slot**\n` +
+              `3. **Payment Method**\n` +
+              `4. **Item Quantities / Remove Items**\n\n` +
+              `Please type the number or option:`,
             intent,
             10,
             [],
             'MODIFY_ORDER_OPTION',
             { orderId: String(latest._id) },
             false,
-            ['Shipping Address', 'Delivery Slot', 'Payment Method', 'Item Quantities']
+            [
+              'Shipping Address',
+              'Delivery Slot',
+              'Payment Method',
+              'Item Quantities',
+            ],
           );
         } catch (e: any) {
-          return this.buildReply(`❌ Modification failed: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Modification failed: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
@@ -3675,10 +4761,25 @@ Enhanced Reply:`;
       // PHASE 9: EXCHANGE
       // ═══════════════════════════════════════════════════════════════════════
       case 'EXCHANGE_ORDER': {
-        if (!userId) return this.buildReply('Please **login** to request exchanges.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to request exchanges.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         try {
           const orders = await this.salesService.getOrders(userId);
-          if (!orders?.length) return this.buildReply('📦 You have no orders to exchange.', intent, 8, []);
+          if (!orders?.length)
+            return this.buildReply(
+              '📦 You have no orders to exchange.',
+              intent,
+              8,
+              [],
+            );
           const latest = orders[0];
           return this.buildReply(
             `🔄 **Exchange Request for Order #${String(latest._id).slice(-8).toUpperCase()}**\n\nPlease state the **reason** for exchange (e.g. Size too small, damaged item):`,
@@ -3686,10 +4787,15 @@ Enhanced Reply:`;
             10,
             [],
             'EXCHANGE_ORDER_REASON',
-            { orderId: String(latest._id) }
+            { orderId: String(latest._id) },
           );
         } catch (e: any) {
-          return this.buildReply(`❌ Exchange initiation failed: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Exchange initiation failed: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
@@ -3697,12 +4803,35 @@ Enhanced Reply:`;
       // PHASE 11: WISHLIST / CART MOVES
       // ═══════════════════════════════════════════════════════════════════════
       case 'WISHLIST_REMOVE': {
-        if (!userId) return this.buildReply('Please **login** to update your wishlist.', intent, 5, [], undefined, undefined, true);
-        const nameQuery = message.replace(/remove from wishlist|delete from wishlist|wishlist remove/gi, '').trim();
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to update your wishlist.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
+        const nameQuery = message
+          .replace(
+            /remove from wishlist|delete from wishlist|wishlist remove/gi,
+            '',
+          )
+          .trim();
         try {
-          const wishlist = await this.salesService.getWishlistWithProducts(userId);
-          const item = wishlist.find((p: any) => new RegExp(nameQuery, 'i').test(p.title));
-          if (!item) return this.buildReply(`❌ Product not found in your wishlist.`, intent, 5, []);
+          const wishlist =
+            await this.salesService.getWishlistWithProducts(userId);
+          const item = wishlist.find((p: any) =>
+            new RegExp(nameQuery, 'i').test(p.title),
+          );
+          if (!item)
+            return this.buildReply(
+              `❌ Product not found in your wishlist.`,
+              intent,
+              5,
+              [],
+            );
           await this.salesService.removeFromWishlist(userId, String(item._id));
           return {
             reply: `💜 Removed **${item.title}** from your wishlist.`,
@@ -3712,17 +4841,42 @@ Enhanced Reply:`;
             suggestions: ['View wishlist', 'Browse products'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Error removing from wishlist: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Error removing from wishlist: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
       case 'MOVE_TO_CART': {
-        if (!userId) return this.buildReply('Please **login** to manage your cart.', intent, 5, [], undefined, undefined, true);
-        const nameQuery = message.replace(/move to cart|add from wishlist/gi, '').trim();
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to manage your cart.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
+        const nameQuery = message
+          .replace(/move to cart|add from wishlist/gi, '')
+          .trim();
         try {
-          const wishlist = await this.salesService.getWishlistWithProducts(userId);
-          const item = wishlist.find((p: any) => new RegExp(nameQuery, 'i').test(p.title));
-          if (!item) return this.buildReply(`❌ Product not found in your wishlist.`, intent, 5, []);
+          const wishlist =
+            await this.salesService.getWishlistWithProducts(userId);
+          const item = wishlist.find((p: any) =>
+            new RegExp(nameQuery, 'i').test(p.title),
+          );
+          if (!item)
+            return this.buildReply(
+              `❌ Product not found in your wishlist.`,
+              intent,
+              5,
+              [],
+            );
           await this.salesService.moveToCart(userId, String(item._id));
           return {
             reply: `🛒 Moved **${item.title}** from your wishlist to your shopping cart.`,
@@ -3732,12 +4886,26 @@ Enhanced Reply:`;
             suggestions: ['View cart', 'View wishlist'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Error moving item: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Error moving item: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
       case 'MOVE_ALL_TO_CART': {
-        if (!userId) return this.buildReply('Please **login** to manage your cart.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to manage your cart.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         try {
           const res = await this.salesService.moveAllToCart(userId);
           return {
@@ -3748,12 +4916,26 @@ Enhanced Reply:`;
             suggestions: ['View cart', 'Checkout'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Error moving all items: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Error moving all items: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
       case 'CLEAR_WISHLIST': {
-        if (!userId) return this.buildReply('Please **login** to manage your wishlist.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to manage your wishlist.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         try {
           await this.salesService.clearWishlist(userId);
           return {
@@ -3764,7 +4946,12 @@ Enhanced Reply:`;
             suggestions: ['Browse products', 'My profile'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Error clearing wishlist: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Error clearing wishlist: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
@@ -3772,13 +4959,31 @@ Enhanced Reply:`;
       // PHASE 12: PRICE ALERT
       // ═══════════════════════════════════════════════════════════════════════
       case 'PRICE_ALERT': {
-        if (!userId) return this.buildReply('Please **login** to set price alerts.', intent, 5, [], undefined, undefined, true);
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to set price alerts.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
         const textLower = message.toLowerCase();
         let alertType = 'drop';
-        if (textLower.includes('stock') || textLower.includes('restock') || textLower.includes('available')) {
+        if (
+          textLower.includes('stock') ||
+          textLower.includes('restock') ||
+          textLower.includes('available')
+        ) {
           alertType = 'restock';
         }
-        let nameQuery = message.replace(/notify me when|alert me when|price drops to|price drops|back in stock|stock|drops to|under|price|alert/gi, '').trim();
+        let nameQuery = message
+          .replace(
+            /notify me when|alert me when|price drops to|price drops|back in stock|stock|drops to|under|price|alert/gi,
+            '',
+          )
+          .trim();
         const priceMatch = message.match(/\b(\d+(?:\.\d+)?)\b/);
         let targetPriceVal = 0;
         if (priceMatch) {
@@ -3786,19 +4991,36 @@ Enhanced Reply:`;
           nameQuery = nameQuery.replace(priceMatch[0], '').trim();
         }
         try {
-          const results = await this.catalogService.getProducts({ search: nameQuery });
+          const results = await this.catalogService.getProducts({
+            search: nameQuery,
+          });
           const product = results?.[0] as any;
-          if (!product) return this.buildReply(`❌ Product **"${nameQuery}"** not found.`, intent, 5, []);
-          const targetPrice = targetPriceVal > 0 ? targetPriceVal : product.price;
-          const user = await (this.authService as any).userRepository.findById(userId);
+          if (!product)
+            return this.buildReply(
+              `❌ Product **"${nameQuery}"** not found.`,
+              intent,
+              5,
+              [],
+            );
+          const targetPrice =
+            targetPriceVal > 0 ? targetPriceVal : product.price;
+          const user = await (this.authService as any).userRepository.findById(
+            userId,
+          );
           if (user) {
             if (!user.priceAlerts) user.priceAlerts = [];
-            user.priceAlerts.push({ productId: String(product._id), targetPrice, notified: false, type: alertType });
+            user.priceAlerts.push({
+              productId: String(product._id),
+              targetPrice,
+              notified: false,
+              type: alertType,
+            });
             await user.save();
           }
-          const alertTypeMsg = alertType === 'restock'
-            ? `comes back in stock`
-            : `drops below **$${targetPrice.toFixed(2)}**`;
+          const alertTypeMsg =
+            alertType === 'restock'
+              ? `comes back in stock`
+              : `drops below **$${targetPrice.toFixed(2)}**`;
           return {
             reply: `🔔 **Price Alert Set!**\n\nI will alert you as soon as the price of **${product.title}** ${alertTypeMsg}.`,
             intent,
@@ -3807,7 +5029,12 @@ Enhanced Reply:`;
             suggestions: ['Browse products', 'My profile'],
           };
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to set price alert: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Failed to set price alert: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
@@ -3821,7 +5048,7 @@ Enhanced Reply:`;
           10,
           [],
           'SHOPPING_ASSISTANT_BUDGET',
-          {}
+          {},
         );
       }
 
@@ -3829,19 +5056,53 @@ Enhanced Reply:`;
       // PHASE 14: VIEW REVIEWS
       // ═══════════════════════════════════════════════════════════════════════
       case 'VIEW_REVIEWS': {
-        const nameQuery = message.replace(/show reviews|read reviews|reviews for/gi, '').trim();
-        if (!nameQuery) return this.buildReply('🔍 Which product reviews would you like to see? Type the product name.', intent, 6, []);
+        const nameQuery = message
+          .replace(/show reviews|read reviews|reviews for/gi, '')
+          .trim();
+        if (!nameQuery)
+          return this.buildReply(
+            '🔍 Which product reviews would you like to see? Type the product name.',
+            intent,
+            6,
+            [],
+          );
         try {
-          const results = await this.catalogService.getProducts({ search: nameQuery });
+          const results = await this.catalogService.getProducts({
+            search: nameQuery,
+          });
           const product = results?.[0] as any;
-          if (!product) return this.buildReply(`❌ **"${nameQuery}"** not found.`, intent, 5, []);
+          if (!product)
+            return this.buildReply(
+              `❌ **"${nameQuery}"** not found.`,
+              intent,
+              5,
+              [],
+            );
 
-          const reviews = await this.salesService.getProductReviews(String(product._id), {});
+          const reviews = await this.salesService.getProductReviews(
+            String(product._id),
+            {},
+          );
           if (!reviews?.length) {
-            return this.buildReply(`⭐ **${product.title}** has no reviews yet. Be the first to rate it!`, intent, 8, [], undefined, undefined, false, [`Rate ${product.title}`]);
+            return this.buildReply(
+              `⭐ **${product.title}** has no reviews yet. Be the first to rate it!`,
+              intent,
+              8,
+              [],
+              undefined,
+              undefined,
+              false,
+              [`Rate ${product.title}`],
+            );
           }
 
-          const rList = reviews.slice(0, 3).map((r: any) => `• **${r.rating}⭐** — _"${r.comment || 'No comment'}"_`).join('\n');
+          const rList = reviews
+            .slice(0, 3)
+            .map(
+              (r: any) =>
+                `• **${r.rating}⭐** — _"${r.comment || 'No comment'}"_`,
+            )
+            .join('\n');
           return this.buildReply(
             `⭐ **Reviews for ${product.title} (${product.averageRating || 'N/A'}⭐):**\n\n${rList}\n\nTotal approved reviews: **${reviews.length}**.`,
             intent,
@@ -3850,17 +5111,171 @@ Enhanced Reply:`;
             undefined,
             undefined,
             false,
-            [`Rate ${product.title}`, 'Search products']
+            [`Rate ${product.title}`, 'Search products'],
           );
         } catch (e: any) {
-          return this.buildReply(`❌ Failed to load reviews: ${e.message}`, intent, 5, []);
+          return this.buildReply(
+            `❌ Failed to load reviews: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
         }
       }
 
       // ═══════════════════════════════════════════════════════════════════════
       // PHASE 15: LIVE_AGENT (alias of ESCALATE)
       // ═══════════════════════════════════════════════════════════════════════
-      case 'LIVE_AGENT':
+
+      case 'RETRY_PAYMENT': {
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to retry payments.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
+        try {
+          const orders = await this.salesService.getOrders(userId);
+          const pending = orders.filter((o) => o.status === 'Pending');
+          if (pending.length === 0)
+            return this.buildReply(
+              'You have no pending orders to pay.',
+              intent,
+              8,
+              [],
+            );
+          const res = await this.paymentService.retryPayment(
+            pending[0]._id.toString(),
+            'Stripe',
+            userId,
+          );
+          return this.buildReply(
+            `💳 **Payment Retry Initialized!**\n\nCreated session for Order #${pending[0]._id.toString().slice(-6).toUpperCase()}.\n• **Transaction ID**: ${res.transactionId}`,
+            intent,
+            10,
+            [],
+          );
+        } catch (e: any) {
+          return this.buildReply(
+            `❌ Retry failed: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
+        }
+      }
+
+      case 'VIEW_PAYMENT_HISTORY': {
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to view payment history.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
+        try {
+          const history = await this.paymentService.getPaymentHistory(userId);
+          if (history.length === 0)
+            return this.buildReply(
+              'No payment transactions found.',
+              intent,
+              8,
+              [],
+            );
+          const list = history
+            .map(
+              (h) =>
+                `• **$${h.amount.toFixed(2)}** (${h.provider}) — Status: ${h.status} (${h.transactionId.substring(0, 12)}...)`,
+            )
+            .join('\n');
+          return this.buildReply(
+            `💳 **Payment History:**\n\n${list}`,
+            intent,
+            10,
+            [],
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      case 'CHECK_PAYMENT_STATUS': {
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to check payment status.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
+        try {
+          const history = await this.paymentService.getPaymentHistory(userId);
+          if (history.length === 0)
+            return this.buildReply(
+              'No payment transactions found.',
+              intent,
+              8,
+              [],
+            );
+          const latest = history[history.length - 1];
+          return this.buildReply(
+            `💳 **Payment Status:**\n\n• **Amount**: $${latest.amount.toFixed(2)}\n• **Provider**: ${latest.provider}\n• **Status**: ${latest.status}\n• **Transaction ID**: ${latest.transactionId}`,
+            intent,
+            10,
+            [],
+          );
+        } catch (e: any) {
+          return this.buildReply(`❌ Failed: ${e.message}`, intent, 5, []);
+        }
+      }
+
+      case 'RECOVER_CART': {
+        if (!userId)
+          return this.buildReply(
+            'Please **login** to recover your cart.',
+            intent,
+            5,
+            [],
+            undefined,
+            undefined,
+            true,
+          );
+        try {
+          const res = await this.recoveryService.sendRecoveryReminder(
+            userId,
+            'Push',
+          );
+          if (!res.success)
+            return this.buildReply(
+              'Your cart is empty. Nothing to recover!',
+              intent,
+              8,
+              [],
+            );
+          return this.buildReply(
+            `🛒 **Cart Recovery:**\n\n${res.message}`,
+            intent,
+            10,
+            [],
+          );
+        } catch (e: any) {
+          return this.buildReply(
+            `❌ Failed to recover: ${e.message}`,
+            intent,
+            5,
+            [],
+          );
+        }
+      }
 
       case 'HELP':
         return this.buildReply(
@@ -3956,7 +5371,9 @@ Enhanced Reply:`;
     if (keys.length === 0) return [];
     let combos: string[] = [''];
     for (const key of keys) {
-      const values = Array.isArray(variants[key]) ? variants[key] : [variants[key]];
+      const values = Array.isArray(variants[key])
+        ? variants[key]
+        : [variants[key]];
       const nextCombos: string[] = [];
       for (const c of combos) {
         for (const val of values) {
@@ -3965,6 +5382,6 @@ Enhanced Reply:`;
       }
       combos = nextCombos;
     }
-    return combos.map(c => c.trim()).filter(Boolean);
+    return combos.map((c) => c.trim()).filter(Boolean);
   }
 }

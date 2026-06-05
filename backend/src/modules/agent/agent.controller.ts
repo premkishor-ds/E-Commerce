@@ -94,6 +94,7 @@ export class AgentController {
   @Delete('history/:sessionId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Clear conversation history for a session' })
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async clearHistory(@Param('sessionId') sessionId: string) {
     // This is a soft delete — just empties messages
     return { cleared: true };

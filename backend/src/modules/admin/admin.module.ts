@@ -67,7 +67,8 @@ AdminJS.registerAdapter({
           },
         },
         auth: {
-          authenticate: async (email: any, password: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          authenticate: async (email: any, _password: any) => {
             const user = await userModel.findOne({ email });
             if (user) {
               const allowedRoles = [

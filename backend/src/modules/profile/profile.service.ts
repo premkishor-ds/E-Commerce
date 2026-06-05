@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   UserRepository,
   AddressRepository,
@@ -30,7 +34,12 @@ export class ProfileService {
   ) {}
 
   // AUDIT LOG HELPER
-  private async logActivity(userId: string, type: string, action: string, details: string) {
+  private async logActivity(
+    userId: string,
+    type: string,
+    action: string,
+    details: string,
+  ) {
     await this.logRepository.create({
       userId: new Types.ObjectId(userId),
       type,
@@ -69,7 +78,8 @@ export class ProfileService {
       marketingEmails: user.marketingEmails !== false,
       productRecommendations: user.productRecommendations !== false,
       newsletterSubscriptions: user.newsletterSubscriptions !== false,
-      referralCode: user.referralCode || `REF-${user.email.split('@')[0].toUpperCase()}`,
+      referralCode:
+        user.referralCode || `REF-${user.email.split('@')[0].toUpperCase()}`,
       referralEarnings: user.referralEarnings || 0,
       subscriptionPlan: user.subscriptionPlan || 'Free',
       billingCycle: user.billingCycle || 'Monthly',
@@ -79,7 +89,9 @@ export class ProfileService {
 
     // If user is Seller or Vendor, fetch shop/vendor details
     if (user.roles.includes('Seller') || user.roles.includes('Vendor')) {
-      const vendorInfo = await this.vendorRepository.findOne({ userId: user._id });
+      const vendorInfo = await this.vendorRepository.findOne({
+        userId: user._id,
+      });
       if (vendorInfo) {
         basicProfile.shopName = vendorInfo.shopName;
         basicProfile.companyLegalName = vendorInfo.companyLegalName || '';
@@ -98,7 +110,9 @@ export class ProfileService {
 
     // Check username duplicates if changed
     if (dto.username && dto.username !== user.username) {
-      const duplicate = await this.userRepository.findOne({ username: dto.username });
+      const duplicate = await this.userRepository.findOne({
+        username: dto.username,
+      });
       if (duplicate) throw new BadRequestException('Username is already taken');
       user.username = dto.username;
     }
@@ -135,7 +149,9 @@ export class ProfileService {
 
     // If user is Seller/Vendor, update the vendor settings too
     if (user.roles.includes('Seller') || user.roles.includes('Vendor')) {
-      let vendorInfo = await this.vendorRepository.findOne({ userId: user._id });
+      let vendorInfo = await this.vendorRepository.findOne({
+        userId: user._id,
+      });
       if (!vendorInfo) {
         vendorInfo = await this.vendorRepository.create({
           userId: user._id,
@@ -145,14 +161,22 @@ export class ProfileService {
       }
 
       if (dto.shopName !== undefined) vendorInfo.shopName = dto.shopName;
-      if (dto.companyLegalName !== undefined) vendorInfo.companyLegalName = dto.companyLegalName;
-      if (dto.businessPhone !== undefined) vendorInfo.businessPhone = dto.businessPhone;
-      if (dto.bankAccountDetails !== undefined) vendorInfo.bankAccountDetails = dto.bankAccountDetails;
+      if (dto.companyLegalName !== undefined)
+        vendorInfo.companyLegalName = dto.companyLegalName;
+      if (dto.businessPhone !== undefined)
+        vendorInfo.businessPhone = dto.businessPhone;
+      if (dto.bankAccountDetails !== undefined)
+        vendorInfo.bankAccountDetails = dto.bankAccountDetails;
 
       await vendorInfo.save();
     }
 
-    await this.logActivity(userId, 'Audit', 'Profile Updated', 'User changed profile details');
+    await this.logActivity(
+      userId,
+      'Audit',
+      'Profile Updated',
+      'User changed profile details',
+    );
     return this.getProfile(userId);
   }
 
@@ -163,7 +187,12 @@ export class ProfileService {
 
     user.profilePhoto = avatarUrl;
     await user.save();
-    await this.logActivity(userId, 'Audit', 'Avatar Updated', 'User updated profile photo');
+    await this.logActivity(
+      userId,
+      'Audit',
+      'Avatar Updated',
+      'User updated profile photo',
+    );
     return { profilePhoto: user.profilePhoto };
   }
 
@@ -183,25 +212,43 @@ export class ProfileService {
       ...dto,
       userId: new Types.ObjectId(userId),
     });
-    await this.logActivity(userId, 'Audit', 'Address Added', `Added address: ${dto.fullName}, ${dto.city}`);
+    await this.logActivity(
+      userId,
+      'Audit',
+      'Address Added',
+      `Added address: ${dto.fullName}, ${dto.city}`,
+    );
     return address;
   }
 
   async updateAddress(userId: string, addressId: string, dto: any) {
     if (dto.isDefault) {
       await this.addressRepository.update(
-        { userId: new Types.ObjectId(userId), _id: { $ne: new Types.ObjectId(addressId) } } as any,
+        {
+          userId: new Types.ObjectId(userId),
+          _id: { $ne: new Types.ObjectId(addressId) },
+        } as any,
         { isDefault: false },
       );
     }
     const updated = await this.addressRepository.update(addressId, dto);
-    await this.logActivity(userId, 'Audit', 'Address Updated', `Updated address: ${addressId}`);
+    await this.logActivity(
+      userId,
+      'Audit',
+      'Address Updated',
+      `Updated address: ${addressId}`,
+    );
     return updated;
   }
 
   async deleteAddress(userId: string, addressId: string) {
     await this.addressRepository.delete(addressId);
-    await this.logActivity(userId, 'Audit', 'Address Deleted', `Deleted address: ${addressId}`);
+    await this.logActivity(
+      userId,
+      'Audit',
+      'Address Deleted',
+      `Deleted address: ${addressId}`,
+    );
     return { success: true };
   }
 
@@ -210,15 +257,29 @@ export class ProfileService {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    const matches = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+    const matches = await bcrypt.compare(
+      dto.currentPassword,
+      user.passwordHash,
+    );
     if (!matches) throw new BadRequestException('Incorrect current password');
 
-    const passwordHistoryCheck = await bcrypt.compare(dto.newPassword, user.passwordHash);
-    if (passwordHistoryCheck) throw new BadRequestException('New password cannot be the same as your old password');
+    const passwordHistoryCheck = await bcrypt.compare(
+      dto.newPassword,
+      user.passwordHash,
+    );
+    if (passwordHistoryCheck)
+      throw new BadRequestException(
+        'New password cannot be the same as your old password',
+      );
 
     user.passwordHash = await bcrypt.hash(dto.newPassword, 10);
     await user.save();
-    await this.logActivity(userId, 'Security', 'Password Changed', 'User modified credential password');
+    await this.logActivity(
+      userId,
+      'Security',
+      'Password Changed',
+      'User modified credential password',
+    );
     return { success: true };
   }
 
@@ -239,7 +300,12 @@ export class ProfileService {
     }
 
     await user.save();
-    await this.logActivity(userId, 'Security', '2FA Status Modified', `Set 2FA status: ${enabled}`);
+    await this.logActivity(
+      userId,
+      'Security',
+      '2FA Status Modified',
+      `Set 2FA status: ${enabled}`,
+    );
     return { mfaEnabled: user.mfaEnabled, backupCodes: user.backupCodes };
   }
 
@@ -256,7 +322,12 @@ export class ProfileService {
 
     user.devices = (user.devices || []).filter((d) => d.deviceId !== deviceId);
     await user.save();
-    await this.logActivity(userId, 'Security', 'Session Revoked', `Revoked device session: ${deviceId}`);
+    await this.logActivity(
+      userId,
+      'Security',
+      'Session Revoked',
+      `Revoked device session: ${deviceId}`,
+    );
     return user.devices;
   }
 
@@ -264,18 +335,32 @@ export class ProfileService {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    user.devices = (user.devices || []).filter((d) => d.deviceId === currentDeviceId);
+    user.devices = (user.devices || []).filter(
+      (d) => d.deviceId === currentDeviceId,
+    );
     await user.save();
-    await this.logActivity(userId, 'Security', 'Other Sessions Revoked', 'Cleared all other device tokens');
+    await this.logActivity(
+      userId,
+      'Security',
+      'Other Sessions Revoked',
+      'Cleared all other device tokens',
+    );
     return user.devices;
   }
 
   // WALLET & LOYALTY
   async getWalletTransactions(userId: string) {
-    return this.walletTransactionRepository.find({ userId: new Types.ObjectId(userId) }, { sort: { createdAt: -1 } });
+    return this.walletTransactionRepository.find(
+      { userId: new Types.ObjectId(userId) },
+      { sort: { createdAt: -1 } },
+    );
   }
 
-  async addWalletFunds(userId: string, amount: number, description: string = 'Add cash funds') {
+  async addWalletFunds(
+    userId: string,
+    amount: number,
+    description: string = 'Add cash funds',
+  ) {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
@@ -290,7 +375,12 @@ export class ProfileService {
       status: 'Completed',
     });
 
-    await this.logActivity(userId, 'Audit', 'Funds Added', `Added $${amount} to wallet balance`);
+    await this.logActivity(
+      userId,
+      'Audit',
+      'Funds Added',
+      `Added $${amount} to wallet balance`,
+    );
     return { walletBalance: user.walletBalance };
   }
 
@@ -316,13 +406,23 @@ export class ProfileService {
       status: 'Completed',
     });
 
-    await this.logActivity(userId, 'Audit', 'Points Converted', `Converted ${points} points to $${credit}`);
-    return { rewardPoints: user.rewardPoints, walletBalance: user.walletBalance };
+    await this.logActivity(
+      userId,
+      'Audit',
+      'Points Converted',
+      `Converted ${points} points to $${credit}`,
+    );
+    return {
+      rewardPoints: user.rewardPoints,
+      walletBalance: user.walletBalance,
+    };
   }
 
   // SAVED PAYMENT METHODS
   async getPaymentMethods(userId: string) {
-    return this.paymentMethodRepository.find({ userId: new Types.ObjectId(userId) });
+    return this.paymentMethodRepository.find({
+      userId: new Types.ObjectId(userId),
+    });
   }
 
   async addPaymentMethod(userId: string, dto: any) {
@@ -336,19 +436,31 @@ export class ProfileService {
       ...dto,
       userId: new Types.ObjectId(userId),
     });
-    await this.logActivity(userId, 'Audit', 'Payment Method Added', `Saved payment type: ${dto.type}`);
+    await this.logActivity(
+      userId,
+      'Audit',
+      'Payment Method Added',
+      `Saved payment type: ${dto.type}`,
+    );
     return pay;
   }
 
   async deletePaymentMethod(userId: string, paymentId: string) {
     await this.paymentMethodRepository.delete(paymentId);
-    await this.logActivity(userId, 'Audit', 'Payment Method Deleted', `Deleted payment method ID: ${paymentId}`);
+    await this.logActivity(
+      userId,
+      'Audit',
+      'Payment Method Deleted',
+      `Deleted payment method ID: ${paymentId}`,
+    );
     return { success: true };
   }
 
   // REFERRALS
   async getReferrals(userId: string) {
-    const referrals = await this.referralRepository.find({ referrerId: new Types.ObjectId(userId) });
+    const referrals = await this.referralRepository.find({
+      referrerId: new Types.ObjectId(userId),
+    });
     // Join with referred user details manually/simulated
     const joined = [];
     for (const r of referrals) {
@@ -366,12 +478,18 @@ export class ProfileService {
 
   // AUDIT LOGS
   async getAuditLogs(userId: string) {
-    return this.logRepository.find({ userId: new Types.ObjectId(userId) }, { sort: { createdAt: -1 } });
+    return this.logRepository.find(
+      { userId: new Types.ObjectId(userId) },
+      { sort: { createdAt: -1 } },
+    );
   }
 
   // TICKETS & HELP
   async getTickets(userId: string) {
-    return this.ticketRepository.find({ userId: new Types.ObjectId(userId) }, { sort: { createdAt: -1 } });
+    return this.ticketRepository.find(
+      { userId: new Types.ObjectId(userId) },
+      { sort: { createdAt: -1 } },
+    );
   }
 
   async createTicket(userId: string, dto: any) {
@@ -388,7 +506,12 @@ export class ProfileService {
         },
       ],
     });
-    await this.logActivity(userId, 'Audit', 'Ticket Raised', `Raised support ticket: ${dto.subject}`);
+    await this.logActivity(
+      userId,
+      'Audit',
+      'Ticket Raised',
+      `Raised support ticket: ${dto.subject}`,
+    );
     return ticket;
   }
 
@@ -396,12 +519,19 @@ export class ProfileService {
   async exportData(userId: string) {
     const profile = await this.getProfile(userId);
     const addresses = await this.getAddresses(userId);
-    const orders = await this.orderRepository.find({ userId: new Types.ObjectId(userId) });
+    const orders = await this.orderRepository.find({
+      userId: new Types.ObjectId(userId),
+    });
     const tickets = await this.getTickets(userId);
     const payments = await this.getPaymentMethods(userId);
     const logs = await this.getAuditLogs(userId);
 
-    await this.logActivity(userId, 'Security', 'GDPR Export Triggered', 'User requested full GDPR data portability export');
+    await this.logActivity(
+      userId,
+      'Security',
+      'GDPR Export Triggered',
+      'User requested full GDPR data portability export',
+    );
 
     return {
       exportedAt: new Date(),
@@ -421,7 +551,12 @@ export class ProfileService {
 
     user.accountStatus = 'Pending Deletion';
     await user.save();
-    await this.logActivity(userId, 'Security', 'Deletion Request Submitted', 'GDPR right to be forgotten requested');
+    await this.logActivity(
+      userId,
+      'Security',
+      'Deletion Request Submitted',
+      'GDPR right to be forgotten requested',
+    );
     return { success: true, message: 'Account scheduled for deletion' };
   }
 }

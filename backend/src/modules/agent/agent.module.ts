@@ -16,6 +16,9 @@ import { SalesModule } from '../sales/sales.module';
 import { SupportModule } from '../support/support.module';
 import { CatalogModule } from '../catalog/catalog.module';
 import { ProfileModule } from '../profile/profile.module';
+import { PaymentModule } from '../payment/payment.module';
+import { VoiceModule } from '../voice/voice.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -29,6 +32,9 @@ import { ProfileModule } from '../profile/profile.module';
     SupportModule,
     CatalogModule,
     ProfileModule,
+    PaymentModule,
+    VoiceModule,
+    NotificationModule,
   ],
   controllers: [AgentController],
   providers: [AgentService, AgentMemoryService],

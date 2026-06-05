@@ -78,4 +78,89 @@ export class SupportController {
   ) {
     return this.supportService.updateTicketStatus(id, status);
   }
+
+  // --- LIVE CHAT FEATURES ---
+
+  @Post('agent/status')
+  @UseGuards(RolesGuard)
+  @Roles('Admin', 'Super Admin', 'Customer Support')
+  @ApiOperation({ summary: 'Set agent status (Staff)' })
+  async setAgentStatus(@Request() req: any, @Body('status') status: string) {
+    return this.supportService.setAgentStatus(req.user.id, status);
+  }
+
+  @Post('agent/notes')
+  @UseGuards(RolesGuard)
+  @Roles('Admin', 'Super Admin', 'Customer Support')
+  @ApiOperation({ summary: 'Add agent note (Staff)' })
+  async addAgentNote(@Request() req: any, @Body('note') note: string) {
+    return this.supportService.addAgentNote(req.user.id, note);
+  }
+
+  @Get('agents/available')
+  @ApiOperation({ summary: 'Get list of available support agents' })
+  async getAvailableAgents() {
+    return this.supportService.getAvailableAgents();
+  }
+
+  @Post('chat/session')
+  @ApiOperation({ summary: 'Start a live chat session (Handoff)' })
+  async startLiveChat(@Request() req: any) {
+    return this.supportService.startLiveChatSession(req.user.id);
+  }
+
+  @Post('chat/session/:id/message')
+  @ApiOperation({ summary: 'Send message in a live chat session' })
+  async sendChatMessage(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body('senderName') senderName: string,
+    @Body('message') message: string,
+  ) {
+    return this.supportService.sendChatMessage(
+      id,
+      req.user.id,
+      senderName || 'User',
+      message,
+    );
+  }
+
+  @Post('chat/session/:id/rate')
+  @ApiOperation({ summary: 'Rate a closed live chat session' })
+  async rateSession(@Param('id') id: string, @Body('rating') rating: number) {
+    return this.supportService.rateLiveChatSession(id, rating);
+  }
+
+  @Post('chat/session/:id/close')
+  @ApiOperation({ summary: 'Force close active live chat session' })
+  async closeSession(@Param('id') id: string, @Body('rating') rating?: number) {
+    return this.supportService.forceCloseSession(id, rating);
+  }
+
+  @Post('chat/session/:id/transfer')
+  @UseGuards(RolesGuard)
+  @Roles('Admin', 'Super Admin', 'Customer Support')
+  @ApiOperation({
+    summary: 'Transfer active chat session to another agent (Staff)',
+  })
+  async transferSession(
+    @Param('id') id: string,
+    @Body('targetAgentId') targetAgentId: string,
+  ) {
+    return this.supportService.transferSession(id, targetAgentId);
+  }
+
+  @Get('chat/sessions/active')
+  @UseGuards(RolesGuard)
+  @Roles('Admin', 'Super Admin', 'Customer Support')
+  @ApiOperation({ summary: 'Monitor active live chat sessions (Admin/Staff)' })
+  async getActiveSessions() {
+    return this.supportService.getActiveSessions();
+  }
+
+  @Get('chat/sessions/history')
+  @ApiOperation({ summary: 'Get user live chat session history' })
+  async getSessionHistory(@Request() req: any) {
+    return this.supportService.getSessionHistory(req.user.id);
+  }
 }

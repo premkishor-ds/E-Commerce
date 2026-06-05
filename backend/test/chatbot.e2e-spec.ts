@@ -6,7 +6,6 @@ import { CatalogService } from '../src/modules/catalog/catalog.service';
 import { SalesService } from '../src/modules/sales/sales.service';
 import { ProfileService } from '../src/modules/profile/profile.service';
 import { AuthService } from '../src/modules/auth/auth.service';
-import { MongooseModule } from '@nestjs/mongoose';
 import { connection } from 'mongoose';
 
 describe('Chatbot Conversational Flows (e2e)', () => {
@@ -81,7 +80,6 @@ describe('Chatbot Conversational Flows (e2e)', () => {
   describe('Advanced E-Commerce Flows (Cart, Checkout, Alerts & Modifications)', () => {
     let testUser: any;
     let testProduct: any;
-    let token: string;
     let userId: string;
 
     beforeAll(async () => {
@@ -90,14 +88,13 @@ describe('Chatbot Conversational Flows (e2e)', () => {
       const pass = 'password123';
       const registerRes = await authService.register({ email, password: pass });
       testUser = registerRes.user;
-      token = registerRes.accessToken;
       userId = String(testUser._id);
 
       // Give loyalty points and wallet balance to make payments possible
       const profile = await profileService.getProfile(userId);
       profile.walletBalance = 1000;
       profile.rewardPoints = 500;
-      await (profile as any).save();
+      await profile.save();
 
       // Add default shipping address
       await profileService.addAddress(userId, {
@@ -119,12 +116,18 @@ describe('Chatbot Conversational Flows (e2e)', () => {
         variants: {
           color: ['Black', 'White'],
         },
-        category: (await (catalogService as any).categoryRepository.findOne({}))?._id || new connection.models.Category()._id,
-        brand: (await (catalogService as any).brandRepository.findOne({}))?._id || new connection.models.Brand()._id,
+        category:
+          (await (catalogService as any).categoryRepository.findOne({}))?._id ||
+          new connection.models.Category()._id,
+        brand:
+          (await (catalogService as any).brandRepository.findOne({}))?._id ||
+          new connection.models.Brand()._id,
       });
 
       // Update inventory flags
-      const inv = await salesService.getInventoryByProductId(String(testProduct._id));
+      const inv = await salesService.getInventoryByProductId(
+        String(testProduct._id),
+      );
       if (inv) {
         inv.stock = 10;
         (inv as any).allowPreorder = true;
@@ -140,7 +143,9 @@ describe('Chatbot Conversational Flows (e2e)', () => {
         userId,
       });
       expect(res.nextStep).toBe('VARIANT_SELECT');
-      expect(res.reply).toContain('Which variant of Apex Gaming Mouse would you like?');
+      expect(res.reply).toContain(
+        'Which variant of Apex Gaming Mouse would you like?',
+      );
     });
 
     it('should add to cart when variant is selected', async () => {
@@ -149,7 +154,10 @@ describe('Chatbot Conversational Flows (e2e)', () => {
         sessionId: 'session-cart-1',
         userId,
         activeStep: 'VARIANT_SELECT',
-        stepData: { productId: String(testProduct._id), combos: ['Black', 'White'] },
+        stepData: {
+          productId: String(testProduct._id),
+          combos: ['Black', 'White'],
+        },
       });
       expect(res.reply).toContain('Added to Cart!');
       expect(res.reply).toContain('Apex Gaming Mouse (Black)');
@@ -206,16 +214,24 @@ describe('Chatbot Conversational Flows (e2e)', () => {
 
       // Check user profile alert list
       const profile = await profileService.getProfile(userId);
-      const matchingAlert = profile.priceAlerts.find(a => a.productId === String(testProduct._id));
+      const matchingAlert = profile.priceAlerts.find(
+        (a) => a.productId === String(testProduct._id),
+      );
       expect(matchingAlert).toBeDefined();
       expect(matchingAlert?.targetPrice).toBe(50);
 
       // Simulate price update to trigger alert
-      await catalogService.updateProduct(String(testProduct._id), { price: 45 });
-      
+      await catalogService.updateProduct(String(testProduct._id), {
+        price: 45,
+      });
+
       // Verification: Check if notification was created
-      const notifications = await (salesService as any).notificationRepository.find({ userId: testUser._id });
-      const alertNotification = notifications.find((n: any) => n.type === 'Alert');
+      const notifications = await (
+        salesService as any
+      ).notificationRepository.find({ userId: testUser._id });
+      const alertNotification = notifications.find(
+        (n: any) => n.type === 'Alert',
+      );
       expect(alertNotification).toBeDefined();
       expect(alertNotification.message).toContain('Price Drop!');
     });

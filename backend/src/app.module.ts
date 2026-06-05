@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SchemasModule } from './schemas/schemas.module';
@@ -14,6 +16,9 @@ import { SeoModule } from './modules/seo/seo.module';
 // import { AppAdminModule } from './modules/admin/admin.module';
 import { AgentModule } from './modules/agent/agent.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { PaymentModule } from './modules/payment/payment.module';
+import { VoiceModule } from './modules/voice/voice.module';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -40,8 +45,23 @@ import { ProfileModule } from './modules/profile/profile.module';
     // AppAdminModule, // Disabled — @adminjs/nestjs package has broken exports
     AgentModule,
     ProfileModule,
+    PaymentModule,
+    VoiceModule,
+    NotificationModule,
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

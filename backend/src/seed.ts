@@ -347,9 +347,6 @@ async function seed() {
   }
   console.log('Inserted Products & Inventories.');
 
-  // Helper map for products
-  const prodMap = new Map(products.map((p) => [p.sku, p]));
-
   // 4. Insert 10 Users and their personalized activities
   for (let i = 0; i < usersData.length; i++) {
     const uData = usersData[i];
@@ -411,7 +408,7 @@ async function seed() {
       'Paid',
       'Delivered',
     ];
-    const order = await Order.create({
+    await Order.create({
       userId: user._id,
       items: [
         {

@@ -144,7 +144,9 @@ export class AgentMemoryService {
         });
       } catch (err: any) {
         if (err.code === 11000) {
-          const fallback = await this.memoryModel.findOne({ userId: uObjectId });
+          const fallback = await this.memoryModel.findOne({
+            userId: uObjectId,
+          });
           if (fallback) return fallback;
         }
         throw err;
@@ -227,7 +229,7 @@ export class AgentMemoryService {
           }
         }
         await userCart.save();
-      } catch (e) {
+      } catch {
         // Log or handle dynamic model load error
       }
     }
@@ -252,7 +254,7 @@ export class AgentMemoryService {
           }
         }
         await userWish.save();
-      } catch (e) {
+      } catch {
         // Log or handle
       }
     }
@@ -270,6 +272,7 @@ export class AgentMemoryService {
   async getFullContext(
     sessionId: string,
     userId?: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     guestId?: string,
   ): Promise<{
     recentMessages: { role: string; text: string }[];

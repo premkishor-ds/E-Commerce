@@ -22,6 +22,11 @@ import {
   PaymentMethodRepository,
   WalletTransactionRepository,
   ReferralRepository,
+  RefundTransactionRepository,
+  PaymentAuditLogRepository,
+  PaymentWebhookLogRepository,
+  AgentStatusRepository,
+  LiveChatSessionRepository,
 } from './concrete.repositories';
 
 const REPOSITORIES = [
@@ -46,6 +51,11 @@ const REPOSITORIES = [
   PaymentMethodRepository,
   WalletTransactionRepository,
   ReferralRepository,
+  RefundTransactionRepository,
+  PaymentAuditLogRepository,
+  PaymentWebhookLogRepository,
+  AgentStatusRepository,
+  LiveChatSessionRepository,
 ];
 
 @Global()

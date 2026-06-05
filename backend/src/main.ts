@@ -24,7 +24,7 @@ async function setupAdminJS(app: any) {
       path.join(process.cwd(), 'node_modules/express-session/index.js'),
     ).href;
 
-    // Use a dynamic Function constructor call to import ESM files so TypeScript doesn't rewrite them to require()
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     const dynamicImport = new Function('p', 'return import(p)');
 
     const [
@@ -32,13 +32,11 @@ async function setupAdminJS(app: any) {
       AdminJSMongoose,
       { buildAuthenticatedRouter },
       session,
-      { default: mongoose },
     ] = await Promise.all([
       dynamicImport(adminJSPath),
       dynamicImport(mongoosePath),
       dynamicImport(expressPath),
       dynamicImport(sessionPath),
-      dynamicImport('mongoose'),
     ]);
 
     // Register the Mongoose adapter
