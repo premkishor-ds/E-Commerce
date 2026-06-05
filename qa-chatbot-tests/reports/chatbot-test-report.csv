@@ -1659,6 +1659,8 @@ Type the **product name** to see details, or **""add [name] to cart""** to purch
 • **Samsung Laptop - ORANGE (6)** — $50000.00 ⭐4.6
 
 Type the **product name** to see details, or **""add [name] to cart""** to purchase!","SEARCH_PRODUCT","PASS",10,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_012","Follow-Ups","Show me Sony","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_013","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
 "FOLLOW_UP_021","Follow-Ups","I need a new mouse","SEARCH_PRODUCT","None","🔍 **Found 144 products** for ""mouse"":
 
 • **Samsung Mouse - ORANGE (12)** — $990.00 ⭐4.3
@@ -1667,8 +1669,6 @@ Type the **product name** to see details, or **""add [name] to cart""** to purch
 • **Samsung Mouse - ORANGE (6)** — $80.00 ⭐4
 
 Type the **product name** to see details, or **""add [name] to cart""** to purchase!","SEARCH_PRODUCT","PASS",10,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_012","Follow-Ups","Show me Sony","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_013","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
 "FOLLOW_UP_002","Follow-Ups","Show me Apple","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_003","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
 "FOLLOW_UP_007","Follow-Ups","Show me Samsung","SEARCH_PRODUCT","None","🔍 **Found 144 products** for ""Samsung phone"":
@@ -1687,29 +1687,29 @@ Type the **product name** to see details, or **""add [name] to cart""** to purch
 ✅ **Samsung Laptop - ORANGE (12)** ($485.00) has been added to your cart.
 
 Would you like to **checkout now** or continue shopping?","ADD_CART","PASS",10,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_016","Follow-Ups","I need a new keyboard","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_009","Follow-Ups","Put it in my cart","ADD_CART","None","🛒 **Added to Cart!**
 
 ✅ **Samsung Phone - ORANGE (12)** ($180.00) has been added to your cart.
 
 Would you like to **checkout now** or continue shopping?","ADD_CART","PASS",10,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_016","Follow-Ups","I need a new keyboard","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_014","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_024","Follow-Ups","Put it in my cart","ADD_CART","None","🛒 **Added to Cart!**
 
 ✅ **Samsung Mouse - ORANGE (12)** ($990.00) has been added to your cart.
 
 Would you like to **checkout now** or continue shopping?","ADD_CART","PASS",10,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_015","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
-
-You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_014","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_005","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_010","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
+"FOLLOW_UP_015","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_017","Follow-Ups","Show me Dell","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_018","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
+"FOLLOW_UP_010","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
+
+You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_025","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
@@ -1735,11 +1735,13 @@ Type the **product name** to see details, or **""add [name] to cart""** to purch
 
 Type the **product name** to see details, or **""add [name] to cart""** to purchase!","SEARCH_PRODUCT","PASS",10,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_038","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
+"FOLLOW_UP_031","Follow-Ups","I need a new camera","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_041","Follow-Ups","I need a new speaker","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_046","Follow-Ups","I need a new tablet","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_027","Follow-Ups","Show me Lenovo","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_028","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
-"FOLLOW_UP_041","Follow-Ups","I need a new speaker","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_031","Follow-Ups","I need a new camera","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_032","Follow-Ups","Show me Asus","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_033","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
 "FOLLOW_UP_047","Follow-Ups","Show me LG","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_048","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
 "FOLLOW_UP_039","Follow-Ups","Put it in my cart","ADD_CART","None","🛒 **Added to Cart!**
@@ -1747,72 +1749,62 @@ Type the **product name** to see details, or **""add [name] to cart""** to purch
 ✅ **Samsung Watch - ORANGE (12)** ($20000.00) has been added to your cart.
 
 Would you like to **checkout now** or continue shopping?","ADD_CART","PASS",10,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_029","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_032","Follow-Ups","Show me Asus","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_033","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
 "FOLLOW_UP_040","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_042","Follow-Ups","Show me Bose","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_043","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
+"FOLLOW_UP_034","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_029","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_049","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_035","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
+
+You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_030","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_043","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
-"FOLLOW_UP_049","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_050","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
-
-You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_034","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_035","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_044","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_045","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_056","Follow-Ups","I need a new cable","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_051","Follow-Ups","I need a new charger","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_056","Follow-Ups","I need a new cable","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_061","Follow-Ups","I need a new backpack","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_066","Follow-Ups","I need a new desk lamp","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_062","Follow-Ups","Show me Nvidia","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_063","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
-"FOLLOW_UP_071","Follow-Ups","I need a new router","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_067","Follow-Ups","Show me Xiaomi","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_068","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
-"FOLLOW_UP_072","Follow-Ups","Show me OnePlus","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_073","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
-"FOLLOW_UP_057","Follow-Ups","Show me AMD","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_058","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
-"FOLLOW_UP_069","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_052","Follow-Ups","Show me Intel","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_053","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
+"FOLLOW_UP_067","Follow-Ups","Show me Xiaomi","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_068","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
+"FOLLOW_UP_062","Follow-Ups","Show me Nvidia","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_057","Follow-Ups","Show me AMD","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_063","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
+"FOLLOW_UP_058","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
+"FOLLOW_UP_071","Follow-Ups","I need a new router","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_054","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_072","Follow-Ups","Show me OnePlus","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_073","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
+"FOLLOW_UP_059","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_064","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_074","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_070","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
+"FOLLOW_UP_069","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_055","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
+
+You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_060","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_065","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_070","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
+
+You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_074","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_075","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_059","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_054","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_060","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
-
-You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_055","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
-
-You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_076","Follow-Ups","I need a new microphone","SEARCH_PRODUCT","None","🔍 **Found 144 products** for ""phone"":
-
-• **Samsung Phone - ORANGE (12)** — $180.00 ⭐4.5
-• **Samsung Phone - ORANGE (11)** — $85.00 ⭐4.4
-• **Samsung Phone - ORANGE (7)** — $49800.00 ⭐4.3
-• **Samsung Phone - ORANGE (6)** — $19900.00 ⭐4.2
-
-Type the **product name** to see details, or **""add [name] to cart""** to purchase!","SEARCH_PRODUCT","PASS",10,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_086","Follow-Ups","I need a new earbuds","SEARCH_PRODUCT","None","🔍 **Found 132 products** for ""I earbuds"":
 
 • **Samsung Earbuds - PURPLE (12)** — $49900.00 ⭐4.7
@@ -1821,7 +1813,15 @@ Type the **product name** to see details, or **""add [name] to cart""** to purch
 • **Samsung Earbuds - PURPLE (6)** — $985.00 ⭐4.4
 
 Type the **product name** to see details, or **""add [name] to cart""** to purchase!","SEARCH_PRODUCT","PASS",10,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_096","Follow-Ups","I need a new graphics card","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_076","Follow-Ups","I need a new microphone","SEARCH_PRODUCT","None","🔍 **Found 144 products** for ""phone"":
+
+• **Samsung Phone - ORANGE (12)** — $180.00 ⭐4.5
+• **Samsung Phone - ORANGE (11)** — $85.00 ⭐4.4
+• **Samsung Phone - ORANGE (7)** — $49800.00 ⭐4.3
+• **Samsung Phone - ORANGE (6)** — $19900.00 ⭐4.2
+
+Type the **product name** to see details, or **""add [name] to cart""** to purchase!","SEARCH_PRODUCT","PASS",10,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_091","Follow-Ups","I need a new hard drive","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_077","Follow-Ups","Show me Microsoft","SEARCH_PRODUCT","None","🔍 **Found 144 products** for ""phone"":
 
 • **Samsung Phone - ORANGE (12)** — $180.00 ⭐4.5
@@ -1831,6 +1831,7 @@ Type the **product name** to see details, or **""add [name] to cart""** to purch
 
 Type the **product name** to see details, or **""add [name] to cart""** to purchase!","SEARCH_PRODUCT","PASS",10,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_078","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
+"FOLLOW_UP_096","Follow-Ups","I need a new graphics card","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_081","Follow-Ups","I need a new projector","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_087","Follow-Ups","Show me Samsung","SEARCH_PRODUCT","None","🔍 **Found 996 products** for ""Samsung"":
 
@@ -1840,19 +1841,18 @@ Type the **product name** to see details, or **""add [name] to cart""** to purch
 • **Samsung Earbuds - PURPLE (6)** — $985.00 ⭐4.4
 
 Type the **product name** to see details, or **""add [name] to cart""** to purchase!","SEARCH_PRODUCT","PASS",10,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_091","Follow-Ups","I need a new hard drive","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_088","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
+"FOLLOW_UP_092","Follow-Ups","Show me Sony","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_093","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
 "FOLLOW_UP_097","Follow-Ups","Show me Dell","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_098","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
-"FOLLOW_UP_082","Follow-Ups","Show me Apple","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_083","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
 "FOLLOW_UP_079","Follow-Ups","Put it in my cart","ADD_CART","None","🛒 **Added to Cart!**
 
 ✅ **Samsung Phone - ORANGE (12)** ($180.00) has been added to your cart.
 
 Would you like to **checkout now** or continue shopping?","ADD_CART","PASS",10,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_092","Follow-Ups","Show me Sony","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_093","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
+"FOLLOW_UP_082","Follow-Ups","Show me Apple","SEARCH_PRODUCT","None","🔍 No matching products found.","SEARCH_PRODUCT","PASS",7,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_083","Follow-Ups","What is the return policy?","GET_PRODUCT","None","Please **login** to request a return or refund.","RETURN_ORDER","FAIL",0,"Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])"
 "FOLLOW_UP_089","Follow-Ups","Put it in my cart","ADD_CART","None","🛒 **Added to Cart!**
 
 ✅ **Samsung Earbuds - PURPLE (12)** ($49900.00) has been added to your cart.
@@ -1861,18 +1861,18 @@ Would you like to **checkout now** or continue shopping?","ADD_CART","PASS",10,"
 "FOLLOW_UP_080","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_094","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_099","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_084","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_095","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
+
+You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_100","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_090","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
+"FOLLOW_UP_084","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
 "FOLLOW_UP_085","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
-
-You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_094","Follow-Ups","Put it in my cart","ADD_CART","None","❌ Couldn't find a matching product to add to the cart. Please search for the product first.","ADD_CART","PASS",5,"The chatbot understood the user intent and responded appropriately."
-"FOLLOW_UP_095","Follow-Ups","Go to checkout","CHECKOUT","None","🛒 **Checkout options:**
 
 You are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?","CHECKOUT","PASS",9,"The chatbot understood the user intent and responded appropriately."

@@ -18250,23 +18250,6 @@
       "confidenceScore": 10
     },
     {
-      "testId": "FOLLOW_UP_021",
-      "category": "Follow-Ups",
-      "query": "I need a new mouse",
-      "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 144 products** for \"mouse\":\n\n• **Samsung Mouse - ORANGE (12)** — $990.00 ⭐4.3\n• **Samsung Mouse - ORANGE (11)** — $495.00 ⭐4.2\n• **Samsung Mouse - ORANGE (7)** — $200.00 ⭐4.1\n• **Samsung Mouse - ORANGE (6)** — $80.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
-      "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 10
-    },
-    {
       "testId": "FOLLOW_UP_012",
       "category": "Follow-Ups",
       "query": "Show me Sony",
@@ -18299,6 +18282,23 @@
       "result": "FAIL",
       "analysis": "Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])",
       "confidenceScore": 0
+    },
+    {
+      "testId": "FOLLOW_UP_021",
+      "category": "Follow-Ups",
+      "query": "I need a new mouse",
+      "expectedGoal": "SEARCH_PRODUCT",
+      "actualResponse": "🔍 **Found 144 products** for \"mouse\":\n\n• **Samsung Mouse - ORANGE (12)** — $990.00 ⭐4.3\n• **Samsung Mouse - ORANGE (11)** — $495.00 ⭐4.2\n• **Samsung Mouse - ORANGE (7)** — $200.00 ⭐4.1\n• **Samsung Mouse - ORANGE (6)** — $80.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "FOLLOW_UP_002",
@@ -18431,6 +18431,23 @@
       "confidenceScore": 10
     },
     {
+      "testId": "FOLLOW_UP_016",
+      "category": "Follow-Ups",
+      "query": "I need a new keyboard",
+      "expectedGoal": "SEARCH_PRODUCT",
+      "actualResponse": "🔍 No matching products found.",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 7
+    },
+    {
       "testId": "FOLLOW_UP_009",
       "category": "Follow-Ups",
       "query": "Put it in my cart",
@@ -18457,40 +18474,6 @@
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
       "confidenceScore": 10
-    },
-    {
-      "testId": "FOLLOW_UP_016",
-      "category": "Follow-Ups",
-      "query": "I need a new keyboard",
-      "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 No matching products found.",
-      "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 7
-    },
-    {
-      "testId": "FOLLOW_UP_014",
-      "category": "Follow-Ups",
-      "query": "Put it in my cart",
-      "expectedGoal": "ADD_CART",
-      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
-      "actualIntent": "ADD_CART",
-      "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
     },
     {
       "testId": "FOLLOW_UP_024",
@@ -18521,22 +18504,13 @@
       "confidenceScore": 10
     },
     {
-      "testId": "FOLLOW_UP_015",
+      "testId": "FOLLOW_UP_014",
       "category": "Follow-Ups",
-      "query": "Go to checkout",
-      "expectedGoal": "CHECKOUT",
-      "actualResponse": "🛒 **Checkout options:**\n\nYou are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?",
-      "actualIntent": "CHECKOUT",
-      "actualActions": [
-        {
-          "type": "CHECKOUT",
-          "payload": {
-            "total": 0,
-            "couponCode": "",
-            "discount": 0
-          }
-        }
-      ],
+      "query": "Put it in my cart",
+      "expectedGoal": "ADD_CART",
+      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
+      "actualIntent": "ADD_CART",
+      "actualActions": [],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -18544,7 +18518,7 @@
       "contextMaintained": true,
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 9
+      "confidenceScore": 5
     },
     {
       "testId": "FOLLOW_UP_005",
@@ -18557,7 +18531,7 @@
         {
           "type": "CHECKOUT",
           "payload": {
-            "total": 2910,
+            "total": 3395,
             "couponCode": "",
             "discount": 0
           }
@@ -18573,7 +18547,7 @@
       "confidenceScore": 9
     },
     {
-      "testId": "FOLLOW_UP_010",
+      "testId": "FOLLOW_UP_015",
       "category": "Follow-Ups",
       "query": "Go to checkout",
       "expectedGoal": "CHECKOUT",
@@ -18583,7 +18557,7 @@
         {
           "type": "CHECKOUT",
           "payload": {
-            "total": 900,
+            "total": 0,
             "couponCode": "",
             "discount": 0
           }
@@ -18633,6 +18607,32 @@
       "confidenceScore": 0
     },
     {
+      "testId": "FOLLOW_UP_010",
+      "category": "Follow-Ups",
+      "query": "Go to checkout",
+      "expectedGoal": "CHECKOUT",
+      "actualResponse": "🛒 **Checkout options:**\n\nYou are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?",
+      "actualIntent": "CHECKOUT",
+      "actualActions": [
+        {
+          "type": "CHECKOUT",
+          "payload": {
+            "total": 1080,
+            "couponCode": "",
+            "discount": 0
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 9
+    },
+    {
       "testId": "FOLLOW_UP_025",
       "category": "Follow-Ups",
       "query": "Go to checkout",
@@ -18643,7 +18643,7 @@
         {
           "type": "CHECKOUT",
           "payload": {
-            "total": 1980,
+            "total": 2970,
             "couponCode": "",
             "discount": 0
           }
@@ -18770,6 +18770,40 @@
       "confidenceScore": 0
     },
     {
+      "testId": "FOLLOW_UP_031",
+      "category": "Follow-Ups",
+      "query": "I need a new camera",
+      "expectedGoal": "SEARCH_PRODUCT",
+      "actualResponse": "🔍 No matching products found.",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 7
+    },
+    {
+      "testId": "FOLLOW_UP_041",
+      "category": "Follow-Ups",
+      "query": "I need a new speaker",
+      "expectedGoal": "SEARCH_PRODUCT",
+      "actualResponse": "🔍 No matching products found.",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 7
+    },
+    {
       "testId": "FOLLOW_UP_046",
       "category": "Follow-Ups",
       "query": "I need a new tablet",
@@ -18821,9 +18855,9 @@
       "confidenceScore": 0
     },
     {
-      "testId": "FOLLOW_UP_041",
+      "testId": "FOLLOW_UP_032",
       "category": "Follow-Ups",
-      "query": "I need a new speaker",
+      "query": "Show me Asus",
       "expectedGoal": "SEARCH_PRODUCT",
       "actualResponse": "🔍 No matching products found.",
       "actualIntent": "SEARCH_PRODUCT",
@@ -18838,21 +18872,21 @@
       "confidenceScore": 7
     },
     {
-      "testId": "FOLLOW_UP_031",
+      "testId": "FOLLOW_UP_033",
       "category": "Follow-Ups",
-      "query": "I need a new camera",
-      "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 No matching products found.",
-      "actualIntent": "SEARCH_PRODUCT",
+      "query": "What is the return policy?",
+      "expectedGoal": "GET_PRODUCT",
+      "actualResponse": "Please **login** to request a return or refund.",
+      "actualIntent": "RETURN_ORDER",
       "actualActions": [],
-      "intentMatch": true,
+      "intentMatch": false,
       "actionMatch": true,
       "relevanceMatch": true,
       "empathyMatch": true,
       "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 7
+      "result": "FAIL",
+      "analysis": "Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])",
+      "confidenceScore": 0
     },
     {
       "testId": "FOLLOW_UP_047",
@@ -18917,57 +18951,6 @@
       "confidenceScore": 10
     },
     {
-      "testId": "FOLLOW_UP_029",
-      "category": "Follow-Ups",
-      "query": "Put it in my cart",
-      "expectedGoal": "ADD_CART",
-      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
-      "actualIntent": "ADD_CART",
-      "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
-    },
-    {
-      "testId": "FOLLOW_UP_032",
-      "category": "Follow-Ups",
-      "query": "Show me Asus",
-      "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 No matching products found.",
-      "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 7
-    },
-    {
-      "testId": "FOLLOW_UP_033",
-      "category": "Follow-Ups",
-      "query": "What is the return policy?",
-      "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "Please **login** to request a return or refund.",
-      "actualIntent": "RETURN_ORDER",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "FAIL",
-      "analysis": "Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])",
-      "confidenceScore": 0
-    },
-    {
       "testId": "FOLLOW_UP_040",
       "category": "Follow-Ups",
       "query": "Go to checkout",
@@ -18978,7 +18961,7 @@
         {
           "type": "CHECKOUT",
           "payload": {
-            "total": 100000,
+            "total": 120000,
             "couponCode": "",
             "discount": 0
           }
@@ -19011,6 +18994,100 @@
       "confidenceScore": 7
     },
     {
+      "testId": "FOLLOW_UP_043",
+      "category": "Follow-Ups",
+      "query": "What is the return policy?",
+      "expectedGoal": "GET_PRODUCT",
+      "actualResponse": "Please **login** to request a return or refund.",
+      "actualIntent": "RETURN_ORDER",
+      "actualActions": [],
+      "intentMatch": false,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "FAIL",
+      "analysis": "Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])",
+      "confidenceScore": 0
+    },
+    {
+      "testId": "FOLLOW_UP_034",
+      "category": "Follow-Ups",
+      "query": "Put it in my cart",
+      "expectedGoal": "ADD_CART",
+      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
+      "actualIntent": "ADD_CART",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 5
+    },
+    {
+      "testId": "FOLLOW_UP_029",
+      "category": "Follow-Ups",
+      "query": "Put it in my cart",
+      "expectedGoal": "ADD_CART",
+      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
+      "actualIntent": "ADD_CART",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 5
+    },
+    {
+      "testId": "FOLLOW_UP_049",
+      "category": "Follow-Ups",
+      "query": "Put it in my cart",
+      "expectedGoal": "ADD_CART",
+      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
+      "actualIntent": "ADD_CART",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 5
+    },
+    {
+      "testId": "FOLLOW_UP_035",
+      "category": "Follow-Ups",
+      "query": "Go to checkout",
+      "expectedGoal": "CHECKOUT",
+      "actualResponse": "🛒 **Checkout options:**\n\nYou are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?",
+      "actualIntent": "CHECKOUT",
+      "actualActions": [
+        {
+          "type": "CHECKOUT",
+          "payload": {
+            "total": 0,
+            "couponCode": "",
+            "discount": 0
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 9
+    },
+    {
       "testId": "FOLLOW_UP_030",
       "category": "Follow-Ups",
       "query": "Go to checkout",
@@ -19037,84 +19114,7 @@
       "confidenceScore": 9
     },
     {
-      "testId": "FOLLOW_UP_043",
-      "category": "Follow-Ups",
-      "query": "What is the return policy?",
-      "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "Please **login** to request a return or refund.",
-      "actualIntent": "RETURN_ORDER",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "FAIL",
-      "analysis": "Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])",
-      "confidenceScore": 0
-    },
-    {
-      "testId": "FOLLOW_UP_049",
-      "category": "Follow-Ups",
-      "query": "Put it in my cart",
-      "expectedGoal": "ADD_CART",
-      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
-      "actualIntent": "ADD_CART",
-      "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
-    },
-    {
       "testId": "FOLLOW_UP_050",
-      "category": "Follow-Ups",
-      "query": "Go to checkout",
-      "expectedGoal": "CHECKOUT",
-      "actualResponse": "🛒 **Checkout options:**\n\nYou are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?",
-      "actualIntent": "CHECKOUT",
-      "actualActions": [
-        {
-          "type": "CHECKOUT",
-          "payload": {
-            "total": 0,
-            "couponCode": "",
-            "discount": 0
-          }
-        }
-      ],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 9
-    },
-    {
-      "testId": "FOLLOW_UP_034",
-      "category": "Follow-Ups",
-      "query": "Put it in my cart",
-      "expectedGoal": "ADD_CART",
-      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
-      "actualIntent": "ADD_CART",
-      "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
-    },
-    {
-      "testId": "FOLLOW_UP_035",
       "category": "Follow-Ups",
       "query": "Go to checkout",
       "expectedGoal": "CHECKOUT",
@@ -19183,9 +19183,9 @@
       "confidenceScore": 9
     },
     {
-      "testId": "FOLLOW_UP_056",
+      "testId": "FOLLOW_UP_051",
       "category": "Follow-Ups",
-      "query": "I need a new cable",
+      "query": "I need a new charger",
       "expectedGoal": "SEARCH_PRODUCT",
       "actualResponse": "🔍 No matching products found.",
       "actualIntent": "SEARCH_PRODUCT",
@@ -19200,9 +19200,9 @@
       "confidenceScore": 7
     },
     {
-      "testId": "FOLLOW_UP_051",
+      "testId": "FOLLOW_UP_056",
       "category": "Follow-Ups",
-      "query": "I need a new charger",
+      "query": "I need a new cable",
       "expectedGoal": "SEARCH_PRODUCT",
       "actualResponse": "🔍 No matching products found.",
       "actualIntent": "SEARCH_PRODUCT",
@@ -19251,9 +19251,9 @@
       "confidenceScore": 7
     },
     {
-      "testId": "FOLLOW_UP_062",
+      "testId": "FOLLOW_UP_052",
       "category": "Follow-Ups",
-      "query": "Show me Nvidia",
+      "query": "Show me Intel",
       "expectedGoal": "SEARCH_PRODUCT",
       "actualResponse": "🔍 No matching products found.",
       "actualIntent": "SEARCH_PRODUCT",
@@ -19268,7 +19268,7 @@
       "confidenceScore": 7
     },
     {
-      "testId": "FOLLOW_UP_063",
+      "testId": "FOLLOW_UP_053",
       "category": "Follow-Ups",
       "query": "What is the return policy?",
       "expectedGoal": "GET_PRODUCT",
@@ -19283,23 +19283,6 @@
       "result": "FAIL",
       "analysis": "Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])",
       "confidenceScore": 0
-    },
-    {
-      "testId": "FOLLOW_UP_071",
-      "category": "Follow-Ups",
-      "query": "I need a new router",
-      "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 No matching products found.",
-      "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 7
     },
     {
       "testId": "FOLLOW_UP_067",
@@ -19336,6 +19319,108 @@
       "confidenceScore": 0
     },
     {
+      "testId": "FOLLOW_UP_062",
+      "category": "Follow-Ups",
+      "query": "Show me Nvidia",
+      "expectedGoal": "SEARCH_PRODUCT",
+      "actualResponse": "🔍 No matching products found.",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 7
+    },
+    {
+      "testId": "FOLLOW_UP_057",
+      "category": "Follow-Ups",
+      "query": "Show me AMD",
+      "expectedGoal": "SEARCH_PRODUCT",
+      "actualResponse": "🔍 No matching products found.",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 7
+    },
+    {
+      "testId": "FOLLOW_UP_063",
+      "category": "Follow-Ups",
+      "query": "What is the return policy?",
+      "expectedGoal": "GET_PRODUCT",
+      "actualResponse": "Please **login** to request a return or refund.",
+      "actualIntent": "RETURN_ORDER",
+      "actualActions": [],
+      "intentMatch": false,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "FAIL",
+      "analysis": "Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])",
+      "confidenceScore": 0
+    },
+    {
+      "testId": "FOLLOW_UP_058",
+      "category": "Follow-Ups",
+      "query": "What is the return policy?",
+      "expectedGoal": "GET_PRODUCT",
+      "actualResponse": "Please **login** to request a return or refund.",
+      "actualIntent": "RETURN_ORDER",
+      "actualActions": [],
+      "intentMatch": false,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "FAIL",
+      "analysis": "Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])",
+      "confidenceScore": 0
+    },
+    {
+      "testId": "FOLLOW_UP_071",
+      "category": "Follow-Ups",
+      "query": "I need a new router",
+      "expectedGoal": "SEARCH_PRODUCT",
+      "actualResponse": "🔍 No matching products found.",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 7
+    },
+    {
+      "testId": "FOLLOW_UP_054",
+      "category": "Follow-Ups",
+      "query": "Put it in my cart",
+      "expectedGoal": "ADD_CART",
+      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
+      "actualIntent": "ADD_CART",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 5
+    },
+    {
       "testId": "FOLLOW_UP_072",
       "category": "Follow-Ups",
       "query": "Show me OnePlus",
@@ -19370,41 +19455,7 @@
       "confidenceScore": 0
     },
     {
-      "testId": "FOLLOW_UP_057",
-      "category": "Follow-Ups",
-      "query": "Show me AMD",
-      "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 No matching products found.",
-      "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 7
-    },
-    {
-      "testId": "FOLLOW_UP_058",
-      "category": "Follow-Ups",
-      "query": "What is the return policy?",
-      "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "Please **login** to request a return or refund.",
-      "actualIntent": "RETURN_ORDER",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "FAIL",
-      "analysis": "Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])",
-      "confidenceScore": 0
-    },
-    {
-      "testId": "FOLLOW_UP_069",
+      "testId": "FOLLOW_UP_059",
       "category": "Follow-Ups",
       "query": "Put it in my cart",
       "expectedGoal": "ADD_CART",
@@ -19419,40 +19470,6 @@
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
       "confidenceScore": 5
-    },
-    {
-      "testId": "FOLLOW_UP_052",
-      "category": "Follow-Ups",
-      "query": "Show me Intel",
-      "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 No matching products found.",
-      "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 7
-    },
-    {
-      "testId": "FOLLOW_UP_053",
-      "category": "Follow-Ups",
-      "query": "What is the return policy?",
-      "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "Please **login** to request a return or refund.",
-      "actualIntent": "RETURN_ORDER",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "FAIL",
-      "analysis": "Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])",
-      "confidenceScore": 0
     },
     {
       "testId": "FOLLOW_UP_064",
@@ -19472,7 +19489,7 @@
       "confidenceScore": 5
     },
     {
-      "testId": "FOLLOW_UP_074",
+      "testId": "FOLLOW_UP_069",
       "category": "Follow-Ups",
       "query": "Put it in my cart",
       "expectedGoal": "ADD_CART",
@@ -19489,7 +19506,33 @@
       "confidenceScore": 5
     },
     {
-      "testId": "FOLLOW_UP_070",
+      "testId": "FOLLOW_UP_055",
+      "category": "Follow-Ups",
+      "query": "Go to checkout",
+      "expectedGoal": "CHECKOUT",
+      "actualResponse": "🛒 **Checkout options:**\n\nYou are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?",
+      "actualIntent": "CHECKOUT",
+      "actualActions": [
+        {
+          "type": "CHECKOUT",
+          "payload": {
+            "total": 0,
+            "couponCode": "",
+            "discount": 0
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 9
+    },
+    {
+      "testId": "FOLLOW_UP_060",
       "category": "Follow-Ups",
       "query": "Go to checkout",
       "expectedGoal": "CHECKOUT",
@@ -19541,6 +19584,49 @@
       "confidenceScore": 9
     },
     {
+      "testId": "FOLLOW_UP_070",
+      "category": "Follow-Ups",
+      "query": "Go to checkout",
+      "expectedGoal": "CHECKOUT",
+      "actualResponse": "🛒 **Checkout options:**\n\nYou are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?",
+      "actualIntent": "CHECKOUT",
+      "actualActions": [
+        {
+          "type": "CHECKOUT",
+          "payload": {
+            "total": 0,
+            "couponCode": "",
+            "discount": 0
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 9
+    },
+    {
+      "testId": "FOLLOW_UP_074",
+      "category": "Follow-Ups",
+      "query": "Put it in my cart",
+      "expectedGoal": "ADD_CART",
+      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
+      "actualIntent": "ADD_CART",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 5
+    },
+    {
       "testId": "FOLLOW_UP_075",
       "category": "Follow-Ups",
       "query": "Go to checkout",
@@ -19567,12 +19653,12 @@
       "confidenceScore": 9
     },
     {
-      "testId": "FOLLOW_UP_059",
+      "testId": "FOLLOW_UP_086",
       "category": "Follow-Ups",
-      "query": "Put it in my cart",
-      "expectedGoal": "ADD_CART",
-      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
-      "actualIntent": "ADD_CART",
+      "query": "I need a new earbuds",
+      "expectedGoal": "SEARCH_PRODUCT",
+      "actualResponse": "🔍 **Found 132 products** for \"I earbuds\":\n\n• **Samsung Earbuds - PURPLE (12)** — $49900.00 ⭐4.7\n• **Samsung Earbuds - PURPLE (11)** — $20000.00 ⭐4.6\n• **Samsung Earbuds - PURPLE (7)** — $14600.00 ⭐4.5\n• **Samsung Earbuds - PURPLE (6)** — $985.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
       "actualActions": [],
       "intentMatch": true,
       "actionMatch": true,
@@ -19581,76 +19667,7 @@
       "contextMaintained": true,
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
-    },
-    {
-      "testId": "FOLLOW_UP_054",
-      "category": "Follow-Ups",
-      "query": "Put it in my cart",
-      "expectedGoal": "ADD_CART",
-      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
-      "actualIntent": "ADD_CART",
-      "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
-    },
-    {
-      "testId": "FOLLOW_UP_060",
-      "category": "Follow-Ups",
-      "query": "Go to checkout",
-      "expectedGoal": "CHECKOUT",
-      "actualResponse": "🛒 **Checkout options:**\n\nYou are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?",
-      "actualIntent": "CHECKOUT",
-      "actualActions": [
-        {
-          "type": "CHECKOUT",
-          "payload": {
-            "total": 0,
-            "couponCode": "",
-            "discount": 0
-          }
-        }
-      ],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 9
-    },
-    {
-      "testId": "FOLLOW_UP_055",
-      "category": "Follow-Ups",
-      "query": "Go to checkout",
-      "expectedGoal": "CHECKOUT",
-      "actualResponse": "🛒 **Checkout options:**\n\nYou are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?",
-      "actualIntent": "CHECKOUT",
-      "actualActions": [
-        {
-          "type": "CHECKOUT",
-          "payload": {
-            "total": 0,
-            "couponCode": "",
-            "discount": 0
-          }
-        }
-      ],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 9
+      "confidenceScore": 10
     },
     {
       "testId": "FOLLOW_UP_076",
@@ -19670,26 +19687,9 @@
       "confidenceScore": 10
     },
     {
-      "testId": "FOLLOW_UP_086",
+      "testId": "FOLLOW_UP_091",
       "category": "Follow-Ups",
-      "query": "I need a new earbuds",
-      "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 132 products** for \"I earbuds\":\n\n• **Samsung Earbuds - PURPLE (12)** — $49900.00 ⭐4.7\n• **Samsung Earbuds - PURPLE (11)** — $20000.00 ⭐4.6\n• **Samsung Earbuds - PURPLE (7)** — $14600.00 ⭐4.5\n• **Samsung Earbuds - PURPLE (6)** — $985.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
-      "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 10
-    },
-    {
-      "testId": "FOLLOW_UP_096",
-      "category": "Follow-Ups",
-      "query": "I need a new graphics card",
+      "query": "I need a new hard drive",
       "expectedGoal": "SEARCH_PRODUCT",
       "actualResponse": "🔍 No matching products found.",
       "actualIntent": "SEARCH_PRODUCT",
@@ -19738,6 +19738,23 @@
       "confidenceScore": 0
     },
     {
+      "testId": "FOLLOW_UP_096",
+      "category": "Follow-Ups",
+      "query": "I need a new graphics card",
+      "expectedGoal": "SEARCH_PRODUCT",
+      "actualResponse": "🔍 No matching products found.",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 7
+    },
+    {
       "testId": "FOLLOW_UP_081",
       "category": "Follow-Ups",
       "query": "I need a new projector",
@@ -19772,9 +19789,26 @@
       "confidenceScore": 10
     },
     {
-      "testId": "FOLLOW_UP_091",
+      "testId": "FOLLOW_UP_088",
       "category": "Follow-Ups",
-      "query": "I need a new hard drive",
+      "query": "What is the return policy?",
+      "expectedGoal": "GET_PRODUCT",
+      "actualResponse": "Please **login** to request a return or refund.",
+      "actualIntent": "RETURN_ORDER",
+      "actualActions": [],
+      "intentMatch": false,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "FAIL",
+      "analysis": "Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])",
+      "confidenceScore": 0
+    },
+    {
+      "testId": "FOLLOW_UP_092",
+      "category": "Follow-Ups",
+      "query": "Show me Sony",
       "expectedGoal": "SEARCH_PRODUCT",
       "actualResponse": "🔍 No matching products found.",
       "actualIntent": "SEARCH_PRODUCT",
@@ -19789,7 +19823,7 @@
       "confidenceScore": 7
     },
     {
-      "testId": "FOLLOW_UP_088",
+      "testId": "FOLLOW_UP_093",
       "category": "Follow-Ups",
       "query": "What is the return policy?",
       "expectedGoal": "GET_PRODUCT",
@@ -19840,40 +19874,6 @@
       "confidenceScore": 0
     },
     {
-      "testId": "FOLLOW_UP_082",
-      "category": "Follow-Ups",
-      "query": "Show me Apple",
-      "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 No matching products found.",
-      "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 7
-    },
-    {
-      "testId": "FOLLOW_UP_083",
-      "category": "Follow-Ups",
-      "query": "What is the return policy?",
-      "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "Please **login** to request a return or refund.",
-      "actualIntent": "RETURN_ORDER",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "FAIL",
-      "analysis": "Failed because of the following: Intent mismatch (Expected: [GET_PRODUCT], Got: [RETURN_ORDER])",
-      "confidenceScore": 0
-    },
-    {
       "testId": "FOLLOW_UP_079",
       "category": "Follow-Ups",
       "query": "Put it in my cart",
@@ -19902,9 +19902,9 @@
       "confidenceScore": 10
     },
     {
-      "testId": "FOLLOW_UP_092",
+      "testId": "FOLLOW_UP_082",
       "category": "Follow-Ups",
-      "query": "Show me Sony",
+      "query": "Show me Apple",
       "expectedGoal": "SEARCH_PRODUCT",
       "actualResponse": "🔍 No matching products found.",
       "actualIntent": "SEARCH_PRODUCT",
@@ -19919,7 +19919,7 @@
       "confidenceScore": 7
     },
     {
-      "testId": "FOLLOW_UP_093",
+      "testId": "FOLLOW_UP_083",
       "category": "Follow-Ups",
       "query": "What is the return policy?",
       "expectedGoal": "GET_PRODUCT",
@@ -19974,7 +19974,7 @@
         {
           "type": "CHECKOUT",
           "payload": {
-            "total": 1080,
+            "total": 1260,
             "couponCode": "",
             "discount": 0
           }
@@ -19988,6 +19988,23 @@
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
       "confidenceScore": 9
+    },
+    {
+      "testId": "FOLLOW_UP_094",
+      "category": "Follow-Ups",
+      "query": "Put it in my cart",
+      "expectedGoal": "ADD_CART",
+      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
+      "actualIntent": "ADD_CART",
+      "actualActions": [],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 5
     },
     {
       "testId": "FOLLOW_UP_099",
@@ -20007,13 +20024,22 @@
       "confidenceScore": 5
     },
     {
-      "testId": "FOLLOW_UP_084",
+      "testId": "FOLLOW_UP_095",
       "category": "Follow-Ups",
-      "query": "Put it in my cart",
-      "expectedGoal": "ADD_CART",
-      "actualResponse": "❌ Couldn't find a matching product to add to the cart. Please search for the product first.",
-      "actualIntent": "ADD_CART",
-      "actualActions": [],
+      "query": "Go to checkout",
+      "expectedGoal": "CHECKOUT",
+      "actualResponse": "🛒 **Checkout options:**\n\nYou are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?",
+      "actualIntent": "CHECKOUT",
+      "actualActions": [
+        {
+          "type": "CHECKOUT",
+          "payload": {
+            "total": 0,
+            "couponCode": "",
+            "discount": 0
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -20021,7 +20047,7 @@
       "contextMaintained": true,
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
+      "confidenceScore": 9
     },
     {
       "testId": "FOLLOW_UP_100",
@@ -20060,7 +20086,7 @@
         {
           "type": "CHECKOUT",
           "payload": {
-            "total": 49900,
+            "total": 99800,
             "couponCode": "",
             "discount": 0
           }
@@ -20076,33 +20102,7 @@
       "confidenceScore": 9
     },
     {
-      "testId": "FOLLOW_UP_085",
-      "category": "Follow-Ups",
-      "query": "Go to checkout",
-      "expectedGoal": "CHECKOUT",
-      "actualResponse": "🛒 **Checkout options:**\n\nYou are not logged in. Would you like to **Login/Register** to save your order details, or proceed to **Checkout as Guest**?",
-      "actualIntent": "CHECKOUT",
-      "actualActions": [
-        {
-          "type": "CHECKOUT",
-          "payload": {
-            "total": 0,
-            "couponCode": "",
-            "discount": 0
-          }
-        }
-      ],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 9
-    },
-    {
-      "testId": "FOLLOW_UP_094",
+      "testId": "FOLLOW_UP_084",
       "category": "Follow-Ups",
       "query": "Put it in my cart",
       "expectedGoal": "ADD_CART",
@@ -20119,7 +20119,7 @@
       "confidenceScore": 5
     },
     {
-      "testId": "FOLLOW_UP_095",
+      "testId": "FOLLOW_UP_085",
       "category": "Follow-Ups",
       "query": "Go to checkout",
       "expectedGoal": "CHECKOUT",

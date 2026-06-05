@@ -442,53 +442,43 @@ function generate1000Products() {
   };
 
   let idCounter = 1;
-  
-  // Use nested loops to generate 1000 completely unique data combinations
-  for (let b = 0; b < brands.length; b++) {
-    for (let p = 0; p < productTypes.length; p++) {
-      for (let c = 0; c < colors.length; c++) {
-        for (let s = 0; s < sizes.length; s++) {
-          if (generated.length >= 1000) {
-            return generated;
-          }
-          const brand = brands[b];
-          const productType = productTypes[p];
-          const catName = productTypeCategoryMap[productType] || 'Electronics';
-          
-          const kw = keywordMap[productType] || 'gadget';
-          const image = `https://loremflickr.com/600/600/${kw}?lock=${idCounter}`;
-          
-          const color = colors[c];
-          const size = sizes[s];
-          const basePrice = prices[(b + p + c + s) % prices.length];
-          const price = parseFloat((basePrice - (idCounter % 5) * (basePrice > 1000 ? 100 : 5)).toFixed(2));
-          
-          const title = `${brand} ${productType.charAt(0).toUpperCase() + productType.slice(1)} - ${color.toUpperCase()} (${size})`;
-          const description = `This ${brand} ${productType} is a premium product in ${color} color and size ${size}, built for outstanding reliability and performance.`;
-          const sku = `SKU-${brand.substring(0, 3).toUpperCase()}-${productType.substring(0, 4).toUpperCase()}-${color.substring(0, 3).toUpperCase()}-${size}-${idCounter++}`;
-          const tags = [productType, brand.toLowerCase(), color, size.toLowerCase()];
-          const averageRating = parseFloat((4.0 + (idCounter % 10) * 0.1).toFixed(1));
+  while (generated.length < 1000) {
+    const brand = brands[idCounter % brands.length];
+    const productType = productTypes[idCounter % productTypes.length];
+    const catName = productTypeCategoryMap[productType] || 'Electronics';
+    
+    const kw = keywordMap[productType] || 'gadget';
+    const image = `https://loremflickr.com/600/600/${kw}?lock=${idCounter}`;
+    
+    const color = colors[idCounter % colors.length];
+    const size = sizes[idCounter % sizes.length];
+    const basePrice = prices[idCounter % prices.length];
+    const price = parseFloat((basePrice - (idCounter % 5) * (basePrice > 1000 ? 100 : 5)).toFixed(2));
+    
+    const title = `${brand} ${productType.charAt(0).toUpperCase() + productType.slice(1)} - ${color.toUpperCase()} (${size})`;
+    const description = `This ${brand} ${productType} is a premium product in ${color} color and size ${size}, built for outstanding reliability and performance.`;
+    const sku = `SKU-${brand.substring(0, 3).toUpperCase()}-${productType.substring(0, 4).toUpperCase()}-${color.substring(0, 3).toUpperCase()}-${size}-${idCounter}`;
+    const tags = [productType, brand.toLowerCase(), color, size.toLowerCase()];
+    const averageRating = parseFloat((4.0 + (idCounter % 10) * 0.1).toFixed(1));
 
-          generated.push({
-            title,
-            description,
-            price,
-            categoryName: catName,
-            brandName: brand,
-            sku,
-            images: [image],
-            tags,
-            averageRating,
-            specifications: [
-              { name: 'Color', value: color },
-              { name: 'Size', value: size },
-              { name: 'Model Year', value: '2026' }
-            ],
-            faqs: [{ question: 'Is it original?', answer: `Yes, it is an official ${brand} product.` }],
-          });
-        }
-      }
-    }
+    generated.push({
+      title,
+      description,
+      price,
+      categoryName: catName,
+      brandName: brand,
+      sku,
+      images: [image],
+      tags,
+      averageRating,
+      specifications: [
+        { name: 'Color', value: color },
+        { name: 'Size', value: size },
+        { name: 'Model Year', value: '2026' }
+      ],
+      faqs: [{ question: 'Is it original?', answer: `Yes, it is an official ${brand} product.` }],
+    });
+    idCounter++;
   }
 
   return generated;
@@ -526,11 +516,12 @@ async function seed() {
   const brandMap = new Map(brands.map((b) => [b.name, b._id]));
 
   // 3. Insert Products and Inventories
-  const products = [];
+  const productsToInsert = [];
+  const inventoriesToInsert = [];
   for (const p of productsData) {
     const catId = catMap.get(p.categoryName);
     const brandId = brandMap.get(p.brandName);
-    const product = await Product.create({
+    productsToInsert.push({
       title: p.title,
       description: p.description,
       price: p.price,
@@ -543,10 +534,8 @@ async function seed() {
       specifications: p.specifications,
       faqs: p.faqs,
     });
-    products.push(product);
 
-    // Create Inventory
-    await Inventory.create({
+    inventoriesToInsert.push({
       sku: p.sku,
       stock: 50,
       lowStockThreshold: 5,
@@ -555,6 +544,9 @@ async function seed() {
       ],
     });
   }
+
+  const products = await Product.insertMany(productsToInsert);
+  await Inventory.insertMany(inventoriesToInsert);
   console.log('Inserted Products & Inventories.');
 
   // 4. Insert 10 Users and their personalized activities
