@@ -2763,3 +2763,91 @@ Would you like to **checkout now** or continue shopping?","ADD_CART","PASS",10,"
 "CART_057","Cart","Remove Bose projector from cart","REMOVE_CART","REMOVE_FROM_CART","🗑️ **Removed from Cart!**
 
 ❌ **Microsoft Projector - PURPLE (11)** has been removed from your cart.","REMOVE_CART","PASS",9,"The chatbot understood the user intent and responded appropriately."
+"CART_058","Cart","Update quantity of LG earbuds to 3","UPDATE_CART_QUANTITY","UPDATE_CART_QUANTITY","✅ Updated quantity for **LG Tablet - WHITE (M)** to **3** in your cart.","UPDATE_CART_QUANTITY","PASS",10,"The chatbot understood the user intent and responded appropriately."
+"CART_059","Cart","Change qty of hard drive to 4","UPDATE_CART_QUANTITY","UPDATE_CART_QUANTITY","✅ Updated quantity for **item** to **4** in your cart.","UPDATE_CART_QUANTITY","PASS",10,"The chatbot understood the user intent and responded appropriately."
+"CART_060","Cart","Show my cart items","VIEW_CART","VIEW_CART","🛒 **Your Shopping Cart:**
+
+• **Nexa Smart Multi-Cooker XL** x 5 — $949.95
+• **Apple Laptop - BLUE (L)** x 4 — $3940.00
+• **Samsung Phone - WHITE (M)** x 18 — $3510.00
+• **LG Tablet - WHITE (M)** x 5 — $2425.00
+• **Intel Charger - GOLD (XXL)** x 24 — $1200000.00
+• **Sony Hard drive - ORANGE (12)** x 4 — $1960.00
+• **Dell Graphics card - BLACK (S)** x 5 — $249500.00
+• **AMD Smartwatch - RED (XL)** x 2 — $100000.00
+• **Nvidia Speaker - PINK (6)** x 4 — $1960.00
+• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00
+• **HP Projector - PURPLE (11)** x 6 — $120000.00
+• **Xiaomi Monitor - PINK (6)** x 6 — $1170.00
+• **OnePlus Camera - BLACK (S)** x 2 — $100000.00
+• **Asus Router - PINK (6)** x 10 — $1850.00
+• **Logitech Microphone - GRAY (7)** x 6 — $2910.00
+• **Apple Mouse - RED (XL)** x 8 — $116800.00
+• **Bose Backpack - GREEN (10)** x 7 — $665.00
+• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00
+• **Sony Headphones - BLUE (L)** x 10 — $850.00
+• **AMD Cable - SILVER (9)** x 14 — $2660.00
+• **HP Mouse - RED (XL)** x 7 — $3360.00
+• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00
+• **Lenovo Monitor - PINK (6)** x 7 — $348600.00
+• **Bose Speaker - PINK (6)** x 7 — $347200.00
+• **Logitech Watch - SILVER (9)** x 7 — $3500.00
+• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00
+• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00
+• **OnePlus Router - PINK (6)** x 7 — $140000.00
+• **Microsoft Phone - WHITE (M)** x 7 — $6965.00
+• **Apple Projector - PURPLE (11)** x 7 — $700.00
+• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00
+• **HP Laptop - BLUE (L)** x 1 — $185.00
+• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00
+• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00
+• **Bose Projector - PURPLE (11)** x 1 — $15000.00
+• **Samsung Monitor - PINK (6)** x 1 — $50000.00
+• **Intel Router - PINK (6)** x 1 — $980.00
+• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00
+
+💵 **Total**: $3348769.95","VIEW_CART","PASS",10,"The chatbot understood the user intent and responded appropriately."
+"CART_061","Cart","View my shopping cart","VIEW_CART","VIEW_CART","🛒 **Your Shopping Cart:**
+
+• **Nexa Smart Multi-Cooker XL** x 4 — $759.96
+• **Apple Laptop - BLUE (L)** x 4 — $3940.00
+• **Samsung Phone - WHITE (M)** x 18 — $3510.00
+• **LG Tablet - WHITE (M)** x 3 — $1455.00
+• **Intel Charger - GOLD (XXL)** x 24 — $1200000.00
+• **Sony Hard drive - ORANGE (12)** x 4 — $1960.00
+• **Dell Graphics card - BLACK (S)** x 5 — $249500.00
+• **AMD Smartwatch - RED (XL)** x 2 — $100000.00
+• **Nvidia Speaker - PINK (6)** x 4 — $1960.00
+• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00
+• **HP Projector - PURPLE (11)** x 6 — $120000.00
+• **Xiaomi Monitor - PINK (6)** x 6 — $1170.00
+• **OnePlus Camera - BLACK (S)** x 2 — $100000.00
+• **Asus Router - PINK (6)** x 10 — $1850.00
+• **Logitech Microphone - GRAY (7)** x 6 — $2910.00
+• **Apple Mouse - RED (XL)** x 8 — $116800.00
+• **Bose Backpack - GREEN (10)** x 7 — $665.00
+• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00
+• **Sony Headphones - BLUE (L)** x 10 — $850.00
+• **AMD Cable - SILVER (9)** x 14 — $2660.00
+• **HP Mouse - RED (XL)** x 7 — $3360.00
+• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00
+• **Lenovo Monitor - PINK (6)** x 7 — $348600.00
+• **Bose Speaker - PINK (6)** x 7 — $347200.00
+• **Logitech Watch - SILVER (9)** x 7 — $3500.00
+• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00
+• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00
+• **OnePlus Router - PINK (6)** x 7 — $140000.00
+• **Microsoft Phone - WHITE (M)** x 7 — $6965.00
+• **Apple Projector - PURPLE (11)** x 7 — $700.00
+• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00
+• **HP Laptop - BLUE (L)** x 1 — $185.00
+• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00
+• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00
+• **Bose Projector - PURPLE (11)** x 1 — $15000.00
+• **Samsung Monitor - PINK (6)** x 1 — $50000.00
+• **Intel Router - PINK (6)** x 1 — $980.00
+• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00
+
+💵 **Total**: $3347609.96","VIEW_CART","PASS",10,"The chatbot understood the user intent and responded appropriately."
+"CART_062","Cart","Clear my entire cart","REMOVE_CART","REMOVE_FROM_CART","🗑️ **Are you sure you want to clear all items from your cart?**","REMOVE_CART","PASS",10,"The chatbot understood the user intent and responded appropriately."
+"CART_063","Cart","Empty the cart","REMOVE_CART","REMOVE_FROM_CART","🗑️ **Are you sure you want to clear all items from your cart?**","REMOVE_CART","PASS",10,"The chatbot understood the user intent and responded appropriately."
