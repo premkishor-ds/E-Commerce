@@ -39,7 +39,7 @@ Thank you for shopping with ApexStore!
 };
 
 export default function ProfilePage() {
-  const { user, wishlist, cart, orders, logout } = useStore();
+  const { user, wishlist, cart, orders: zOrders, logout } = useStore();
   const router = useRouter();
   
   // Navigation & Tabs
@@ -53,6 +53,7 @@ export default function ProfilePage() {
   const [walletTx, setWalletTx] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   
   // Input Form States
   const [profileForm, setProfileForm] = useState<any>({});
@@ -96,7 +97,7 @@ export default function ProfilePage() {
     
     try {
       // Profile Fetch
-      const pResp = await fetch('http://localhost:5001/profile/me', {
+      const pResp = await fetch('http://localhost:5001/api/v1/profile/me', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!pResp.ok) throw new Error();
@@ -136,7 +137,7 @@ export default function ProfilePage() {
 
     try {
       // Addresses Fetch
-      const aResp = await fetch('http://localhost:5001/profile/addresses', {
+      const aResp = await fetch('http://localhost:5001/api/v1/profile/addresses', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!aResp.ok) throw new Error();
@@ -150,7 +151,7 @@ export default function ProfilePage() {
 
     try {
       // Payments Fetch
-      const payResp = await fetch('http://localhost:5001/profile/payments', {
+      const payResp = await fetch('http://localhost:5001/api/v1/profile/payments', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!payResp.ok) throw new Error();
@@ -164,7 +165,7 @@ export default function ProfilePage() {
 
     try {
       // Wallet Fetch
-      const wResp = await fetch('http://localhost:5001/profile/wallet', {
+      const wResp = await fetch('http://localhost:5001/api/v1/profile/wallet', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!wResp.ok) throw new Error();
@@ -179,7 +180,7 @@ export default function ProfilePage() {
 
     try {
       // Support Tickets Fetch
-      const tResp = await fetch('http://localhost:5001/profile/tickets', {
+      const tResp = await fetch('http://localhost:5001/api/v1/profile/tickets', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!tResp.ok) throw new Error();
@@ -192,8 +193,57 @@ export default function ProfilePage() {
     }
 
     try {
+      // Orders Fetch
+      const oResp = await fetch('http://localhost:5001/api/v1/sales/orders', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!oResp.ok) throw new Error();
+      const oData = await oResp.json();
+      
+      const formattedOrders = await Promise.all(oData.map(async (o: any) => {
+        const items = await Promise.all((o.items || []).map(async (item: any) => {
+          try {
+            const prodResp = await fetch(`http://localhost:5001/api/v1/catalog/products/${item.productId.toString()}`);
+            if (prodResp.ok) {
+              const prod = await prodResp.json();
+              return {
+                id: item.productId.toString(),
+                title: prod.title,
+                price: item.price,
+                image: prod.images?.[0] || 'https://picsum.photos/seed/product/600/600',
+                quantity: item.quantity
+              };
+            }
+          } catch {}
+          return {
+            id: item.productId.toString(),
+            title: `Product #${item.productId.toString().slice(-4).toUpperCase()}`,
+            price: item.price,
+            image: 'https://picsum.photos/seed/product/600/600',
+            quantity: item.quantity
+          };
+        }));
+
+        return {
+          id: String(o._id).slice(-8).toUpperCase(),
+          items,
+          fullName: o.shippingAddress?.fullName || 'Customer',
+          address: o.shippingAddress?.addressLine1 || o.shippingAddress?.street || '123 E-Commerce Way',
+          city: o.shippingAddress?.city || 'Metropolis',
+          zipCode: o.shippingAddress?.postalCode || o.shippingAddress?.pincode || '10001',
+          status: o.status || 'Pending',
+          createdAt: new Date(o.createdAt).toLocaleDateString()
+        };
+      }));
+
+      setOrders(formattedOrders);
+    } catch {
+      setOrders(zOrders);
+    }
+
+    try {
       // Audit Logs Fetch
-      const lResp = await fetch('http://localhost:5001/profile/logs', {
+      const lResp = await fetch('http://localhost:5001/api/v1/profile/logs', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!lResp.ok) throw new Error();
@@ -217,7 +267,7 @@ export default function ProfilePage() {
     e.preventDefault();
     const token = localStorage.getItem('apex_token');
     try {
-      const resp = await fetch('http://localhost:5001/profile/update', {
+      const resp = await fetch('http://localhost:5001/api/v1/profile/update', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(profileForm)
@@ -241,7 +291,7 @@ export default function ProfilePage() {
     }
     const token = localStorage.getItem('apex_token');
     try {
-      const resp = await fetch('http://localhost:5001/profile/security/password', {
+      const resp = await fetch('http://localhost:5001/api/v1/profile/security/password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ currentPassword: passwordForm.currentPassword, newPassword: passwordForm.newPassword })
@@ -265,7 +315,7 @@ export default function ProfilePage() {
     try {
       if (editingAddressId) {
         // Edit Address
-        const resp = await fetch(`http://localhost:5001/profile/addresses/${editingAddressId}`, {
+        const resp = await fetch(`http://localhost:5001/api/v1/profile/addresses/${editingAddressId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify(addressForm)
@@ -276,7 +326,7 @@ export default function ProfilePage() {
         showToast('Shipping address edited successfully!');
       } else {
         // Add Address
-        const resp = await fetch('http://localhost:5001/profile/addresses', {
+        const resp = await fetch('http://localhost:5001/api/v1/profile/addresses', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify(addressForm)
@@ -309,7 +359,7 @@ export default function ProfilePage() {
   const handleAddressDelete = async (id: string) => {
     const token = localStorage.getItem('apex_token');
     try {
-      await fetch(`http://localhost:5001/profile/addresses/${id}`, {
+      await fetch(`http://localhost:5001/api/v1/profile/addresses/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -326,7 +376,7 @@ export default function ProfilePage() {
     e.preventDefault();
     const token = localStorage.getItem('apex_token');
     try {
-      const resp = await fetch('http://localhost:5001/profile/payments', {
+      const resp = await fetch('http://localhost:5001/api/v1/profile/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(paymentForm)
@@ -350,7 +400,7 @@ export default function ProfilePage() {
   const handlePaymentDelete = async (id: string) => {
     const token = localStorage.getItem('apex_token');
     try {
-      await fetch(`http://localhost:5001/profile/payments/${id}`, {
+      await fetch(`http://localhost:5001/api/v1/profile/payments/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -367,7 +417,7 @@ export default function ProfilePage() {
     e.preventDefault();
     const token = localStorage.getItem('apex_token');
     try {
-      const resp = await fetch('http://localhost:5001/profile/tickets', {
+      const resp = await fetch('http://localhost:5001/api/v1/profile/tickets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(ticketForm)
@@ -402,7 +452,7 @@ export default function ProfilePage() {
     }
     const token = localStorage.getItem('apex_token');
     try {
-      const resp = await fetch('http://localhost:5001/profile/rewards/convert', {
+      const resp = await fetch('http://localhost:5001/api/v1/profile/rewards/convert', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ points: pts })
@@ -438,7 +488,7 @@ export default function ProfilePage() {
     }
     const token = localStorage.getItem('apex_token');
     try {
-      const resp = await fetch('http://localhost:5001/profile/wallet', {
+      const resp = await fetch('http://localhost:5001/api/v1/profile/wallet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ amount: amt, description: 'Added wallet balance funds' })
@@ -464,7 +514,7 @@ export default function ProfilePage() {
     const nextState = !profile?.mfaEnabled;
     const token = localStorage.getItem('apex_token');
     try {
-      const resp = await fetch('http://localhost:5001/profile/security/2fa', {
+      const resp = await fetch('http://localhost:5001/api/v1/profile/security/2fa', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ enabled: nextState, secret: nextState ? 'TFA-SECRET-APEX-1234' : undefined })
@@ -487,7 +537,7 @@ export default function ProfilePage() {
   const handleGdprExport = async () => {
     const token = localStorage.getItem('apex_token');
     try {
-      const resp = await fetch('http://localhost:5001/profile/export', {
+      const resp = await fetch('http://localhost:5001/api/v1/profile/export', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!resp.ok) throw new Error();
@@ -516,7 +566,7 @@ export default function ProfilePage() {
     if (!confirm('Are you absolutely sure you want to request account deletion? This request will clear all addresses, payment configurations, and wallet credits.')) return;
     const token = localStorage.getItem('apex_token');
     try {
-      const resp = await fetch('http://localhost:5001/profile/delete-request', {
+      const resp = await fetch('http://localhost:5001/api/v1/profile/delete-request', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -901,7 +951,7 @@ export default function ProfilePage() {
                         onClick={async () => {
                           const token = localStorage.getItem('apex_token');
                           try {
-                            await fetch('http://localhost:5001/profile/avatar', {
+                            await fetch('http://localhost:5001/api/v1/profile/avatar', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                               body: JSON.stringify({ avatarUrl: avatarPreview })

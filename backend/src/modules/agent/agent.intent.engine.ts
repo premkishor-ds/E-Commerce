@@ -294,6 +294,7 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'order list',
     'show orders',
     'view orders',
+    'all orders',
   ],
   TRACK_ORDER: [
     'track order',
@@ -417,6 +418,15 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'ticket status',
     'support history',
     'ticket list',
+    'see tickets',
+    'see ticket',
+    'show tickets',
+    'show ticket',
+    'list tickets',
+    'list ticket',
+    'all tickets',
+    'all ticket',
+    'tickets',
   ],
   ESCALATE: [
     'escalate',
@@ -543,7 +553,6 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
   ],
   ADMIN_ORDERS: [
     'manage orders',
-    'all orders',
     'admin orders',
     'order management',
     'update order status',
@@ -1041,6 +1050,25 @@ export function classifyIntent(message: string): IntentMatch {
       score: 10,
       entities,
     };
+  }
+
+  // Handle ticket queries explicitly to distinguish between VIEW_TICKETS and CREATE_TICKET
+  if (/\btickets?\b/i.test(lower)) {
+    const hasViewKeywords = /\b(view|see|show|list|all|track|status|history|my|check|get|retrieve)\b/i.test(lower);
+    const hasCreateKeywords = /\b(create|open|new|raise|file|make|add|post|submit)\b/i.test(lower);
+    if (hasViewKeywords && !hasCreateKeywords) {
+      return {
+        intent: 'VIEW_TICKETS',
+        score: 8,
+        entities,
+      };
+    } else if (hasCreateKeywords && !hasViewKeywords) {
+      return {
+        intent: 'CREATE_TICKET',
+        score: 8,
+        entities,
+      };
+    }
   }
 
   if (

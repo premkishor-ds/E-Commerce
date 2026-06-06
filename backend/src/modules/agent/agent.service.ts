@@ -582,6 +582,21 @@ Enhanced Reply:`;
       forceMapped = true;
     }
 
+    // 3b. Support Ticket Follow-ups
+    const ticketFollowUpKeywords = /\b(status|open|resolved|close|closed|progress|list|show|view|see|check|them|any)\b/i;
+    if (
+      ticketFollowUpKeywords.test(resolvedWorkMessage) &&
+      (state.activeIntent === 'VIEW_TICKETS' ||
+        state.activeIntent === 'CREATE_TICKET' ||
+        state.activeWorkflow === 'VIEW_TICKETS' ||
+        state.activeWorkflow === 'CREATE_TICKET') &&
+      !/\b(order|product|cart|wishlist|profile|address|wallet|pay|coupon|checkout)\b/i.test(resolvedWorkMessage)
+    ) {
+      intent = 'VIEW_TICKETS';
+      score = 10;
+      forceMapped = true;
+    }
+
     // 4. Guest checkout intercept
     if (lowerMsg.includes('guest') && lowerMsg.includes('checkout')) {
       intent = 'CHECKOUT';
@@ -5709,13 +5724,73 @@ Enhanced Reply:`;
         }
 
         try {
+          const validateProductForSearch = (product: any, queryStr: string) => {
+            if (!product) return false;
+            const qLower = queryStr.toLowerCase();
+            const prodBrand = (product.brand?.name || product.brand || '').toString().toLowerCase();
+            const prodTitle = (product.title || '').toLowerCase();
+            const prodCategory = (product.category?.name || product.category || '').toString().toLowerCase();
+            const prodDesc = (product.description || '').toLowerCase();
+
+            const brands = [
+              'apple', 'samsung', 'sony', 'lg', 'dell', 'hp', 'lenovo', 'asus', 'acer', 
+              'oneplus', 'realme', 'oppo', 'vivo', 'xiaomi', 'redmi', 'motorola', 'nike', 
+              'adidas', 'puma', 'reebok', 'apextech', 'nexahome', 'aurawear', 'velosport', 
+              'logitech', 'bose', 'intel', 'amd', 'nvidia', 'microsoft'
+            ];
+            for (const brand of brands) {
+              const wordRegex = new RegExp('\\b' + brand + '\\b', 'i');
+              if (wordRegex.test(qLower)) {
+                if (!prodBrand.includes(brand) && !prodTitle.includes(brand)) {
+                  return false;
+                }
+              }
+            }
+
+            const productTypes = [
+              'multi-cooker', 'smartwatch', 'treadmill', 'laptop', 'phone', 'headphones', 
+              'keyboard', 'mouse', 'monitor', 'camera', 'speaker', 'tablet', 'charger', 
+              'cable', 'backpack', 'desk lamp', 'router', 'microphone', 'projector', 
+              'earbuds', 'hard drive', 'graphics card', 'jacket', 'shoes', 'shirt', 'watch'
+            ];
+            
+            const normalizeWord = (w: string) => {
+              let res = w.toLowerCase().trim();
+              if (res.endsWith('s') && res !== 'asus' && res !== 'bose' && res !== 'graphics') {
+                res = res.substring(0, res.length - 1);
+              }
+              return res;
+            };
+
+            for (const pt of productTypes) {
+              const wordRegex = new RegExp('\\b' + pt + 's?\\b', 'i');
+              if (wordRegex.test(qLower)) {
+                const normalizedPt = normalizeWord(pt);
+                const isMatch = prodCategory.includes(normalizedPt) || prodTitle.includes(normalizedPt) || prodDesc.includes(normalizedPt);
+                if (!isMatch) return false;
+                
+                for (const otherPt of productTypes) {
+                  if (otherPt !== pt) {
+                    const normalizedOther = normalizeWord(otherPt);
+                    if (prodTitle.includes(normalizedOther) && !wordRegex.test(prodTitle) && !prodCategory.includes(normalizedPt)) {
+                      return false;
+                    }
+                  }
+                }
+              }
+            }
+
+            return true;
+          };
+
           const products: any[] = [];
           for (const part of parts) {
             const results = await this.catalogService.getProducts({
               search: part,
             });
-            if (results && results[0]) {
-              products.push(results[0]);
+            const matched = results?.find((p: any) => validateProductForSearch(p, part));
+            if (matched) {
+              products.push(matched);
             }
           }
 
