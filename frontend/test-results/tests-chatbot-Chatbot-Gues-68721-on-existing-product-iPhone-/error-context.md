@@ -213,18 +213,18 @@ waiting for navigation until "load"
   206 |   });
   207 | 
   208 |   test('Apply Coupon via Chatbot', async ({ page }) => {
-  209 |     await sendChatMessage(page, 'apply coupon SAVE20');
-  210 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  211 |     expect(botReply).toContain('valid');
-  212 |   });
-  213 | 
-  214 |   test('Complete Checkout & Order Placement via Chatbot', async ({ page }) => {
-  215 |     // Make sure we have items in cart
-  216 |     await sendChatMessage(page, 'Add headphones to cart');
-  217 |     
-  218 |     await sendChatMessage(page, 'Checkout now');
-  219 |     await sendChatMessage(page, 'John Doe');
-  220 |     await sendChatMessage(page, '123 Test Road');
-  221 |     await sendChatMessage(page, 'New York, 10001');
-  222 |     
+  209 |     await sendChatMessage(page, 'Add headphones to cart');
+  210 |     await sendChatMessage(page, 'apply coupon SAVE20');
+  211 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
+  212 |     expect(botReply).toContain('valid');
+  213 |   });
+  214 | 
+  215 |   test('Complete Checkout & Order Placement via Chatbot', async ({ page }) => {
+  216 |     // Make sure we have items in cart
+  217 |     await sendChatMessage(page, 'Add headphones to cart');
+  218 |     
+  219 |     await sendChatMessage(page, 'Checkout now');
+  220 |     await sendChatMessage(page, 'John Doe');
+  221 |     await sendChatMessage(page, '123 Test Road');
+  222 |     await sendChatMessage(page, 'New York, 10001');
 ```

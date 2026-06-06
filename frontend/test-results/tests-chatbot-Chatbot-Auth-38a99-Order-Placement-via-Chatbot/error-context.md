@@ -7,20 +7,162 @@
 # Test info
 
 - Name: tests\chatbot.spec.ts >> Chatbot Authenticated User Actions >> Complete Checkout & Order Placement via Chatbot
-- Location: tests\chatbot.spec.ts:214:7
+- Location: tests\chatbot.spec.ts:215:7
 
 # Error details
 
 ```
-Error: expect(received).toContain(expected) // indexOf
+Test timeout of 30000ms exceeded.
+```
 
-Expected substring: "Placed Successfully"
-Received string:    "[Live Agent Active] Message sent to support representative.03:41 PM"
+```
+Error: page.waitForResponse: Test timeout of 30000ms exceeded.
 ```
 
 # Test source
 
 ```ts
+  1   | import { test, expect, type Page } from '@playwright/test';
+  2   | import { MongoClient, ObjectId } from 'mongodb';
+  3   | import * as fs from 'fs';
+  4   | import * as path from 'path';
+  5   | 
+  6   | const DB_URI = 'mongodb+srv://premkishor:Hsndehzd6oFmbvHA@cluster0.x1ez0rp.mongodb.net/test';
+  7   | const BASE_URL = 'http://localhost:3001';
+  8   | 
+  9   | let mongoClient: MongoClient;
+  10  | 
+  11  | // Test execution records for report generation
+  12  | const reportResults = {
+  13  |   totalTests: 0,
+  14  |   passed: 0,
+  15  |   failed: 0,
+  16  |   capabilities: {
+  17  |     search: 'Fail',
+  18  |     cart: 'Fail',
+  19  |     wishlist: 'Fail',
+  20  |     profile: 'Fail',
+  21  |     address: 'Fail',
+  22  |     checkout: 'Fail',
+  23  |     payment: 'Fail',
+  24  |     orders: 'Fail',
+  25  |     returns: 'Fail',
+  26  |     memory: 'Fail'
+  27  |   },
+  28  |   failures: [] as string[]
+  29  | };
+  30  | 
+  31  | test.beforeAll(async () => {
+  32  |   mongoClient = new MongoClient(DB_URI);
+  33  |   await mongoClient.connect();
+  34  | });
+  35  | 
+  36  | test.afterEach(async ({}, testInfo) => {
+  37  |   reportResults.totalTests++;
+  38  |   if (testInfo.status === 'passed') {
+  39  |     reportResults.passed++;
+  40  |   } else {
+  41  |     reportResults.failed++;
+  42  |     if (testInfo.error) {
+  43  |       reportResults.failures.push(`${testInfo.title} failed: ${testInfo.error.message}`);
+  44  |     }
+  45  |   }
+  46  | });
+  47  | 
+  48  | test.afterAll(async () => {
+  49  |   await mongoClient.close();
+  50  |   
+  51  |   // Save final report to the workspace and brain artifacts
+  52  |   const reportContent = JSON.stringify(reportResults, null, 2);
+  53  |   const reportsDir = path.join(__dirname, '../../artifacts');
+  54  |   if (!fs.existsSync(reportsDir)) {
+  55  |     fs.mkdirSync(reportsDir, { recursive: true });
+  56  |   }
+  57  |   
+  58  |   fs.writeFileSync(path.join(__dirname, '../chatbot-test-report.json'), reportContent);
+  59  |   fs.writeFileSync(path.join(__dirname, '../../artifacts/chatbot-test-report.json'), reportContent);
+  60  |   console.log('📊 Generated Playwright Test Report successfully.');
+  61  | });
+  62  | 
+  63  | // Helper: open chatbot widget
+  64  | async function openChatbot(page: Page) {
+  65  |   const bubble = page.locator('button[aria-label="Open AI Agent chat"]');
+  66  |   await expect(bubble).toBeVisible();
+  67  |   await bubble.click();
+  68  |   const chatHeader = page.locator('h3:has-text("ApexStore AI Agent")');
+  69  |   await expect(chatHeader).toBeVisible();
+  70  | }
+  71  | 
+  72  | // Helper: send message to chatbot and wait for loader to disappear
+  73  | async function sendChatMessage(page: Page, message: string) {
+  74  |   const chatbotForm = page.locator('form:has(button[aria-label="Send message"])');
+  75  |   const input = chatbotForm.locator('textarea');
+  76  |   await input.fill(message);
+  77  |   const sendBtn = chatbotForm.locator('button[aria-label="Send message"]');
+  78  |   
+  79  |   // Wait for response of this specific message
+  80  |   const [response] = await Promise.all([
+> 81  |     page.waitForResponse(res => 
+      |          ^ Error: page.waitForResponse: Test timeout of 30000ms exceeded.
+  82  |       res.url().includes('/api/v1/agent/message') && 
+  83  |       res.status() === 200 &&
+  84  |       res.request().postData()?.includes(message)
+  85  |     ),
+  86  |     sendBtn.click()
+  87  |   ]);
+  88  |   
+  89  |   // Wait for processing loader to disappear (just in case)
+  90  |   const loader = page.locator('text=Processing...');
+  91  |   await loader.waitFor({ state: 'detached', timeout: 8000 }).catch(() => {});
+  92  |   
+  93  |   return response;
+  94  | }
+  95  | 
+  96  | // Helper: verify if chatbot response contains only text instructions
+  97  | async function assertNotTextOnly(replyText: string, actionName: string) {
+  98  |   const lowercaseReply = replyText.toLowerCase();
+  99  |   const instructionsKeywords = ['should navigate', 'please go to', 'manually', 'go to profile', 'visit the page', 'navigate to'];
+  100 |   const isInstructionOnly = instructionsKeywords.some(kw => lowercaseReply.includes(kw));
+  101 |   
+  102 |   if (isInstructionOnly) {
+  103 |     throw new Error(`${actionName} failed: Chatbot only returned instructions instead of executing action.`);
+  104 |   }
+  105 | }
+  106 | 
+  107 | // ─── GUEST USER TESTS ────────────────────────────────────────────────────────
+  108 | 
+  109 | test.describe('Chatbot Guest User Actions', () => {
+  110 | 
+  111 |   test.beforeEach(async ({ page }) => {
+  112 |     await page.goto(BASE_URL);
+  113 |     await openChatbot(page);
+  114 |   });
+  115 | 
+  116 |   test('Search for non-existing product (iPhone)', async ({ page }) => {
+  117 |     const response = await sendChatMessage(page, 'Search for iPhone');
+  118 |     const results = await response.json();
+  119 |     expect(results.intent).toBe('SEARCH_PRODUCT');
+  120 |     
+  121 |     // Check UI has routed to search page
+  122 |     await page.waitForURL(url => url.pathname === '/search' && !!url.searchParams.get('q')?.toLowerCase().includes('phone'));
+  123 |     
+  124 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
+  125 |     await assertNotTextOnly(botReply, 'Search for iPhone');
+  126 |     
+  127 |     reportResults.capabilities.search = 'Pass';
+  128 |   });
+  129 | 
+  130 |   test('Search for existing product (headphones)', async ({ page }) => {
+  131 |     const response = await sendChatMessage(page, 'search for headphones');
+  132 |     const results = await response.json();
+  133 |     expect(results.intent).toBe('SEARCH_PRODUCT');
+  134 |     expect(results.data?.products?.length).toBeGreaterThan(0);
+  135 |     
+  136 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
+  137 |     expect(botReply).toContain('Apex Sound-Pro ANC Headphones');
+  138 |     
+  139 |     reportResults.capabilities.search = 'Pass';
+  140 |   });
   141 | 
   142 |   test('Guest Add to Cart (should prevent and ask to login)', async ({ page }) => {
   143 |     await sendChatMessage(page, 'Add headphones to cart');
@@ -62,105 +204,4 @@ Received string:    "[Live Agent Active] Message sent to support representative.
   179 |     await sendChatMessage(page, 'Change my name to John Doe');
   180 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
   181 |     await assertNotTextOnly(botReply, 'Change Profile Name');
-  182 |     
-  183 |     reportResults.capabilities.profile = 'Pass';
-  184 |   });
-  185 | 
-  186 |   test('Address Management - add/view address', async ({ page }) => {
-  187 |     await sendChatMessage(page, 'my address');
-  188 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  189 |     await assertNotTextOnly(botReply, 'Address Management');
-  190 |     
-  191 |     reportResults.capabilities.address = 'Pass';
-  192 |   });
-  193 | 
-  194 |   test('Add existing product to cart (headphones)', async ({ page }) => {
-  195 |     await sendChatMessage(page, 'Add headphones to cart');
-  196 |     
-  197 |     // Verify chatbot message bubble is visible
-  198 |     const cartAddedBubble = page.locator('div.rounded-tl-none:has-text("Added to Cart")');
-  199 |     await expect(cartAddedBubble.last()).toBeVisible();
-  200 |     
-  201 |     // Verify UI state cart badge contains '1'
-  202 |     const badge = page.locator('span.absolute.bg-indigo-600');
-  203 |     await expect(badge).toHaveText('1');
-  204 |     
-  205 |     reportResults.capabilities.cart = 'Pass';
-  206 |   });
-  207 | 
-  208 |   test('Apply Coupon via Chatbot', async ({ page }) => {
-  209 |     await sendChatMessage(page, 'apply coupon SAVE20');
-  210 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  211 |     expect(botReply).toContain('valid');
-  212 |   });
-  213 | 
-  214 |   test('Complete Checkout & Order Placement via Chatbot', async ({ page }) => {
-  215 |     // Make sure we have items in cart
-  216 |     await sendChatMessage(page, 'Add headphones to cart');
-  217 |     
-  218 |     await sendChatMessage(page, 'Checkout now');
-  219 |     await sendChatMessage(page, 'John Doe');
-  220 |     await sendChatMessage(page, '123 Test Road');
-  221 |     await sendChatMessage(page, 'New York, 10001');
-  222 |     
-  223 |     // Confirm order placement
-  224 |     await sendChatMessage(page, 'confirm');
-  225 |     
-  226 |     // Verify DB state
-  227 |     const db = mongoClient.db();
-  228 |     const ordersCol = db.collection('orders');
-  229 |     const userDoc = await db.collection('users').findOne({ email: 'john.doe@example.com' });
-  230 |     expect(userDoc).not.toBeNull();
-  231 |     
-  232 |     const dbOrder = await ordersCol.findOne(
-  233 |       { userId: userDoc!._id },
-  234 |       { sort: { createdAt: -1 } }
-  235 |     );
-  236 |     expect(dbOrder).not.toBeNull();
-  237 |     expect(dbOrder!.status).toBe('Pending');
-  238 |     
-  239 |     // Verify UI cart total cleared
-  240 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-> 241 |     expect(botReply).toContain('Placed Successfully');
-      |                      ^ Error: expect(received).toContain(expected) // indexOf
-  242 |     
-  243 |     reportResults.capabilities.checkout = 'Pass';
-  244 |     reportResults.capabilities.orders = 'Pass';
-  245 |     reportResults.capabilities.payment = 'Pass';
-  246 |   });
-  247 | 
-  248 |   test('Track order status', async ({ page }) => {
-  249 |     await sendChatMessage(page, 'Track my latest order');
-  250 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  251 |     expect(botReply).toContain('Status');
-  252 |   });
-  253 | 
-  254 |   test('Create support ticket via Chatbot', async ({ page }) => {
-  255 |     await sendChatMessage(page, 'Open a support ticket');
-  256 |     await sendChatMessage(page, 'Delay in shipment');
-  257 |     await sendChatMessage(page, 'My order has not arrived yet.');
-  258 |     
-  259 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  260 |     expect(botReply).toContain('Created');
-  261 |   });
-  262 | 
-  263 |   test('Wishlist actions via Chatbot', async ({ page }) => {
-  264 |     await sendChatMessage(page, 'my wishlist');
-  265 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  266 |     await assertNotTextOnly(botReply, 'Wishlist View');
-  267 |     
-  268 |     reportResults.capabilities.wishlist = 'Pass';
-  269 |   });
-  270 | 
-  271 |   test('Memory context test (Add and add one more)', async ({ page }) => {
-  272 |     await sendChatMessage(page, 'Add headphones to cart');
-  273 |     await sendChatMessage(page, 'Add one more');
-  274 |     
-  275 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  276 |     expect(botReply).toContain('Added to Cart');
-  277 |     
-  278 |     reportResults.capabilities.memory = 'Pass';
-  279 |   });
-  280 | });
-  281 | 
 ```

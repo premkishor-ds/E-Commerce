@@ -698,6 +698,17 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'show abandoned cart',
     'recover cart',
   ],
+  TOGGLE_THEME: [
+    'change theme',
+    'toggle theme',
+    'dark mode',
+    'light mode',
+    'switch theme',
+    'change to dark mode',
+    'change to light mode',
+    'switch to dark mode',
+    'switch to light mode',
+  ],
 };
 
 // ─── ENTITY EXTRACTOR ─────────────────────────────────────────────────────────
@@ -1196,6 +1207,12 @@ export function classifyIntent(message: string): IntentMatch {
       topScore = score;
       topIntent = intent;
     }
+  }
+
+  // Ignore weak partial token matches (e.g. score 1.5 for matching 1 out of 2 words)
+  if (topScore < 3.0) {
+    topIntent = 'UNKNOWN';
+    topScore = 0;
   }
 
   // Robust fallback logic:

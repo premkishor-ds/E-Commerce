@@ -206,6 +206,7 @@ test.describe('Chatbot Authenticated User Actions', () => {
   });
 
   test('Apply Coupon via Chatbot', async ({ page }) => {
+    await sendChatMessage(page, 'Add headphones to cart');
     await sendChatMessage(page, 'apply coupon SAVE20');
     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
     expect(botReply).toContain('valid');
@@ -219,6 +220,7 @@ test.describe('Chatbot Authenticated User Actions', () => {
     await sendChatMessage(page, 'John Doe');
     await sendChatMessage(page, '123 Test Road');
     await sendChatMessage(page, 'New York, 10001');
+    await sendChatMessage(page, 'COD');
     
     // Confirm order placement
     await sendChatMessage(page, 'confirm');

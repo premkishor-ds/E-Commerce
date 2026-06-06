@@ -17,7 +17,7 @@ Error: expect(received).toContain(expected) // indexOf
 Expected substring: "login"
 Received string:    "🛒 **Added to Cart!**·
 ✅ **Microsoft Headphones - BLUE (L)** ($95.00) has been added to your cart.·
-Would you like to **checkout now** or continue shopping?03:39 PM"
+Would you like to **checkout now** or continue shopping?04:18 PM"
 ```
 
 # Test source
@@ -188,41 +188,41 @@ Would you like to **checkout now** or continue shopping?03:39 PM"
   206 |   });
   207 | 
   208 |   test('Apply Coupon via Chatbot', async ({ page }) => {
-  209 |     await sendChatMessage(page, 'apply coupon SAVE20');
-  210 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  211 |     expect(botReply).toContain('valid');
-  212 |   });
-  213 | 
-  214 |   test('Complete Checkout & Order Placement via Chatbot', async ({ page }) => {
-  215 |     // Make sure we have items in cart
-  216 |     await sendChatMessage(page, 'Add headphones to cart');
-  217 |     
-  218 |     await sendChatMessage(page, 'Checkout now');
-  219 |     await sendChatMessage(page, 'John Doe');
-  220 |     await sendChatMessage(page, '123 Test Road');
-  221 |     await sendChatMessage(page, 'New York, 10001');
-  222 |     
-  223 |     // Confirm order placement
-  224 |     await sendChatMessage(page, 'confirm');
-  225 |     
-  226 |     // Verify DB state
-  227 |     const db = mongoClient.db();
-  228 |     const ordersCol = db.collection('orders');
-  229 |     const userDoc = await db.collection('users').findOne({ email: 'john.doe@example.com' });
-  230 |     expect(userDoc).not.toBeNull();
-  231 |     
-  232 |     const dbOrder = await ordersCol.findOne(
-  233 |       { userId: userDoc!._id },
-  234 |       { sort: { createdAt: -1 } }
-  235 |     );
-  236 |     expect(dbOrder).not.toBeNull();
-  237 |     expect(dbOrder!.status).toBe('Pending');
-  238 |     
-  239 |     // Verify UI cart total cleared
-  240 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  241 |     expect(botReply).toContain('Placed Successfully');
-  242 |     
-  243 |     reportResults.capabilities.checkout = 'Pass';
-  244 |     reportResults.capabilities.orders = 'Pass';
-  245 |     reportResults.capabilities.payment = 'Pass';
+  209 |     await sendChatMessage(page, 'Add headphones to cart');
+  210 |     await sendChatMessage(page, 'apply coupon SAVE20');
+  211 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
+  212 |     expect(botReply).toContain('valid');
+  213 |   });
+  214 | 
+  215 |   test('Complete Checkout & Order Placement via Chatbot', async ({ page }) => {
+  216 |     // Make sure we have items in cart
+  217 |     await sendChatMessage(page, 'Add headphones to cart');
+  218 |     
+  219 |     await sendChatMessage(page, 'Checkout now');
+  220 |     await sendChatMessage(page, 'John Doe');
+  221 |     await sendChatMessage(page, '123 Test Road');
+  222 |     await sendChatMessage(page, 'New York, 10001');
+  223 |     await sendChatMessage(page, 'COD');
+  224 |     
+  225 |     // Confirm order placement
+  226 |     await sendChatMessage(page, 'confirm');
+  227 |     
+  228 |     // Verify DB state
+  229 |     const db = mongoClient.db();
+  230 |     const ordersCol = db.collection('orders');
+  231 |     const userDoc = await db.collection('users').findOne({ email: 'john.doe@example.com' });
+  232 |     expect(userDoc).not.toBeNull();
+  233 |     
+  234 |     const dbOrder = await ordersCol.findOne(
+  235 |       { userId: userDoc!._id },
+  236 |       { sort: { createdAt: -1 } }
+  237 |     );
+  238 |     expect(dbOrder).not.toBeNull();
+  239 |     expect(dbOrder!.status).toBe('Pending');
+  240 |     
+  241 |     // Verify UI cart total cleared
+  242 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
+  243 |     expect(botReply).toContain('Placed Successfully');
+  244 |     
+  245 |     reportResults.capabilities.checkout = 'Pass';
 ```

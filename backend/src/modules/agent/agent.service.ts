@@ -530,8 +530,17 @@ Enhanced Reply:`;
     if (activeStep && !isStaleAuthStep) {
       // Check if user is trying to switch topic/intent before executing the active step
       const tempRuleMatch = classifyIntent(correctTypos(resolvedWorkMessage));
-      const isStrongTopicSwitch = 
-        tempRuleMatch.score >= 5 && 
+      const isFreeFormStep = [
+        'CREATE_TICKET_SUBJECT',
+        'CREATE_TICKET_MESSAGE',
+        'CHECKOUT_NAME',
+        'CHECKOUT_ADDRESS',
+        'CHECKOUT_CITY_ZIP',
+        'REVIEW_COMMENT',
+      ].includes(activeStep);
+      const isStrongTopicSwitch =
+        !isFreeFormStep &&
+        tempRuleMatch.score >= 5 &&
         tempRuleMatch.intent !== 'UNKNOWN' &&
         tempRuleMatch.intent !== state.activeIntent &&
         !/^(yes|no|confirm|cancel|y|n|ok|okay|stripe|razorpay|wallet|cod)$/i.test(resolvedWorkMessage.trim());
@@ -2031,7 +2040,7 @@ Enhanced Reply:`;
           const recommendations = filtered
             .map(
               (p: any) =>
-                `• **${p.title}** — **$${p.price}** (${p.averageRating}⭐)\n  _${p.description.slice(0, 80)}..._`,
+                `• **[${p.title}](/product/${p._id || p.id})** — **$${p.price}** (${p.averageRating}⭐)\n  _${p.description.slice(0, 80)}..._`,
             )
             .join('\n\n');
 
@@ -3788,7 +3797,7 @@ Enhanced Reply:`;
           const list = top
             .map(
               (p: any) =>
-                `• **${p.title}** — $${p.price.toFixed(2)} ⭐${p.averageRating || 'N/A'}`,
+                `• **[${p.title}](/product/${p._id || p.id})** — $${p.price.toFixed(2)} ⭐${p.averageRating || 'N/A'}`,
             )
             .join('\n');
           const ids = top.map((p: any) => String(p._id || p.id));
@@ -3871,7 +3880,7 @@ Enhanced Reply:`;
           const list = top
             .map(
               (p: any) =>
-                `• **${p.title}** — $${p.price.toFixed(2)} ⭐${p.averageRating || 'N/A'}`,
+                `• **[${p.title}](/product/${p._id || p.id})** — $${p.price.toFixed(2)} ⭐${p.averageRating || 'N/A'}`,
             )
             .join('\n');
 
@@ -4916,6 +4925,15 @@ Enhanced Reply:`;
           {},
         );
 
+      case 'TOGGLE_THEME':
+        return {
+          reply: `🌓 **Theme toggled!** I've switched the theme for you.`,
+          intent,
+          confidence: 10,
+          actions: [{ type: 'TOGGLE_THEME' as any, payload: {} }],
+          suggestions: ['Home', 'Browse products'],
+        };
+
       case 'VIEW_TICKETS': {
         if (!userId)
           return this.buildReply(
@@ -5462,7 +5480,7 @@ Enhanced Reply:`;
                 [],
               );
             }
-            const list = products.map((p) => `• **${p.title}** (SKU: ${p.sku}) — $${p.price.toFixed(2)} (Stock: ${p.isActive ? 'Active' : 'Inactive'})`).join('\n');
+            const list = products.map((p) => `• **[${p.title}](/product/${p._id || p.id})** (SKU: ${p.sku}) — $${p.price.toFixed(2)} (Stock: ${p.isActive ? 'Active' : 'Inactive'})`).join('\n');
             return this.buildReply(
               `🏪 **Your Listed Products:**\n\n${list}`,
               intent,

@@ -15,13 +15,15 @@
 Error: expect(received).toContain(expected) // indexOf
 
 Expected substring: "valid"
-Received string:    "[Live Agent Active] Message sent to support representative.03:41 PM"
+Received string:    "🏷️ To apply a coupon, type: **\"apply coupon [CODE]\"**·
+Example: *\"apply coupon SAVE20\"*·
+Active codes you can try:
+• **SAVE20** — 20% off your order04:19 PM"
 ```
 
 # Test source
 
 ```ts
-  111 |   test.beforeEach(async ({ page }) => {
   112 |     await page.goto(BASE_URL);
   113 |     await openChatbot(page);
   114 |   });
@@ -119,78 +121,80 @@ Received string:    "[Live Agent Active] Message sent to support representative.
   206 |   });
   207 | 
   208 |   test('Apply Coupon via Chatbot', async ({ page }) => {
-  209 |     await sendChatMessage(page, 'apply coupon SAVE20');
-  210 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-> 211 |     expect(botReply).toContain('valid');
+  209 |     await sendChatMessage(page, 'Add headphones to cart');
+  210 |     await sendChatMessage(page, 'apply coupon SAVE20');
+  211 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
+> 212 |     expect(botReply).toContain('valid');
       |                      ^ Error: expect(received).toContain(expected) // indexOf
-  212 |   });
-  213 | 
-  214 |   test('Complete Checkout & Order Placement via Chatbot', async ({ page }) => {
-  215 |     // Make sure we have items in cart
-  216 |     await sendChatMessage(page, 'Add headphones to cart');
-  217 |     
-  218 |     await sendChatMessage(page, 'Checkout now');
-  219 |     await sendChatMessage(page, 'John Doe');
-  220 |     await sendChatMessage(page, '123 Test Road');
-  221 |     await sendChatMessage(page, 'New York, 10001');
-  222 |     
-  223 |     // Confirm order placement
-  224 |     await sendChatMessage(page, 'confirm');
-  225 |     
-  226 |     // Verify DB state
-  227 |     const db = mongoClient.db();
-  228 |     const ordersCol = db.collection('orders');
-  229 |     const userDoc = await db.collection('users').findOne({ email: 'john.doe@example.com' });
-  230 |     expect(userDoc).not.toBeNull();
-  231 |     
-  232 |     const dbOrder = await ordersCol.findOne(
-  233 |       { userId: userDoc!._id },
-  234 |       { sort: { createdAt: -1 } }
-  235 |     );
-  236 |     expect(dbOrder).not.toBeNull();
-  237 |     expect(dbOrder!.status).toBe('Pending');
-  238 |     
-  239 |     // Verify UI cart total cleared
-  240 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  241 |     expect(botReply).toContain('Placed Successfully');
-  242 |     
-  243 |     reportResults.capabilities.checkout = 'Pass';
-  244 |     reportResults.capabilities.orders = 'Pass';
-  245 |     reportResults.capabilities.payment = 'Pass';
-  246 |   });
-  247 | 
-  248 |   test('Track order status', async ({ page }) => {
-  249 |     await sendChatMessage(page, 'Track my latest order');
-  250 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  251 |     expect(botReply).toContain('Status');
-  252 |   });
-  253 | 
-  254 |   test('Create support ticket via Chatbot', async ({ page }) => {
-  255 |     await sendChatMessage(page, 'Open a support ticket');
-  256 |     await sendChatMessage(page, 'Delay in shipment');
-  257 |     await sendChatMessage(page, 'My order has not arrived yet.');
-  258 |     
-  259 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  260 |     expect(botReply).toContain('Created');
-  261 |   });
-  262 | 
-  263 |   test('Wishlist actions via Chatbot', async ({ page }) => {
-  264 |     await sendChatMessage(page, 'my wishlist');
-  265 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  266 |     await assertNotTextOnly(botReply, 'Wishlist View');
-  267 |     
-  268 |     reportResults.capabilities.wishlist = 'Pass';
-  269 |   });
-  270 | 
-  271 |   test('Memory context test (Add and add one more)', async ({ page }) => {
-  272 |     await sendChatMessage(page, 'Add headphones to cart');
-  273 |     await sendChatMessage(page, 'Add one more');
-  274 |     
-  275 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  276 |     expect(botReply).toContain('Added to Cart');
-  277 |     
-  278 |     reportResults.capabilities.memory = 'Pass';
-  279 |   });
-  280 | });
-  281 | 
+  213 |   });
+  214 | 
+  215 |   test('Complete Checkout & Order Placement via Chatbot', async ({ page }) => {
+  216 |     // Make sure we have items in cart
+  217 |     await sendChatMessage(page, 'Add headphones to cart');
+  218 |     
+  219 |     await sendChatMessage(page, 'Checkout now');
+  220 |     await sendChatMessage(page, 'John Doe');
+  221 |     await sendChatMessage(page, '123 Test Road');
+  222 |     await sendChatMessage(page, 'New York, 10001');
+  223 |     await sendChatMessage(page, 'COD');
+  224 |     
+  225 |     // Confirm order placement
+  226 |     await sendChatMessage(page, 'confirm');
+  227 |     
+  228 |     // Verify DB state
+  229 |     const db = mongoClient.db();
+  230 |     const ordersCol = db.collection('orders');
+  231 |     const userDoc = await db.collection('users').findOne({ email: 'john.doe@example.com' });
+  232 |     expect(userDoc).not.toBeNull();
+  233 |     
+  234 |     const dbOrder = await ordersCol.findOne(
+  235 |       { userId: userDoc!._id },
+  236 |       { sort: { createdAt: -1 } }
+  237 |     );
+  238 |     expect(dbOrder).not.toBeNull();
+  239 |     expect(dbOrder!.status).toBe('Pending');
+  240 |     
+  241 |     // Verify UI cart total cleared
+  242 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
+  243 |     expect(botReply).toContain('Placed Successfully');
+  244 |     
+  245 |     reportResults.capabilities.checkout = 'Pass';
+  246 |     reportResults.capabilities.orders = 'Pass';
+  247 |     reportResults.capabilities.payment = 'Pass';
+  248 |   });
+  249 | 
+  250 |   test('Track order status', async ({ page }) => {
+  251 |     await sendChatMessage(page, 'Track my latest order');
+  252 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
+  253 |     expect(botReply).toContain('Status');
+  254 |   });
+  255 | 
+  256 |   test('Create support ticket via Chatbot', async ({ page }) => {
+  257 |     await sendChatMessage(page, 'Open a support ticket');
+  258 |     await sendChatMessage(page, 'Delay in shipment');
+  259 |     await sendChatMessage(page, 'My order has not arrived yet.');
+  260 |     
+  261 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
+  262 |     expect(botReply).toContain('Created');
+  263 |   });
+  264 | 
+  265 |   test('Wishlist actions via Chatbot', async ({ page }) => {
+  266 |     await sendChatMessage(page, 'my wishlist');
+  267 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
+  268 |     await assertNotTextOnly(botReply, 'Wishlist View');
+  269 |     
+  270 |     reportResults.capabilities.wishlist = 'Pass';
+  271 |   });
+  272 | 
+  273 |   test('Memory context test (Add and add one more)', async ({ page }) => {
+  274 |     await sendChatMessage(page, 'Add headphones to cart');
+  275 |     await sendChatMessage(page, 'Add one more');
+  276 |     
+  277 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
+  278 |     expect(botReply).toContain('Added to Cart');
+  279 |     
+  280 |     reportResults.capabilities.memory = 'Pass';
+  281 |   });
+  282 | });
+  283 | 
 ```

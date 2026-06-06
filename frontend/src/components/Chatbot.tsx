@@ -80,7 +80,7 @@ function getOrCreateSessionId(): string {
 export default function Chatbot() {
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { user, cart, wishlist, addToCart, orders, addOrder, clearCart, login, logout } = useStore();
+  const { user, cart, wishlist, addToCart, orders, addOrder, clearCart, login, logout, toggleTheme } = useStore();
   const router = useRouter();
 
   // Mount effect
@@ -268,11 +268,14 @@ export default function Chatbot() {
           break;
         case 'NOTIFY':
           break;
+        case 'TOGGLE_THEME':
+          toggleTheme();
+          break;
         default:
           break;
       }
     }
-  }, [addToCart, clearCart, login, logout, router, guestId]);
+  }, [addToCart, clearCart, login, logout, router, guestId, toggleTheme]);
 
   // ─── AGENT API CALL ───────────────────────────────────────────────────────
 

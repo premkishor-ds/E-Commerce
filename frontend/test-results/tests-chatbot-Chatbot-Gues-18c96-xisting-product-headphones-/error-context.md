@@ -20,7 +20,7 @@ Received string:    "🔍 **Found 63 products** for \"headphones\":·
 • **Microsoft Headphone - ORANGE (12)** — $49900.00 ⭐4.1
 • **Nvidia Headphones - BLUE (L)** — $50000.00 ⭐4
 • **Nvidia Headphone - ORANGE (12)** — $20000.00 ⭐4.5·
-Type the **product name** to see details, or **\"add [name] to cart\"** to purchase!03:38 PM"
+Type the **product name** to see details, or **\"add [name] to cart\"** to purchase!04:18 PM"
 ```
 
 # Test source
@@ -199,33 +199,33 @@ Type the **product name** to see details, or **\"add [name] to cart\"** to purch
   206 |   });
   207 | 
   208 |   test('Apply Coupon via Chatbot', async ({ page }) => {
-  209 |     await sendChatMessage(page, 'apply coupon SAVE20');
-  210 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
-  211 |     expect(botReply).toContain('valid');
-  212 |   });
-  213 | 
-  214 |   test('Complete Checkout & Order Placement via Chatbot', async ({ page }) => {
-  215 |     // Make sure we have items in cart
-  216 |     await sendChatMessage(page, 'Add headphones to cart');
-  217 |     
-  218 |     await sendChatMessage(page, 'Checkout now');
-  219 |     await sendChatMessage(page, 'John Doe');
-  220 |     await sendChatMessage(page, '123 Test Road');
-  221 |     await sendChatMessage(page, 'New York, 10001');
-  222 |     
-  223 |     // Confirm order placement
-  224 |     await sendChatMessage(page, 'confirm');
-  225 |     
-  226 |     // Verify DB state
-  227 |     const db = mongoClient.db();
-  228 |     const ordersCol = db.collection('orders');
-  229 |     const userDoc = await db.collection('users').findOne({ email: 'john.doe@example.com' });
-  230 |     expect(userDoc).not.toBeNull();
-  231 |     
-  232 |     const dbOrder = await ordersCol.findOne(
-  233 |       { userId: userDoc!._id },
-  234 |       { sort: { createdAt: -1 } }
-  235 |     );
-  236 |     expect(dbOrder).not.toBeNull();
-  237 |     expect(dbOrder!.status).toBe('Pending');
+  209 |     await sendChatMessage(page, 'Add headphones to cart');
+  210 |     await sendChatMessage(page, 'apply coupon SAVE20');
+  211 |     const botReply = await page.locator('div.rounded-tl-none').last().textContent() || '';
+  212 |     expect(botReply).toContain('valid');
+  213 |   });
+  214 | 
+  215 |   test('Complete Checkout & Order Placement via Chatbot', async ({ page }) => {
+  216 |     // Make sure we have items in cart
+  217 |     await sendChatMessage(page, 'Add headphones to cart');
+  218 |     
+  219 |     await sendChatMessage(page, 'Checkout now');
+  220 |     await sendChatMessage(page, 'John Doe');
+  221 |     await sendChatMessage(page, '123 Test Road');
+  222 |     await sendChatMessage(page, 'New York, 10001');
+  223 |     await sendChatMessage(page, 'COD');
+  224 |     
+  225 |     // Confirm order placement
+  226 |     await sendChatMessage(page, 'confirm');
+  227 |     
+  228 |     // Verify DB state
+  229 |     const db = mongoClient.db();
+  230 |     const ordersCol = db.collection('orders');
+  231 |     const userDoc = await db.collection('users').findOne({ email: 'john.doe@example.com' });
+  232 |     expect(userDoc).not.toBeNull();
+  233 |     
+  234 |     const dbOrder = await ordersCol.findOne(
+  235 |       { userId: userDoc!._id },
+  236 |       { sort: { createdAt: -1 } }
+  237 |     );
 ```

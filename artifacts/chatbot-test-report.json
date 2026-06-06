@@ -1,6 +1,6 @@
 {
-  "totalTests": 2,
-  "passed": 1,
+  "totalTests": 3,
+  "passed": 2,
   "failed": 1,
   "capabilities": {
     "search": "Fail",
@@ -15,6 +15,6 @@
     "memory": "Fail"
   },
   "failures": [
-    "Memory context test (Add and add one more) failed: Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"Added to Cart\"\u001b[39m\nReceived string:    \u001b[31m\"[Live Agent Active] Message sent to support representative.03:42 PM\"\u001b[39m"
+    "Memory context test (Add and add one more) failed: \u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
   ]
 }
