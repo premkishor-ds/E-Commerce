@@ -79,19 +79,16 @@ export function evaluateResponse(
   let analysis = 'The chatbot understood the user intent and responded appropriately.';
   let confidenceScore = botResponse.confidence ?? 100;
 
-  if (!intentMatch || !actionMatch || !relevanceMatch || !contextMaintained) {
+  if (!intentMatch || !actionMatch || !relevanceMatch || !contextMaintained || !empathyMatch) {
     result = 'FAIL';
     analysis = `Failed because of the following: ` + [
       !intentMatch ? `Intent mismatch (Expected: [${testCase.expectedGoal}], Got: [${actualIntent}])` : '',
       !actionMatch ? `Action mismatch (Expected: [${testCase.expectedAction || 'None'}], Got: ${JSON.stringify(actualActions)})` : '',
       !relevanceMatch ? 'Relevance mismatch (fallback or missing keywords)' : '',
-      !contextMaintained ? 'Context maintenance failure' : ''
+      !contextMaintained ? 'Context maintenance failure' : '',
+      !empathyMatch ? 'Empathy check failed' : ''
     ].filter(Boolean).join(', ');
     confidenceScore = 0;
-  } else if (hasEmotion && !empathyMatch) {
-    result = 'PARTIAL';
-    analysis = 'Intent matched, but failed to express empathy to the emotional user query.';
-    confidenceScore = Math.max(70, confidenceScore - 10);
   }
 
   return {

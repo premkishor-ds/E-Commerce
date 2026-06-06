@@ -63,6 +63,7 @@ const ProductSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+ProductSchema.index({ title: 'text', description: 'text', tags: 'text' });
 
 const CartSchema = new mongoose.Schema(
   {
@@ -249,6 +250,12 @@ const brandsData = [
   { name: 'Adidas' },
   { name: 'Puma' },
   { name: 'Reebok' },
+  { name: 'Logitech' },
+  { name: 'Bose' },
+  { name: 'Intel' },
+  { name: 'AMD' },
+  { name: 'Nvidia' },
+  { name: 'Microsoft' },
 ];
 
 const initialProductsData = [
@@ -316,14 +323,17 @@ function generate1000Products() {
   const brands = [
     'Samsung', 'Apple', 'Sony', 'Nike', 'Adidas', 'Dell', 'HP', 'Lenovo', 'OnePlus', 'Google',
     'LG', 'Asus', 'Acer', 'Realme', 'Oppo', 'Vivo', 'Xiaomi', 'Redmi', 'Motorola',
-    'Puma', 'Reebok', 'ApexTech', 'NexaHome', 'AuraWear', 'VeloSport'
+    'Puma', 'Reebok', 'ApexTech', 'NexaHome', 'AuraWear', 'VeloSport',
+    'Logitech', 'Bose', 'Intel', 'AMD', 'Nvidia', 'Microsoft'
   ];
 
   const productTypes = [
     'phone', 'laptop', 'mouse', 'shoes', 'watch', 'TV', 'earbuds', 'speaker',
     'multi-cooker', 'treadmill', 'headphone', 'camera', 'tablet', 'shirt',
     'jacket', 'bag', 'cooker', 'bicycle', 'keyboard', 'monitor',
-    'refrigerator', 'washing machine', 'microwave', 'blender', 'air purifier'
+    'refrigerator', 'washing machine', 'microwave', 'blender', 'air purifier',
+    'headphones', 'smartwatch', 'charger', 'cable', 'backpack', 'desk lamp',
+    'router', 'microphone', 'projector', 'hard drive', 'graphics card'
   ];
 
   const productTypeCategoryMap: Record<string, string> = {
@@ -334,11 +344,13 @@ function generate1000Products() {
     'microwave': 'Home & Kitchen',
     'blender': 'Home & Kitchen',
     'air purifier': 'Home & Kitchen',
+    'desk lamp': 'Home & Kitchen',
     
     'smartwatch': 'Electronics',
     'laptop': 'Electronics',
     'phone': 'Electronics',
     'headphone': 'Electronics',
+    'headphones': 'Electronics',
     'earphone': 'Electronics',
     'earbud': 'Electronics',
     'earbuds': 'Electronics',
@@ -352,11 +364,19 @@ function generate1000Products() {
     'television': 'Electronics',
     'tv': 'Electronics',
     'TV': 'Electronics',
+    'charger': 'Electronics',
+    'cable': 'Electronics',
+    'router': 'Electronics',
+    'microphone': 'Electronics',
+    'projector': 'Electronics',
+    'hard drive': 'Electronics',
+    'graphics card': 'Electronics',
     
     'shirt': 'Fashion',
     'shoes': 'Fashion',
     'jacket': 'Fashion',
     'bag': 'Fashion',
+    'backpack': 'Fashion',
     'leggings': 'Fashion',
     
     'treadmill': 'Fitness & Sports',
@@ -371,11 +391,13 @@ function generate1000Products() {
     'microwave': '/images/cooker.png',
     'blender': '/images/cooker.png',
     'air purifier': '/images/cooker.png',
+    'desk lamp': '/images/cooker.png',
     
     'smartwatch': '/images/smartwatch.png',
     'laptop': '/images/laptop.png',
     'phone': '/images/phone.png',
     'headphone': '/images/headphones.png',
+    'headphones': '/images/headphones.png',
     'earphone': '/images/headphones.png',
     'earbud': '/images/earbuds.png',
     'earbuds': '/images/earbuds.png',
@@ -389,11 +411,19 @@ function generate1000Products() {
     'television': '/images/tv.png',
     'tv': '/images/tv.png',
     'TV': '/images/tv.png',
+    'charger': '/images/laptop.png',
+    'cable': '/images/laptop.png',
+    'router': '/images/laptop.png',
+    'microphone': '/images/laptop.png',
+    'projector': '/images/laptop.png',
+    'hard drive': '/images/laptop.png',
+    'graphics card': '/images/laptop.png',
     
     'shirt': '/images/leggings.png',
     'shoes': '/images/shoes.png',
     'jacket': '/images/leggings.png',
     'bag': '/images/leggings.png',
+    'backpack': '/images/leggings.png',
     'leggings': '/images/leggings.png',
     
     'treadmill': '/images/bicycle.png',
@@ -412,11 +442,13 @@ function generate1000Products() {
     'microwave': 'microwave,kitchen',
     'blender': 'blender,kitchen',
     'air purifier': 'airpurifier,appliance',
+    'desk lamp': 'desklamp,kitchen,home',
     
     'smartwatch': 'smartwatch,watch',
     'laptop': 'laptop,computer',
     'phone': 'smartphone,phone',
     'headphone': 'headphones,audio',
+    'headphones': 'headphones,audio',
     'earphone': 'earphones,audio',
     'earbud': 'earbuds,audio',
     'earbuds': 'earbuds,audio',
@@ -430,11 +462,19 @@ function generate1000Products() {
     'television': 'television,tv',
     'tv': 'television,tv',
     'TV': 'television,tv',
+    'charger': 'charger,power',
+    'cable': 'cable,usb',
+    'router': 'router,wifi',
+    'microphone': 'microphone,audio',
+    'projector': 'projector,video',
+    'hard drive': 'harddrive,storage',
+    'graphics card': 'gpu,graphics',
     
     'shirt': 'shirt,apparel',
     'shoes': 'shoes,sneakers',
     'jacket': 'jacket,apparel',
     'bag': 'bag,backpack',
+    'backpack': 'backpack,bag',
     'leggings': 'leggings,apparel',
     
     'treadmill': 'treadmill,fitness',
@@ -442,43 +482,43 @@ function generate1000Products() {
   };
 
   let idCounter = 1;
-  while (generated.length < 1000) {
-    const brand = brands[idCounter % brands.length];
-    const productType = productTypes[idCounter % productTypes.length];
-    const catName = productTypeCategoryMap[productType] || 'Electronics';
-    
-    const kw = keywordMap[productType] || 'gadget';
-    const image = `https://loremflickr.com/600/600/${kw}?lock=${idCounter}`;
-    
-    const color = colors[idCounter % colors.length];
-    const size = sizes[idCounter % sizes.length];
-    const basePrice = prices[idCounter % prices.length];
-    const price = parseFloat((basePrice - (idCounter % 5) * (basePrice > 1000 ? 100 : 5)).toFixed(2));
-    
-    const title = `${brand} ${productType.charAt(0).toUpperCase() + productType.slice(1)} - ${color.toUpperCase()} (${size})`;
-    const description = `This ${brand} ${productType} is a premium product in ${color} color and size ${size}, built for outstanding reliability and performance.`;
-    const sku = `SKU-${brand.substring(0, 3).toUpperCase()}-${productType.substring(0, 4).toUpperCase()}-${color.substring(0, 3).toUpperCase()}-${size}-${idCounter}`;
-    const tags = [productType, brand.toLowerCase(), color, size.toLowerCase()];
-    const averageRating = parseFloat((4.0 + (idCounter % 10) * 0.1).toFixed(1));
+  for (const brand of brands) {
+    for (const productType of productTypes) {
+      const catName = productTypeCategoryMap[productType] || 'Electronics';
+      
+      const kw = keywordMap[productType] || 'gadget';
+      const image = `https://loremflickr.com/600/600/${kw}?lock=${idCounter}`;
+      
+      const color = colors[idCounter % colors.length];
+      const size = sizes[idCounter % sizes.length];
+      const basePrice = prices[idCounter % prices.length];
+      const price = parseFloat((basePrice - (idCounter % 5) * (basePrice > 1000 ? 100 : 5)).toFixed(2));
+      
+      const title = `${brand} ${productType.charAt(0).toUpperCase() + productType.slice(1)} - ${color.toUpperCase()} (${size})`;
+      const description = `This ${brand} ${productType} is a premium product in ${color} color and size ${size}, built for outstanding reliability and performance.`;
+      const sku = `SKU-${brand.substring(0, 3).toUpperCase()}-${productType.substring(0, 4).toUpperCase()}-${color.substring(0, 3).toUpperCase()}-${size}-${idCounter}`;
+      const tags = [productType, brand.toLowerCase(), color, size.toLowerCase()];
+      const averageRating = parseFloat((4.0 + (idCounter % 10) * 0.1).toFixed(1));
 
-    generated.push({
-      title,
-      description,
-      price,
-      categoryName: catName,
-      brandName: brand,
-      sku,
-      images: [image],
-      tags,
-      averageRating,
-      specifications: [
-        { name: 'Color', value: color },
-        { name: 'Size', value: size },
-        { name: 'Model Year', value: '2026' }
-      ],
-      faqs: [{ question: 'Is it original?', answer: `Yes, it is an official ${brand} product.` }],
-    });
-    idCounter++;
+      generated.push({
+        title,
+        description,
+        price,
+        categoryName: catName,
+        brandName: brand,
+        sku,
+        images: [image],
+        tags,
+        averageRating,
+        specifications: [
+          { name: 'Color', value: color },
+          { name: 'Size', value: size },
+          { name: 'Model Year', value: '2026' }
+        ],
+        faqs: [{ question: 'Is it original?', answer: `Yes, it is an official ${brand} product.` }],
+      });
+      idCounter++;
+    }
   }
 
   return generated;
@@ -490,21 +530,16 @@ async function seed() {
   await mongoose.connect(MONGO_URI);
   console.log('Connected to Database. Seeding...');
 
-  // 1. Clean existing collections
-  await Promise.all([
-    User.deleteMany({}),
-    Category.deleteMany({}),
-    Brand.deleteMany({}),
-    Inventory.deleteMany({}),
-    Product.deleteMany({}),
-    Cart.deleteMany({}),
-    Wishlist.deleteMany({}),
-    Order.deleteMany({}),
-    Ticket.deleteMany({}),
-    Review.deleteMany({}),
-    UserMemory.deleteMany({}),
-  ]);
-  console.log('Cleared existing database entries.');
+  // 1. Clean existing collections by dropping them to clear conflicting indexes
+  const collections = ['users', 'categories', 'brands', 'inventories', 'products', 'carts', 'wishlists', 'orders', 'tickets', 'reviews', 'usermemories'];
+  for (const col of collections) {
+    try {
+      await mongoose.connection.db!.dropCollection(col);
+    } catch (e) {
+      // Ignore if collection doesn't exist
+    }
+  }
+  console.log('Dropped existing collections.');
 
   // 2. Insert Categories and Brands
   const categories = await Category.insertMany(categoriesData);
@@ -546,6 +581,7 @@ async function seed() {
   }
 
   const products = await Product.insertMany(productsToInsert);
+  await Product.createIndexes();
   await Inventory.insertMany(inventoriesToInsert);
   console.log('Inserted Products & Inventories.');
 

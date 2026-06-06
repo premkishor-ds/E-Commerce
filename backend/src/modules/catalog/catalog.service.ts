@@ -31,23 +31,41 @@ export class CatalogService {
     private readonly vendorRepository: VendorRepository,
   ) {}
 
-  private async getCategoryByName(name: string) {
-    if (!this.categoryCache) {
-      this.categoryCache = await this.categoryRepository.find({});
+  private normalizeCategoryName(name: string): string {
+    const lower = name.toLowerCase().trim();
+    if (['phone', 'phones', 'smartphone', 'smartphones', 'laptop', 'laptops', 'computer', 'computers', 'headphone', 'headphones', 'earphone', 'earphones', 'earbud', 'earbuds', 'speaker', 'speakers', 'watch', 'watches', 'smartwatch', 'smartwatches', 'camera', 'cameras', 'tablet', 'tablets', 'keyboard', 'keyboards', 'mouse', 'mice', 'monitor', 'monitors', 'television', 'televisions', 'tv', 'tvs', 'charger', 'chargers', 'cable', 'cables', 'router', 'routers', 'microphone', 'microphones', 'projector', 'projectors', 'hard drive', 'hard drives', 'graphics card', 'graphics cards'].includes(lower)) {
+      return 'Electronics';
     }
-    const found = this.categoryCache.find(
-      (c) => c.name.toLowerCase() === name.toLowerCase()
+    if (['shirt', 'shirts', 'shoes', 'shoe', 'jacket', 'jackets', 'bag', 'bags', 'backpack', 'backpacks', 'leggings', 'apparel', 'clothing'].includes(lower)) {
+      return 'Fashion';
+    }
+    if (['multi-cooker', 'multi-cookers', 'cooker', 'cookers', 'refrigerator', 'refrigerators', 'fridge', 'fridges', 'washing machine', 'washing machines', 'microwave', 'microwaves', 'blender', 'blenders', 'air purifier', 'air purifiers', 'desk lamp', 'desk lamps', 'kitchen', 'home'].includes(lower)) {
+      return 'Home & Kitchen';
+    }
+    if (['treadmill', 'treadmills', 'bicycle', 'bicycles', 'bike', 'bikes', 'fitness', 'sports'].includes(lower)) {
+      return 'Fitness & Sports';
+    }
+    return name;
+  }
+
+  private async getCategoryByName(name: string) {
+    const normalizedName = this.normalizeCategoryName(name);
+    console.log('[DEBUG_CATALOG] getCategoryByName input:', name, 'normalized:', normalizedName);
+    const categories = await this.categoryRepository.find({});
+    const found = categories.find(
+      (c) => c.name.toLowerCase() === normalizedName.toLowerCase()
     );
+    console.log('[DEBUG_CATALOG] getCategoryByName found:', found ? found.name : 'null', found ? found._id : 'null');
     return found ? found._id : null;
   }
 
   private async getBrandByName(name: string) {
-    if (!this.brandCache) {
-      this.brandCache = await this.brandRepository.find({});
-    }
-    const found = this.brandCache.find(
+    console.log('[DEBUG_CATALOG] getBrandByName input:', name);
+    const brands = await this.brandRepository.find({});
+    const found = brands.find(
       (b) => b.name.toLowerCase() === name.toLowerCase()
     );
+    console.log('[DEBUG_CATALOG] getBrandByName found:', found ? found.name : 'null', found ? found._id : 'null');
     return found ? found._id : null;
   }
 
@@ -117,6 +135,7 @@ export class CatalogService {
   }
 
   async getProducts(filters: any) {
+    console.log('[DEBUG_CATALOG] getProducts filters:', JSON.stringify(filters));
     const query: any = {};
     if (filters.category) {
       if (Types.ObjectId.isValid(filters.category)) {
@@ -152,7 +171,9 @@ export class CatalogService {
       query.$text = { $search: filters.search };
     }
 
+    console.log('[DEBUG_CATALOG] getProducts query:', JSON.stringify(query));
     let products = await this.productRepository.find(query);
+    console.log('[DEBUG_CATALOG] getProducts DB products found count:', products ? products.length : 0);
 
     // Fallback to regex-like filter if $text finds nothing (production only to prevent breaking mock)
     if ((!products || products.length === 0) && filters.search) {
@@ -164,6 +185,7 @@ export class CatalogService {
         p.description?.toLowerCase().includes(filters.search.toLowerCase()) ||
         p.sku?.toLowerCase().includes(filters.search.toLowerCase())
       );
+      console.log('[DEBUG_CATALOG] getProducts fallback products found count:', products.length);
     }
 
     // Apply advanced filters in-memory for accuracy and test compatibility
@@ -213,21 +235,17 @@ export class CatalogService {
     // Populate brand and category documents for validation inside agent.service using caches to avoid database bottlenecks
     let plainProducts = (products || []).map((p: any) => typeof p.toObject === 'function' ? p.toObject() : p);
     if (plainProducts.length > 0) {
-      if (!this.brandCache) {
-        this.brandCache = await this.brandRepository.find({});
-      }
-      if (!this.categoryCache) {
-        this.categoryCache = await this.categoryRepository.find({});
-      }
+      const brandCache = await this.brandRepository.find({});
+      const categoryCache = await this.categoryRepository.find({});
       for (const p of plainProducts) {
         if (p.brand && Types.ObjectId.isValid(p.brand)) {
           const brandIdStr = p.brand.toString();
-          const brandDoc = this.brandCache.find(b => b._id.toString() === brandIdStr);
+          const brandDoc = brandCache.find(b => b._id.toString() === brandIdStr);
           if (brandDoc) p.brand = brandDoc;
         }
         if (p.category && Types.ObjectId.isValid(p.category)) {
           const categoryIdStr = p.category.toString();
-          const categoryDoc = this.categoryCache.find(c => c._id.toString() === categoryIdStr);
+          const categoryDoc = categoryCache.find(c => c._id.toString() === categoryIdStr);
           if (categoryDoc) p.category = categoryDoc;
         }
       }

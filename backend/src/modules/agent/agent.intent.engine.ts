@@ -820,13 +820,18 @@ export function extractEntities(text: string): Record<string, string> {
     entities.storage = storageMatch[0].replace(/\s+/g, '').toUpperCase();
 
   // ── Product name from comparison queries ─────────────────────────────────
-  // "compare A vs B" / "compare A versus B"
-  const compareMatch = text.match(
-    /compare\s+(.+?)\s+(?:vs|versus|or|against)\s+(.+)/i,
+  const compMatch = text.match(
+    /(?:compare|comparison of|difference between|better between|which is better:?|should i buy)\s+(.+?)\s+(?:vs|versus|or|against|and)\s+(.+)/i,
   );
-  if (compareMatch) {
-    entities.compareProductA = compareMatch[1].trim();
-    entities.compareProductB = compareMatch[2].trim();
+  if (compMatch) {
+    entities.compareProductA = compMatch[1].trim().replace(/\?$/, '');
+    entities.compareProductB = compMatch[2].trim().replace(/\?$/, '');
+  } else {
+    const vsMatch = text.match(/(.+?)\s+(?:vs|versus)\s+(.+)/i);
+    if (vsMatch) {
+      entities.compareProductA = vsMatch[1].trim().replace(/\?$/, '');
+      entities.compareProductB = vsMatch[2].trim().replace(/\?$/, '');
+    }
   }
 
   // ── Category keywords ────────────────────────────────────────────────────
@@ -880,12 +885,23 @@ export function extractEntities(text: string): Record<string, string> {
     'microwave',
     'blender',
     'air purifier',
+    'headphones',
+    'charger',
+    'cable',
+    'backpack',
+    'desk lamp',
+    'router',
+    'microphone',
+    'projector',
+    'earbuds',
+    'hard drive',
+    'graphics card',
   ];
   const sortedProductTypes = [...productTypes].sort(
     (a, b) => b.length - a.length,
   );
   for (const pt of sortedProductTypes) {
-    const regex = new RegExp('\\b' + pt + '\\b', 'i');
+    const regex = new RegExp('\\b' + pt + 's?\\b', 'i');
     if (regex.test(lower)) {
       entities.productType = pt;
       break;
@@ -918,6 +934,12 @@ export function extractEntities(text: string): Record<string, string> {
     'nexahome',
     'aurawear',
     'velosport',
+    'logitech',
+    'bose',
+    'intel',
+    'amd',
+    'nvidia',
+    'microsoft',
   ];
   for (const brand of brands) {
     const regex = new RegExp('\\b' + brand + '\\b', 'i');
@@ -999,6 +1021,27 @@ export function classifyIntent(message: string): IntentMatch {
   const lower = message.toLowerCase().trim();
   const scores: Record<string, number> = {};
   const entities = extractEntities(message);
+
+  // Check if it is a comparison query first to avoid misclassification
+  const isCompare = (() => {
+    const hasTrigger = /\b(compare|comparison|versus|vs|difference|better|should\s+i\s+(?:buy|get|purchase))\b/i.test(lower);
+    if (!hasTrigger) return false;
+    if (/\b(vs|versus|or|against)\b/i.test(lower)) {
+      return true;
+    }
+    if (/\band\b/i.test(lower)) {
+      return /\b(compare|comparison|difference|between|better)\b/i.test(lower);
+    }
+    return false;
+  })();
+
+  if (isCompare) {
+    return {
+      intent: 'COMPARE',
+      score: 10,
+      entities,
+    };
+  }
 
   if (
     lower.includes('bought together') ||
