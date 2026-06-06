@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { PRODUCTS, CATEGORIES, BRANDS } from '../../data/mockData';
 import { useStore } from '../../store/store';
@@ -42,40 +42,63 @@ function SearchPageContent() {
     router.push('/search');
   };
 
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (query) params.set('search', query);
+    if (activeCategory && activeCategory !== 'All') params.set('category', activeCategory);
+    if (activeBrand && activeBrand !== 'All') params.set('brand', activeBrand);
+
+    fetch(`http://127.0.0.1:5001/api/v1/catalog/products?${params.toString()}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setProducts(data || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        // Fallback to static mock data if backend is offline
+        let result = [...PRODUCTS];
+        if (query.trim()) {
+          const q = query.toLowerCase();
+          result = result.filter(
+            (p) =>
+              p.title.toLowerCase().includes(q) ||
+              p.description.toLowerCase().includes(q) ||
+              p.brand.toLowerCase().includes(q) ||
+              p.category.toLowerCase().includes(q) ||
+              p.tags.some((t) => t.toLowerCase().includes(q)),
+          );
+        }
+        if (activeCategory !== 'All') {
+          result = result.filter((p) => p.category === activeCategory);
+        }
+        if (activeBrand !== 'All') {
+          result = result.filter((p) => p.brand === activeBrand);
+        }
+        setProducts(result);
+        setLoading(false);
+      });
+  }, [query, activeCategory, activeBrand]);
+
   // Filter and sort products
   const filteredProducts = useMemo(() => {
-    let result = [...PRODUCTS];
-
-    // Text query search
-    if (query.trim()) {
-      const q = query.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.title.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.brand.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          p.tags.some((t) => t.toLowerCase().includes(q))
-      );
-    }
-
-    // Category filter
-    if (activeCategory !== 'All') {
-      result = result.filter((p) => p.category === activeCategory);
-    }
-
-    // Brand filter
-    if (activeBrand !== 'All') {
-      result = result.filter((p) => p.brand === activeBrand);
-    }
+    let result = [...products];
 
     // Rating filter
     if (activeRating > 0) {
-      result = result.filter((p) => p.averageRating >= activeRating);
+      result = result.filter(
+        (p) =>
+          (p.averageRating || p.rating || 0) >= activeRating,
+      );
     }
 
     // Price range filter
-    result = result.filter((p) => p.price >= activeMinPrice && p.price <= activeMaxPrice);
+    result = result.filter(
+      (p) => p.price >= activeMinPrice && p.price <= activeMaxPrice,
+    );
 
     // Sorting
     if (activeSort === 'price-asc') {
@@ -83,11 +106,15 @@ function SearchPageContent() {
     } else if (activeSort === 'price-desc') {
       result.sort((a, b) => b.price - a.price);
     } else if (activeSort === 'rating') {
-      result.sort((a, b) => b.averageRating - a.averageRating);
+      result.sort(
+        (a, b) =>
+          (b.averageRating || b.rating || 0) -
+          (a.averageRating || a.rating || 0),
+      );
     }
 
     return result;
-  }, [query, activeCategory, activeBrand, activeRating, activeSort, activeMinPrice, activeMaxPrice]);
+  }, [products, activeRating, activeSort, activeMinPrice, activeMaxPrice]);
 
   return (
     <div className="flex-grow bg-zinc-50 dark:bg-zinc-950 pb-20">
@@ -284,20 +311,23 @@ function SearchPageContent() {
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map((p) => {
-                  const isWishlisted = wishlist.includes(p.id);
+                  const pId = p.id || p._id;
+                  const isWishlisted = wishlist.includes(pId);
+                  const brandName = typeof p.brand === 'object' && p.brand !== null ? (p.brand.name || '') : p.brand;
+                  const imgUrl = p.images?.[0] || 'https://picsum.photos/seed/product/600/600';
                   return (
                     <div
-                      key={p.id}
+                      key={pId}
                       className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-4 transition-all hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
                     >
                       <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-zinc-100">
                         <img
-                          src={p.images[0]}
+                          src={imgUrl}
                           alt={p.title}
                           className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                         />
                         <button
-                          onClick={() => toggleWishlist(p.id)}
+                          onClick={() => toggleWishlist(pId)}
                           className={`absolute top-2 right-2 rounded-full p-2 bg-white/90 shadow dark:bg-zinc-900/90 transition-all ${
                             isWishlisted ? 'text-red-500' : 'text-zinc-400 hover:text-red-500'
                           }`}
@@ -307,15 +337,15 @@ function SearchPageContent() {
                       </div>
 
                       <div className="mt-4 flex-1 space-y-2">
-                        <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-bold">{p.brand}</span>
+                        <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-bold">{brandName}</span>
                         <h3 className="font-semibold text-sm text-zinc-900 dark:text-white line-clamp-1">
-                          <Link href={`/product/${p.id}`} className="hover:text-indigo-600">
+                          <Link href={`/product/${pId}`} className="hover:text-indigo-600">
                             {p.title}
                           </Link>
                         </h3>
                         <div className="flex items-center gap-1 text-xs text-amber-500 font-bold">
                           <Star className="h-3.5 w-3.5 fill-current" />
-                          <span>{p.averageRating}</span>
+                          <span>{p.averageRating || p.rating || 0}</span>
                         </div>
                         <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">{p.description}</p>
                       </div>
@@ -323,7 +353,7 @@ function SearchPageContent() {
                       <div className="mt-4 flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800">
                         <span className="font-extrabold text-zinc-900 dark:text-white">${p.price.toFixed(2)}</span>
                         <button
-                          onClick={() => addToCart({ id: p.id, title: p.title, price: p.price, image: p.images[0] })}
+                          onClick={() => addToCart({ id: pId, title: p.title, price: p.price, image: imgUrl })}
                           className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 active:scale-95 transition-all shadow-md shadow-indigo-600/10"
                         >
                           <ShoppingCart className="h-3.5 w-3.5" />

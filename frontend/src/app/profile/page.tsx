@@ -1169,7 +1169,7 @@ export default function ProfilePage() {
 
                       {/* Items */}
                       <div className="space-y-3">
-                        {ord.items.map((item) => (
+                        {ord.items.map((item: any) => (
                           <div key={item.id} className="flex gap-4 items-center">
                             <img src={item.image} alt={item.title} className="h-12 w-12 object-cover rounded-lg border dark:border-zinc-800" />
                             <div className="flex-1 min-w-0">
@@ -1182,11 +1182,11 @@ export default function ProfilePage() {
 
                       {/* Total and Actions */}
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-t pt-3 dark:border-zinc-800 gap-4">
-                        <p className="text-xs font-semibold">Total Paid: <strong className="text-sm font-black text-zinc-950 dark:text-white">${ord.items.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2)}</strong></p>
+                        <p className="text-xs font-semibold">Total Paid: <strong className="text-sm font-black text-zinc-950 dark:text-white">${ord.items.reduce((s: number, i: any) => s + i.price * i.quantity, 0).toFixed(2)}</strong></p>
                         
                         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                           <button 
-                            onClick={() => downloadMockInvoice(ord.id, ord.items.reduce((s, i) => s + i.price * i.quantity, 0))}
+                            onClick={() => downloadMockInvoice(ord.id, ord.items.reduce((s: number, i: any) => s + i.price * i.quantity, 0))}
                             className="flex items-center gap-1 bg-white border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 hover:bg-zinc-100 rounded-xl px-3 py-2 text-[10px] font-bold cursor-pointer"
                           >
                             <Download className="h-3.5 w-3.5" />

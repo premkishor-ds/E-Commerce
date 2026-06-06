@@ -1,13 +1,13 @@
 {
   "summary": {
-    "totalTests": 320,
-    "passed": 306,
+    "totalTests": 357,
+    "passed": 351,
     "partial": 0,
-    "failed": 14,
-    "intentAccuracyPercent": "95.63",
-    "actionAccuracyPercent": "96.88",
-    "contextAccuracyPercent": "96.88",
-    "conversationQualityPercent": "95.63"
+    "failed": 6,
+    "intentAccuracyPercent": "98.32",
+    "actionAccuracyPercent": "98.32",
+    "contextAccuracyPercent": "98.32",
+    "conversationQualityPercent": "98.32"
   },
   "results": [
     {
@@ -15,9 +15,16 @@
       "category": "Product Search",
       "query": "I want to buy a Apple laptop",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"apple laptop\":\n\n• **Apple Laptop - BLUE (L)** — $985.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"apple laptop\":\n\n• **[Apple Laptop - BLUE (L)](/product/6a23ad49e3ab29f4cd51879c)** — $985.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=apple%20laptop"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -32,9 +39,16 @@
       "category": "Product Search",
       "query": "Show me some Samsung phones",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"samsung phone\":\n\n• **Samsung Phone - WHITE (M)** — $195.00 ⭐4.1\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"samsung phone\":\n\n• **[Samsung Phone - WHITE (M)](/product/6a23ad49e3ab29f4cd518777)** — $195.00 ⭐4.1\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=samsung%20phone"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -49,9 +63,16 @@
       "category": "Product Search",
       "query": "Find a cheap headphones made by Sony",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 2 products** for \"sony headphones\":\n\n• **Sony Headphones - BLUE (L)** — $85.00 ⭐4.8\n• **Sony Headphone - ORANGE (12)** — $49700.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 2 products** for \"sony headphones\":\n\n• **[Sony Headphones - BLUE (L)](/product/6a23ad49e3ab29f4cd5187d8)** — $85.00 ⭐4.8\n• **[Sony Headphone - ORANGE (12)](/product/6a23ad49e3ab29f4cd5187c9)** — $49700.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=sony%20headphones"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -66,9 +87,16 @@
       "category": "Product Search",
       "query": "Looking for a Dell keyboard",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"dell keyboard\":\n\n• **Dell Keyboard - YELLOW (8)** — $980.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"dell keyboard\":\n\n• **[Dell Keyboard - YELLOW (8)](/product/6a23ad49e3ab29f4cd51883d)** — $980.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=dell%20keyboard"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -83,9 +111,16 @@
       "category": "Product Search",
       "query": "Search for HP mouse on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"hp mouse\":\n\n• **HP Mouse - RED (XL)** — $480.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"hp mouse\":\n\n• **[HP Mouse - RED (XL)](/product/6a23ad49e3ab29f4cd518851)** — $480.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=hp%20mouse"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -100,9 +135,16 @@
       "category": "Product Search",
       "query": "I want to buy a Lenovo monitor",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"lenovo monitor\":\n\n• **Lenovo Monitor - PINK (6)** — $49800.00 ⭐4.2\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"lenovo monitor\":\n\n• **[Lenovo Monitor - PINK (6)](/product/6a23ad49e3ab29f4cd518886)** — $49800.00 ⭐4.2\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=lenovo%20monitor"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -117,26 +159,40 @@
       "category": "Product Search",
       "query": "Show me some Asus cameras",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "❌ **\"asus camera\"** not found. Try a different name.",
-      "actualIntent": "GET_PRODUCT",
-      "actualActions": [],
-      "intentMatch": false,
+      "actualResponse": "🔍 **Found 1 products** for \"asus camera\":\n\n• **[Asus Camera - BLACK (S)](/product/6a23ad49e3ab29f4cd51890e)** — $485.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=asus%20camera"
+          }
+        }
+      ],
+      "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
       "empathyMatch": true,
       "contextMaintained": true,
-      "result": "FAIL",
-      "analysis": "Failed because of the following: Intent mismatch (Expected: [SEARCH_PRODUCT], Got: [GET_PRODUCT])",
-      "confidenceScore": 0
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_008",
       "category": "Product Search",
       "query": "Find a cheap smartwatch made by Logitech",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"logitech smartwatch\":\n\n• **Logitech Smartwatch - RED (XL)** — $990.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"logitech smartwatch\":\n\n• **[Logitech Smartwatch - RED (XL)](/product/6a23ad49e3ab29f4cd518b15)** — $990.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=logitech%20smartwatch"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -151,9 +207,16 @@
       "category": "Product Search",
       "query": "Looking for a Bose speaker",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"bose speaker\":\n\n• **Bose Speaker - PINK (6)** — $49600.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"bose speaker\":\n\n• **[Bose Speaker - PINK (6)](/product/6a23ad49e3ab29f4cd518b26)** — $49600.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=bose%20speaker"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -168,9 +231,16 @@
       "category": "Product Search",
       "query": "Search for LG tablet on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"lg tablet\":\n\n• **LG Tablet - WHITE (M)** — $485.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"lg tablet\":\n\n• **[LG Tablet - WHITE (M)](/product/6a23ad49e3ab29f4cd5188eb)** — $485.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=lg%20tablet"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -185,9 +255,16 @@
       "category": "Product Search",
       "query": "I want to buy a Intel charger",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"intel charger\":\n\n• **Intel Charger - GOLD (XXL)** — $50000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"intel charger\":\n\n• **[Intel Charger - GOLD (XXL)](/product/6a23ad49e3ab29f4cd518b5e)** — $50000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=intel%20charger"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -202,9 +279,16 @@
       "category": "Product Search",
       "query": "Show me some AMD cables",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"amd cable\":\n\n• **AMD Cable - SILVER (9)** — $190.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"amd cable\":\n\n• **[AMD Cable - SILVER (9)](/product/6a23ad49e3ab29f4cd518b83)** — $190.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=amd%20cable"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -219,9 +303,16 @@
       "category": "Product Search",
       "query": "Find a cheap backpack made by Nvidia",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"nvidia backpack\":\n\n• **Nvidia Backpack - GREEN (10)** — $980.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"nvidia backpack\":\n\n• **[Nvidia Backpack - GREEN (10)](/product/6a23ad49e3ab29f4cd518ba8)** — $980.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=nvidia%20backpack"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -236,9 +327,16 @@
       "category": "Product Search",
       "query": "Looking for a Xiaomi desk lamp",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"xiaomi desk lamp\":\n\n• **Xiaomi Desk lamp - YELLOW (8)** — $19800.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"xiaomi desk lamp\":\n\n• **[Xiaomi Desk lamp - YELLOW (8)](/product/6a23ad49e3ab29f4cd5189d5)** — $19800.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=xiaomi%20desk%20lamp"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -253,9 +351,16 @@
       "category": "Product Search",
       "query": "Search for OnePlus router on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"oneplus router\":\n\n• **OnePlus Router - PINK (6)** — $20000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"oneplus router\":\n\n• **[OnePlus Router - PINK (6)](/product/6a23ad49e3ab29f4cd5188b6)** — $20000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=oneplus%20router"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -270,9 +375,16 @@
       "category": "Product Search",
       "query": "I want to buy a Microsoft microphone",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"microsoft microphone\":\n\n• **Microsoft Microphone - GRAY (7)** — $85.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"microsoft microphone\":\n\n• **[Microsoft Microphone - GRAY (7)](/product/6a23ad49e3ab29f4cd518bcf)** — $85.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=microsoft%20microphone"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -287,9 +399,16 @@
       "category": "Product Search",
       "query": "Show me some Apple projectors",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"apple projector\":\n\n• **Apple Projector - PURPLE (11)** — $100.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"apple projector\":\n\n• **[Apple Projector - PURPLE (11)](/product/6a23ad49e3ab29f4cd5187bc)** — $100.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=apple%20projector"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -304,9 +423,16 @@
       "category": "Product Search",
       "query": "Find a cheap earbuds made by Samsung",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"samsung earbuds\":\n\n• **Samsung Earbuds - YELLOW (8)** — $90.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"samsung earbuds\":\n\n• **[Samsung Earbuds - YELLOW (8)](/product/6a23ad49e3ab29f4cd51877d)** — $90.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=samsung%20earbuds"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -321,9 +447,16 @@
       "category": "Product Search",
       "query": "Looking for a Sony hard drive",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"sony hard drive\":\n\n• **Sony Hard drive - ORANGE (12)** — $490.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"sony hard drive\":\n\n• **[Sony Hard drive - ORANGE (12)](/product/6a23ad49e3ab29f4cd5187e1)** — $490.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=sony%20hard%20drive"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -338,9 +471,16 @@
       "category": "Product Search",
       "query": "Search for Dell graphics card on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"dell graphics card\":\n\n• **Dell Graphics card - BLACK (S)** — $49900.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"dell graphics card\":\n\n• **[Dell Graphics card - BLACK (S)](/product/6a23ad49e3ab29f4cd51884e)** — $49900.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=dell%20graphics%20card"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -355,9 +495,16 @@
       "category": "Product Search",
       "query": "I want to buy a HP laptop",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"hp laptop\":\n\n• **HP Laptop - BLUE (L)** — $185.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"hp laptop\":\n\n• **[HP Laptop - BLUE (L)](/product/6a23ad49e3ab29f4cd518850)** — $185.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=hp%20laptop"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -372,9 +519,16 @@
       "category": "Product Search",
       "query": "Show me some Lenovo phones",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"lenovo phone\":\n\n• **Lenovo Phone - WHITE (M)** — $185.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"lenovo phone\":\n\n• **[Lenovo Phone - WHITE (M)](/product/6a23ad49e3ab29f4cd518873)** — $185.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=lenovo%20phone"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -389,9 +543,16 @@
       "category": "Product Search",
       "query": "Find a cheap headphones made by Asus",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 2 products** for \"asus headphones\":\n\n• **Asus Headphones - BLUE (L)** — $490.00 ⭐4.2\n• **Asus Headphone - ORANGE (12)** — $190.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 2 products** for \"asus headphones\":\n\n• **[Asus Headphones - BLUE (L)](/product/6a23ad49e3ab29f4cd51891c)** — $490.00 ⭐4.2\n• **[Asus Headphone - ORANGE (12)](/product/6a23ad49e3ab29f4cd51890d)** — $190.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=asus%20headphones"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -406,9 +567,16 @@
       "category": "Product Search",
       "query": "Looking for a Logitech keyboard",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"logitech keyboard\":\n\n• **Logitech Keyboard - YELLOW (8)** — $480.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"logitech keyboard\":\n\n• **[Logitech Keyboard - YELLOW (8)](/product/6a23ad49e3ab29f4cd518b0d)** — $480.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=logitech%20keyboard"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -423,9 +591,16 @@
       "category": "Product Search",
       "query": "Search for Bose mouse on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"bose mouse\":\n\n• **Bose Mouse - RED (XL)** — $180.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"bose mouse\":\n\n• **[Bose Mouse - RED (XL)](/product/6a23ad49e3ab29f4cd518b21)** — $180.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=bose%20mouse"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -440,9 +615,16 @@
       "category": "Product Search",
       "query": "I want to buy a LG monitor",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"lg monitor\":\n\n• **LG Monitor - PINK (6)** — $500.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"lg monitor\":\n\n• **[LG Monitor - PINK (6)](/product/6a23ad49e3ab29f4cd5188f2)** — $500.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=lg%20monitor"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -457,26 +639,40 @@
       "category": "Product Search",
       "query": "Show me some Intel cameras",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "⚙️ **Specifications for Intel Camera - BLACK (S):**\n\n• **Color**: black\n• **Size**: S\n• **Model Year**: 2026",
-      "actualIntent": "GET_PRODUCT",
-      "actualActions": [],
-      "intentMatch": false,
+      "actualResponse": "🔍 **Found 1 products** for \"intel camera\":\n\n• **[Intel Camera - BLACK (S)](/product/6a23ad49e3ab29f4cd518b4e)** — $14600.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=intel%20camera"
+          }
+        }
+      ],
+      "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
       "empathyMatch": true,
       "contextMaintained": true,
-      "result": "FAIL",
-      "analysis": "Failed because of the following: Intent mismatch (Expected: [SEARCH_PRODUCT], Got: [GET_PRODUCT])",
-      "confidenceScore": 0
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_028",
       "category": "Product Search",
       "query": "Find a cheap smartwatch made by AMD",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"amd smartwatch\":\n\n• **AMD Smartwatch - RED (XL)** — $50000.00 ⭐4.5\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"amd smartwatch\":\n\n• **[AMD Smartwatch - RED (XL)](/product/6a23ad49e3ab29f4cd518b81)** — $50000.00 ⭐4.5\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=amd%20smartwatch"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -491,9 +687,16 @@
       "category": "Product Search",
       "query": "Looking for a Nvidia speaker",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"nvidia speaker\":\n\n• **Nvidia Speaker - PINK (6)** — $490.00 ⭐4.2\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"nvidia speaker\":\n\n• **[Nvidia Speaker - PINK (6)](/product/6a23ad49e3ab29f4cd518b92)** — $490.00 ⭐4.2\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=nvidia%20speaker"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -508,9 +711,16 @@
       "category": "Product Search",
       "query": "Search for Xiaomi tablet on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"xiaomi tablet\":\n\n• **Xiaomi Tablet - WHITE (M)** — $180.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"xiaomi tablet\":\n\n• **[Xiaomi Tablet - WHITE (M)](/product/6a23ad49e3ab29f4cd5189c3)** — $180.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=xiaomi%20tablet"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -525,9 +735,16 @@
       "category": "Product Search",
       "query": "I want to buy a OnePlus charger",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"oneplus charger\":\n\n• **OnePlus Charger - GOLD (XXL)** — $195.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"oneplus charger\":\n\n• **[OnePlus Charger - GOLD (XXL)](/product/6a23ad49e3ab29f4cd5188b2)** — $195.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=oneplus%20charger"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -542,9 +759,16 @@
       "category": "Product Search",
       "query": "Show me some Microsoft cables",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"microsoft cable\":\n\n• **Microsoft Cable - SILVER (9)** — $980.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"microsoft cable\":\n\n• **[Microsoft Cable - SILVER (9)](/product/6a23ad49e3ab29f4cd518bcb)** — $980.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=microsoft%20cable"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -559,9 +783,16 @@
       "category": "Product Search",
       "query": "Find a cheap backpack made by Apple",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"apple backpack\":\n\n• **Apple Backpack - GREEN (10)** — $995.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"apple backpack\":\n\n• **[Apple Backpack - GREEN (10)](/product/6a23ad49e3ab29f4cd5187b8)** — $995.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=apple%20backpack"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -576,9 +807,16 @@
       "category": "Product Search",
       "query": "Looking for a Samsung desk lamp",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"samsung desk lamp\":\n\n• **Samsung Desk lamp - YELLOW (8)** — $995.00 ⭐4.1\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"samsung desk lamp\":\n\n• **[Samsung Desk lamp - YELLOW (8)](/product/6a23ad49e3ab29f4cd518795)** — $995.00 ⭐4.1\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=samsung%20desk%20lamp"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -593,9 +831,16 @@
       "category": "Product Search",
       "query": "Search for Sony router on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"sony router\":\n\n• **Sony Router - PINK (6)** — $49600.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"sony router\":\n\n• **[Sony Router - PINK (6)](/product/6a23ad49e3ab29f4cd5187de)** — $49600.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=sony%20router"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -610,9 +855,16 @@
       "category": "Product Search",
       "query": "I want to buy a Dell microphone",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"dell microphone\":\n\n• **Dell Microphone - GRAY (7)** — $985.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"dell microphone\":\n\n• **[Dell Microphone - GRAY (7)](/product/6a23ad49e3ab29f4cd51884b)** — $985.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=dell%20microphone"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -627,9 +879,16 @@
       "category": "Product Search",
       "query": "Show me some HP projectors",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"hp projector\":\n\n• **HP Projector - PURPLE (11)** — $20000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"hp projector\":\n\n• **[HP Projector - PURPLE (11)](/product/6a23ad49e3ab29f4cd518870)** — $20000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=hp%20projector"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -644,9 +903,16 @@
       "category": "Product Search",
       "query": "Find a cheap earbuds made by Lenovo",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"lenovo earbuds\":\n\n• **Lenovo Earbuds - YELLOW (8)** — $80.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"lenovo earbuds\":\n\n• **[Lenovo Earbuds - YELLOW (8)](/product/6a23ad49e3ab29f4cd518879)** — $80.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=lenovo%20earbuds"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -661,9 +927,16 @@
       "category": "Product Search",
       "query": "Looking for a Asus hard drive",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"asus hard drive\":\n\n• **Asus Hard drive - ORANGE (12)** — $14900.00 ⭐4.1\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"asus hard drive\":\n\n• **[Asus Hard drive - ORANGE (12)](/product/6a23ad49e3ab29f4cd518925)** — $14900.00 ⭐4.1\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=asus%20hard%20drive"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -678,9 +951,16 @@
       "category": "Product Search",
       "query": "Search for Logitech graphics card on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"logitech graphics card\":\n\n• **Logitech Graphics card - BLACK (S)** — $19900.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"logitech graphics card\":\n\n• **[Logitech Graphics card - BLACK (S)](/product/6a23ad49e3ab29f4cd518b1e)** — $19900.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=logitech%20graphics%20card"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -695,9 +975,16 @@
       "category": "Product Search",
       "query": "I want to buy a Bose laptop",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"bose laptop\":\n\n• **Bose Laptop - BLUE (L)** — $85.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"bose laptop\":\n\n• **[Bose Laptop - BLUE (L)](/product/6a23ad49e3ab29f4cd518b20)** — $85.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=bose%20laptop"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -712,9 +999,16 @@
       "category": "Product Search",
       "query": "Show me some LG phones",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"lg phone\":\n\n• **LG Phone - WHITE (M)** — $14900.00 ⭐4.1\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"lg phone\":\n\n• **[LG Phone - WHITE (M)](/product/6a23ad49e3ab29f4cd5188df)** — $14900.00 ⭐4.1\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=lg%20phone"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -729,9 +1023,16 @@
       "category": "Product Search",
       "query": "Find a cheap headphones made by Intel",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 2 products** for \"intel headphones\":\n\n• **Intel Headphones - BLUE (L)** — $14700.00 ⭐4.8\n• **Intel Headphone - ORANGE (12)** — $985.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 2 products** for \"intel headphones\":\n\n• **[Intel Headphones - BLUE (L)](/product/6a23ad49e3ab29f4cd518b5c)** — $14700.00 ⭐4.8\n• **[Intel Headphone - ORANGE (12)](/product/6a23ad49e3ab29f4cd518b4d)** — $985.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=intel%20headphones"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -746,9 +1047,16 @@
       "category": "Product Search",
       "query": "Looking for a AMD keyboard",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"amd keyboard\":\n\n• **AMD Keyboard - YELLOW (8)** — $19800.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"amd keyboard\":\n\n• **[AMD Keyboard - YELLOW (8)](/product/6a23ad49e3ab29f4cd518b79)** — $19800.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=amd%20keyboard"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -763,9 +1071,16 @@
       "category": "Product Search",
       "query": "Search for Nvidia mouse on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"nvidia mouse\":\n\n• **Nvidia Mouse - RED (XL)** — $14800.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"nvidia mouse\":\n\n• **[Nvidia Mouse - RED (XL)](/product/6a23ad49e3ab29f4cd518b8d)** — $14800.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=nvidia%20mouse"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -780,9 +1095,16 @@
       "category": "Product Search",
       "query": "I want to buy a Xiaomi monitor",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"xiaomi monitor\":\n\n• **Xiaomi Monitor - PINK (6)** — $195.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"xiaomi monitor\":\n\n• **[Xiaomi Monitor - PINK (6)](/product/6a23ad49e3ab29f4cd5189ca)** — $195.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=xiaomi%20monitor"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -797,26 +1119,40 @@
       "category": "Product Search",
       "query": "Show me some OnePlus cameras",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "⚙️ **Specifications for OnePlus Camera - BLACK (S):**\n\n• **Color**: black\n• **Size**: S\n• **Model Year**: 2026",
-      "actualIntent": "GET_PRODUCT",
-      "actualActions": [],
-      "intentMatch": false,
+      "actualResponse": "🔍 **Found 1 products** for \"oneplus camera\":\n\n• **[OnePlus Camera - BLACK (S)](/product/6a23ad49e3ab29f4cd5188a2)** — $50000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=oneplus%20camera"
+          }
+        }
+      ],
+      "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
       "empathyMatch": true,
       "contextMaintained": true,
-      "result": "FAIL",
-      "analysis": "Failed because of the following: Intent mismatch (Expected: [SEARCH_PRODUCT], Got: [GET_PRODUCT])",
-      "confidenceScore": 0
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_048",
       "category": "Product Search",
       "query": "Find a cheap smartwatch made by Microsoft",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"microsoft smartwatch\":\n\n• **Microsoft Smartwatch - RED (XL)** — $190.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"microsoft smartwatch\":\n\n• **[Microsoft Smartwatch - RED (XL)](/product/6a23ad49e3ab29f4cd518bc9)** — $190.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=microsoft%20smartwatch"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -831,9 +1167,16 @@
       "category": "Product Search",
       "query": "Looking for a Apple speaker",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"apple speaker\":\n\n• **Apple Speaker - PINK (6)** — $480.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"apple speaker\":\n\n• **[Apple Speaker - PINK (6)](/product/6a23ad49e3ab29f4cd5187a2)** — $480.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=apple%20speaker"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -848,9 +1191,16 @@
       "category": "Product Search",
       "query": "Search for Samsung tablet on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"samsung tablet\":\n\n• **Samsung Tablet - WHITE (M)** — $49700.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"samsung tablet\":\n\n• **[Samsung Tablet - WHITE (M)](/product/6a23ad49e3ab29f4cd518783)** — $49700.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=samsung%20tablet"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -865,9 +1215,16 @@
       "category": "Product Search",
       "query": "I want to buy a Sony charger",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"sony charger\":\n\n• **Sony Charger - GOLD (XXL)** — $500.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"sony charger\":\n\n• **[Sony Charger - GOLD (XXL)](/product/6a23ad49e3ab29f4cd5187da)** — $500.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=sony%20charger"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -882,9 +1239,16 @@
       "category": "Product Search",
       "query": "Show me some Dell cables",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"dell cable\":\n\n• **Dell Cable - SILVER (9)** — $49600.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"dell cable\":\n\n• **[Dell Cable - SILVER (9)](/product/6a23ad49e3ab29f4cd518847)** — $49600.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=dell%20cable"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -899,9 +1263,16 @@
       "category": "Product Search",
       "query": "Find a cheap backpack made by HP",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"hp backpack\":\n\n• **HP Backpack - GREEN (10)** — $195.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"hp backpack\":\n\n• **[HP Backpack - GREEN (10)](/product/6a23ad49e3ab29f4cd51886c)** — $195.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=hp%20backpack"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -916,9 +1287,16 @@
       "category": "Product Search",
       "query": "Looking for a Lenovo desk lamp",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"lenovo desk lamp\":\n\n• **Lenovo Desk lamp - YELLOW (8)** — $985.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"lenovo desk lamp\":\n\n• **[Lenovo Desk lamp - YELLOW (8)](/product/6a23ad49e3ab29f4cd518891)** — $985.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=lenovo%20desk%20lamp"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -933,9 +1311,16 @@
       "category": "Product Search",
       "query": "Search for Asus router on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"asus router\":\n\n• **Asus Router - PINK (6)** — $185.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"asus router\":\n\n• **[Asus Router - PINK (6)](/product/6a23ad49e3ab29f4cd518922)** — $185.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=asus%20router"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -950,9 +1335,16 @@
       "category": "Product Search",
       "query": "I want to buy a Logitech microphone",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"logitech microphone\":\n\n• **Logitech Microphone - GRAY (7)** — $485.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"logitech microphone\":\n\n• **[Logitech Microphone - GRAY (7)](/product/6a23ad49e3ab29f4cd518b1b)** — $485.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=logitech%20microphone"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -967,9 +1359,16 @@
       "category": "Product Search",
       "query": "Show me some Bose projectors",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"bose projector\":\n\n• **Bose Projector - PURPLE (11)** — $15000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"bose projector\":\n\n• **[Bose Projector - PURPLE (11)](/product/6a23ad49e3ab29f4cd518b40)** — $15000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=bose%20projector"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -984,9 +1383,16 @@
       "category": "Product Search",
       "query": "Find a cheap earbuds made by LG",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"lg earbuds\":\n\n• **LG Earbuds - YELLOW (8)** — $990.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"lg earbuds\":\n\n• **[LG Earbuds - YELLOW (8)](/product/6a23ad49e3ab29f4cd5188e5)** — $990.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=lg%20earbuds"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1001,9 +1407,16 @@
       "category": "Product Search",
       "query": "Looking for a Intel hard drive",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"intel hard drive\":\n\n• **Intel Hard drive - ORANGE (12)** — $49800.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"intel hard drive\":\n\n• **[Intel Hard drive - ORANGE (12)](/product/6a23ad49e3ab29f4cd518b65)** — $49800.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=intel%20hard%20drive"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1018,9 +1431,16 @@
       "category": "Product Search",
       "query": "Search for AMD graphics card on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"amd graphics card\":\n\n• **AMD Graphics card - BLACK (S)** — $180.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"amd graphics card\":\n\n• **[AMD Graphics card - BLACK (S)](/product/6a23ad49e3ab29f4cd518b8a)** — $180.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=amd%20graphics%20card"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1035,9 +1455,16 @@
       "category": "Product Search",
       "query": "I want to buy a Nvidia laptop",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"nvidia laptop\":\n\n• **Nvidia Laptop - BLUE (L)** — $995.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"nvidia laptop\":\n\n• **[Nvidia Laptop - BLUE (L)](/product/6a23ad49e3ab29f4cd518b8c)** — $995.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=nvidia%20laptop"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1052,9 +1479,16 @@
       "category": "Product Search",
       "query": "Show me some Xiaomi phones",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"xiaomi phone\":\n\n• **Xiaomi Phone - WHITE (M)** — $990.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"xiaomi phone\":\n\n• **[Xiaomi Phone - WHITE (M)](/product/6a23ad49e3ab29f4cd5189b7)** — $990.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=xiaomi%20phone"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1069,9 +1503,16 @@
       "category": "Product Search",
       "query": "Find a cheap headphones made by OnePlus",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 2 products** for \"oneplus headphones\":\n\n• **OnePlus Headphones - BLUE (L)** — $49600.00 ⭐4.4\n• **OnePlus Headphone - ORANGE (12)** — $19600.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 2 products** for \"oneplus headphones\":\n\n• **[OnePlus Headphones - BLUE (L)](/product/6a23ad49e3ab29f4cd5188b0)** — $49600.00 ⭐4.4\n• **[OnePlus Headphone - ORANGE (12)](/product/6a23ad49e3ab29f4cd5188a1)** — $19600.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=oneplus%20headphones"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1086,9 +1527,16 @@
       "category": "Product Search",
       "query": "Looking for a Microsoft keyboard",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"microsoft keyboard\":\n\n• **Microsoft Keyboard - YELLOW (8)** — $80.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"microsoft keyboard\":\n\n• **[Microsoft Keyboard - YELLOW (8)](/product/6a23ad49e3ab29f4cd518bc1)** — $80.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=microsoft%20keyboard"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1103,9 +1551,16 @@
       "category": "Product Search",
       "query": "Search for Apple mouse on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"apple mouse\":\n\n• **Apple Mouse - RED (XL)** — $14600.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"apple mouse\":\n\n• **[Apple Mouse - RED (XL)](/product/6a23ad49e3ab29f4cd51879d)** — $14600.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=apple%20mouse"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1120,179 +1575,256 @@
       "category": "Product Search",
       "query": "I want to buy a Samsung monitor",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "Failed to contact Chatbot API: timeout of 15000ms exceeded",
-      "actualIntent": "ERROR_OR_TIMEOUT",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": false,
-      "relevanceMatch": false,
-      "empathyMatch": false,
-      "contextMaintained": false,
-      "result": "FAIL",
-      "analysis": "Network or Server error: timeout of 15000ms exceeded",
-      "confidenceScore": 0
+      "actualResponse": "🔍 **Found 1 products** for \"samsung monitor\":\n\n• **[Samsung Monitor - PINK (6)](/product/6a23ad49e3ab29f4cd51878a)** — $50000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=samsung%20monitor"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_067",
       "category": "Product Search",
       "query": "Show me some Sony cameras",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "Failed to contact Chatbot API: timeout of 15000ms exceeded",
-      "actualIntent": "ERROR_OR_TIMEOUT",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": false,
-      "relevanceMatch": false,
-      "empathyMatch": false,
-      "contextMaintained": false,
-      "result": "FAIL",
-      "analysis": "Network or Server error: timeout of 15000ms exceeded",
-      "confidenceScore": 0
+      "actualResponse": "🔍 **Found 1 products** for \"sony camera\":\n\n• **[Sony Camera - BLACK (S)](/product/6a23ad49e3ab29f4cd5187ca)** — $80.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=sony%20camera"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_068",
       "category": "Product Search",
       "query": "Find a cheap smartwatch made by Dell",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "Failed to contact Chatbot API: timeout of 15000ms exceeded",
-      "actualIntent": "ERROR_OR_TIMEOUT",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": false,
-      "relevanceMatch": false,
-      "empathyMatch": false,
-      "contextMaintained": false,
-      "result": "FAIL",
-      "analysis": "Network or Server error: timeout of 15000ms exceeded",
-      "confidenceScore": 0
+      "actualResponse": "🔍 **Found 1 products** for \"dell smartwatch\":\n\n• **[Dell Smartwatch - RED (XL)](/product/6a23ad49e3ab29f4cd518845)** — $14800.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=dell%20smartwatch"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_069",
       "category": "Product Search",
       "query": "Looking for a HP speaker",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "Failed to contact Chatbot API: timeout of 15000ms exceeded",
-      "actualIntent": "ERROR_OR_TIMEOUT",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": false,
-      "relevanceMatch": false,
-      "empathyMatch": false,
-      "contextMaintained": false,
-      "result": "FAIL",
-      "analysis": "Network or Server error: timeout of 15000ms exceeded",
-      "confidenceScore": 0
+      "actualResponse": "🔍 **Found 1 products** for \"hp speaker\":\n\n• **[HP Speaker - PINK (6)](/product/6a23ad49e3ab29f4cd518856)** — $80.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=hp%20speaker"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_070",
       "category": "Product Search",
       "query": "Search for Lenovo tablet on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "Failed to contact Chatbot API: timeout of 15000ms exceeded",
-      "actualIntent": "ERROR_OR_TIMEOUT",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": false,
-      "relevanceMatch": false,
-      "empathyMatch": false,
-      "contextMaintained": false,
-      "result": "FAIL",
-      "analysis": "Network or Server error: timeout of 15000ms exceeded",
-      "confidenceScore": 0
+      "actualResponse": "🔍 **Found 1 products** for \"lenovo tablet\":\n\n• **[Lenovo Tablet - WHITE (M)](/product/6a23ad49e3ab29f4cd51887f)** — $50000.00 ⭐4.5\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=lenovo%20tablet"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_071",
       "category": "Product Search",
       "query": "I want to buy a Asus charger",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "Failed to contact Chatbot API: timeout of 15000ms exceeded",
-      "actualIntent": "ERROR_OR_TIMEOUT",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": false,
-      "relevanceMatch": false,
-      "empathyMatch": false,
-      "contextMaintained": false,
-      "result": "FAIL",
-      "analysis": "Network or Server error: timeout of 15000ms exceeded",
-      "confidenceScore": 0
+      "actualResponse": "🔍 **Found 1 products** for \"asus charger\":\n\n• **[Asus Charger - GOLD (XXL)](/product/6a23ad49e3ab29f4cd51891e)** — $14600.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=asus%20charger"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_072",
       "category": "Product Search",
       "query": "Show me some Logitech cables",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "Failed to contact Chatbot API: timeout of 15000ms exceeded",
-      "actualIntent": "ERROR_OR_TIMEOUT",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": false,
-      "relevanceMatch": false,
-      "empathyMatch": false,
-      "contextMaintained": false,
-      "result": "FAIL",
-      "analysis": "Network or Server error: timeout of 15000ms exceeded",
-      "confidenceScore": 0
+      "actualResponse": "🔍 **Found 1 products** for \"logitech cable\":\n\n• **[Logitech Cable - SILVER (9)](/product/6a23ad49e3ab29f4cd518b17)** — $19600.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=logitech%20cable"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_073",
       "category": "Product Search",
       "query": "Find a cheap backpack made by Bose",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "Failed to contact Chatbot API: timeout of 15000ms exceeded",
-      "actualIntent": "ERROR_OR_TIMEOUT",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": false,
-      "relevanceMatch": false,
-      "empathyMatch": false,
-      "contextMaintained": false,
-      "result": "FAIL",
-      "analysis": "Network or Server error: timeout of 15000ms exceeded",
-      "confidenceScore": 0
+      "actualResponse": "🔍 **Found 1 products** for \"bose backpack\":\n\n• **[Bose Backpack - GREEN (10)](/product/6a23ad49e3ab29f4cd518b3c)** — $95.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=bose%20backpack"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_074",
       "category": "Product Search",
       "query": "Looking for a LG desk lamp",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "Failed to contact Chatbot API: timeout of 15000ms exceeded",
-      "actualIntent": "ERROR_OR_TIMEOUT",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": false,
-      "relevanceMatch": false,
-      "empathyMatch": false,
-      "contextMaintained": false,
-      "result": "FAIL",
-      "analysis": "Network or Server error: timeout of 15000ms exceeded",
-      "confidenceScore": 0
+      "actualResponse": "🔍 **Found 1 products** for \"lg desk lamp\":\n\n• **[LG Desk lamp - YELLOW (8)](/product/6a23ad49e3ab29f4cd5188fd)** — $49900.00 ⭐4.1\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=lg%20desk%20lamp"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_075",
       "category": "Product Search",
       "query": "Search for Intel router on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "Failed to contact Chatbot API: timeout of 15000ms exceeded",
-      "actualIntent": "ERROR_OR_TIMEOUT",
-      "actualActions": [],
-      "intentMatch": false,
-      "actionMatch": false,
-      "relevanceMatch": false,
-      "empathyMatch": false,
-      "contextMaintained": false,
-      "result": "FAIL",
-      "analysis": "Network or Server error: timeout of 15000ms exceeded",
-      "confidenceScore": 0
+      "actualResponse": "🔍 **Found 1 products** for \"intel router\":\n\n• **[Intel Router - PINK (6)](/product/6a23ad49e3ab29f4cd518b62)** — $980.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=intel%20router"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_076",
       "category": "Product Search",
       "query": "I want to buy a AMD microphone",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"amd microphone\":\n\n• **AMD Microphone - GRAY (7)** — $19900.00 ⭐4.1\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"amd microphone\":\n\n• **[AMD Microphone - GRAY (7)](/product/6a23ad49e3ab29f4cd518b87)** — $19900.00 ⭐4.1\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=amd%20microphone"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1307,9 +1839,16 @@
       "category": "Product Search",
       "query": "Show me some Nvidia projectors",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"nvidia projector\":\n\n• **Nvidia Projector - PURPLE (11)** — $85.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"nvidia projector\":\n\n• **[Nvidia Projector - PURPLE (11)](/product/6a23ad49e3ab29f4cd518bac)** — $85.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=nvidia%20projector"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1324,9 +1863,16 @@
       "category": "Product Search",
       "query": "Find a cheap earbuds made by Xiaomi",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"xiaomi earbuds\":\n\n• **Xiaomi Earbuds - YELLOW (8)** — $485.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"xiaomi earbuds\":\n\n• **[Xiaomi Earbuds - YELLOW (8)](/product/6a23ad49e3ab29f4cd5189bd)** — $485.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=xiaomi%20earbuds"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1341,9 +1887,16 @@
       "category": "Product Search",
       "query": "Looking for a OnePlus hard drive",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"oneplus hard drive\":\n\n• **OnePlus Hard drive - ORANGE (12)** — $185.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"oneplus hard drive\":\n\n• **[OnePlus Hard drive - ORANGE (12)](/product/6a23ad49e3ab29f4cd5188b9)** — $185.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=oneplus%20hard%20drive"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1358,9 +1911,16 @@
       "category": "Product Search",
       "query": "Search for Microsoft graphics card on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"microsoft graphics card\":\n\n• **Microsoft Graphics card - BLACK (S)** — $995.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"microsoft graphics card\":\n\n• **[Microsoft Graphics card - BLACK (S)](/product/6a23ad49e3ab29f4cd518bd2)** — $995.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=microsoft%20graphics%20card"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1375,9 +1935,16 @@
       "category": "Product Search",
       "query": "I want to buy a Apple laptop",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"apple laptop\":\n\n• **Apple Laptop - BLUE (L)** — $985.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"apple laptop\":\n\n• **[Apple Laptop - BLUE (L)](/product/6a23ad49e3ab29f4cd51879c)** — $985.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=apple%20laptop"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1392,9 +1959,16 @@
       "category": "Product Search",
       "query": "Show me some Samsung phones",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"samsung phone\":\n\n• **Samsung Phone - WHITE (M)** — $195.00 ⭐4.1\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"samsung phone\":\n\n• **[Samsung Phone - WHITE (M)](/product/6a23ad49e3ab29f4cd518777)** — $195.00 ⭐4.1\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=samsung%20phone"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1409,9 +1983,16 @@
       "category": "Product Search",
       "query": "Find a cheap headphones made by Sony",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 2 products** for \"sony headphones\":\n\n• **Sony Headphones - BLUE (L)** — $85.00 ⭐4.8\n• **Sony Headphone - ORANGE (12)** — $49700.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 2 products** for \"sony headphones\":\n\n• **[Sony Headphones - BLUE (L)](/product/6a23ad49e3ab29f4cd5187d8)** — $85.00 ⭐4.8\n• **[Sony Headphone - ORANGE (12)](/product/6a23ad49e3ab29f4cd5187c9)** — $49700.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=sony%20headphones"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1426,9 +2007,16 @@
       "category": "Product Search",
       "query": "Looking for a Dell keyboard",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"dell keyboard\":\n\n• **Dell Keyboard - YELLOW (8)** — $980.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"dell keyboard\":\n\n• **[Dell Keyboard - YELLOW (8)](/product/6a23ad49e3ab29f4cd51883d)** — $980.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=dell%20keyboard"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1443,9 +2031,16 @@
       "category": "Product Search",
       "query": "Search for HP mouse on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"hp mouse\":\n\n• **HP Mouse - RED (XL)** — $480.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"hp mouse\":\n\n• **[HP Mouse - RED (XL)](/product/6a23ad49e3ab29f4cd518851)** — $480.00 ⭐4.9\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=hp%20mouse"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1460,9 +2055,16 @@
       "category": "Product Search",
       "query": "I want to buy a Lenovo monitor",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"lenovo monitor\":\n\n• **Lenovo Monitor - PINK (6)** — $49800.00 ⭐4.2\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"lenovo monitor\":\n\n• **[Lenovo Monitor - PINK (6)](/product/6a23ad49e3ab29f4cd518886)** — $49800.00 ⭐4.2\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=lenovo%20monitor"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1477,26 +2079,40 @@
       "category": "Product Search",
       "query": "Show me some Asus cameras",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "❌ **\"asus camera\"** not found. Try a different name.",
-      "actualIntent": "GET_PRODUCT",
-      "actualActions": [],
-      "intentMatch": false,
+      "actualResponse": "🔍 **Found 1 products** for \"asus camera\":\n\n• **[Asus Camera - BLACK (S)](/product/6a23ad49e3ab29f4cd51890e)** — $485.00 ⭐4.8\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualIntent": "SEARCH_PRODUCT",
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=asus%20camera"
+          }
+        }
+      ],
+      "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
       "empathyMatch": true,
       "contextMaintained": true,
-      "result": "FAIL",
-      "analysis": "Failed because of the following: Intent mismatch (Expected: [SEARCH_PRODUCT], Got: [GET_PRODUCT])",
-      "confidenceScore": 0
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
     },
     {
       "testId": "SEARCH_088",
       "category": "Product Search",
       "query": "Find a cheap smartwatch made by Logitech",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"logitech smartwatch\":\n\n• **Logitech Smartwatch - RED (XL)** — $990.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"logitech smartwatch\":\n\n• **[Logitech Smartwatch - RED (XL)](/product/6a23ad49e3ab29f4cd518b15)** — $990.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=logitech%20smartwatch"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1511,9 +2127,16 @@
       "category": "Product Search",
       "query": "Looking for a Bose speaker",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"bose speaker\":\n\n• **Bose Speaker - PINK (6)** — $49600.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"bose speaker\":\n\n• **[Bose Speaker - PINK (6)](/product/6a23ad49e3ab29f4cd518b26)** — $49600.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=bose%20speaker"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1528,9 +2151,16 @@
       "category": "Product Search",
       "query": "Search for LG tablet on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"lg tablet\":\n\n• **LG Tablet - WHITE (M)** — $485.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"lg tablet\":\n\n• **[LG Tablet - WHITE (M)](/product/6a23ad49e3ab29f4cd5188eb)** — $485.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=lg%20tablet"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1545,9 +2175,16 @@
       "category": "Product Search",
       "query": "I want to buy a Intel charger",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"intel charger\":\n\n• **Intel Charger - GOLD (XXL)** — $50000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"intel charger\":\n\n• **[Intel Charger - GOLD (XXL)](/product/6a23ad49e3ab29f4cd518b5e)** — $50000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=intel%20charger"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1562,9 +2199,16 @@
       "category": "Product Search",
       "query": "Show me some AMD cables",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"amd cable\":\n\n• **AMD Cable - SILVER (9)** — $190.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"amd cable\":\n\n• **[AMD Cable - SILVER (9)](/product/6a23ad49e3ab29f4cd518b83)** — $190.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=amd%20cable"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1579,9 +2223,16 @@
       "category": "Product Search",
       "query": "Find a cheap backpack made by Nvidia",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"nvidia backpack\":\n\n• **Nvidia Backpack - GREEN (10)** — $980.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"nvidia backpack\":\n\n• **[Nvidia Backpack - GREEN (10)](/product/6a23ad49e3ab29f4cd518ba8)** — $980.00 ⭐4.4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=nvidia%20backpack"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1596,9 +2247,16 @@
       "category": "Product Search",
       "query": "Looking for a Xiaomi desk lamp",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"xiaomi desk lamp\":\n\n• **Xiaomi Desk lamp - YELLOW (8)** — $19800.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"xiaomi desk lamp\":\n\n• **[Xiaomi Desk lamp - YELLOW (8)](/product/6a23ad49e3ab29f4cd5189d5)** — $19800.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=xiaomi%20desk%20lamp"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1613,9 +2271,16 @@
       "category": "Product Search",
       "query": "Search for OnePlus router on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"oneplus router\":\n\n• **OnePlus Router - PINK (6)** — $20000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"oneplus router\":\n\n• **[OnePlus Router - PINK (6)](/product/6a23ad49e3ab29f4cd5188b6)** — $20000.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=oneplus%20router"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1630,9 +2295,16 @@
       "category": "Product Search",
       "query": "I want to buy a Microsoft microphone",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"microsoft microphone\":\n\n• **Microsoft Microphone - GRAY (7)** — $85.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"microsoft microphone\":\n\n• **[Microsoft Microphone - GRAY (7)](/product/6a23ad49e3ab29f4cd518bcf)** — $85.00 ⭐4.3\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=microsoft%20microphone"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1647,9 +2319,16 @@
       "category": "Product Search",
       "query": "Show me some Apple projectors",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"apple projector\":\n\n• **Apple Projector - PURPLE (11)** — $100.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"apple projector\":\n\n• **[Apple Projector - PURPLE (11)](/product/6a23ad49e3ab29f4cd5187bc)** — $100.00 ⭐4\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=apple%20projector"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1664,9 +2343,16 @@
       "category": "Product Search",
       "query": "Find a cheap earbuds made by Samsung",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"samsung earbuds\":\n\n• **Samsung Earbuds - YELLOW (8)** — $90.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"samsung earbuds\":\n\n• **[Samsung Earbuds - YELLOW (8)](/product/6a23ad49e3ab29f4cd51877d)** — $90.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=samsung%20earbuds"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1681,9 +2367,16 @@
       "category": "Product Search",
       "query": "Looking for a Sony hard drive",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"sony hard drive\":\n\n• **Sony Hard drive - ORANGE (12)** — $490.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"sony hard drive\":\n\n• **[Sony Hard drive - ORANGE (12)](/product/6a23ad49e3ab29f4cd5187e1)** — $490.00 ⭐4.7\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=sony%20hard%20drive"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -1698,9 +2391,16 @@
       "category": "Product Search",
       "query": "Search for Dell graphics card on your store",
       "expectedGoal": "SEARCH_PRODUCT",
-      "actualResponse": "🔍 **Found 1 products** for \"dell graphics card\":\n\n• **Dell Graphics card - BLACK (S)** — $49900.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
+      "actualResponse": "🔍 **Found 1 products** for \"dell graphics card\":\n\n• **[Dell Graphics card - BLACK (S)](/product/6a23ad49e3ab29f4cd51884e)** — $49900.00 ⭐4.6\n\nType the **product name** to see details, or **\"add [name] to cart\"** to purchase!",
       "actualIntent": "SEARCH_PRODUCT",
-      "actualActions": [],
+      "actualActions": [
+        {
+          "type": "NAVIGATE",
+          "payload": {
+            "path": "/search?q=dell%20graphics%20card"
+          }
+        }
+      ],
       "intentMatch": true,
       "actionMatch": true,
       "relevanceMatch": true,
@@ -2038,7 +2738,7 @@
       "category": "Product Details",
       "query": "Give me specifications of Dell graphics card",
       "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "❌ **\"Dell Graphics card - BLACK (S)\"** not found. Try a different name.",
+      "actualResponse": "⚙️ **Specifications for Dell Graphics card - BLACK (S):**\n\n• **Color**: black\n• **Size**: S\n• **Model Year**: 2026",
       "actualIntent": "GET_PRODUCT",
       "actualActions": [],
       "intentMatch": true,
@@ -2048,7 +2748,7 @@
       "contextMaintained": true,
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
+      "confidenceScore": 10
     },
     {
       "testId": "DETAILS_021",
@@ -2157,7 +2857,7 @@
       "category": "Product Details",
       "query": "Show details for Intel camera",
       "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "❌ **\"Intel Camera - BLACK (S)\"** not found. Try a different name.",
+      "actualResponse": "⚙️ **Specifications for Intel Camera - BLACK (S):**\n\n• **Color**: black\n• **Size**: S\n• **Model Year**: 2026",
       "actualIntent": "GET_PRODUCT",
       "actualActions": [],
       "intentMatch": true,
@@ -2167,7 +2867,7 @@
       "contextMaintained": true,
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
+      "confidenceScore": 10
     },
     {
       "testId": "DETAILS_028",
@@ -2378,7 +3078,7 @@
       "category": "Product Details",
       "query": "Give me specifications of Logitech graphics card",
       "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "❌ **\"Logitech Graphics card - BLACK (S)\"** not found. Try a different name.",
+      "actualResponse": "⚙️ **Specifications for Logitech Graphics card - BLACK (S):**\n\n• **Color**: black\n• **Size**: S\n• **Model Year**: 2026",
       "actualIntent": "GET_PRODUCT",
       "actualActions": [],
       "intentMatch": true,
@@ -2388,7 +3088,7 @@
       "contextMaintained": true,
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
+      "confidenceScore": 10
     },
     {
       "testId": "DETAILS_041",
@@ -2480,7 +3180,7 @@
       "category": "Product Details",
       "query": "What are the specs of the Xiaomi monitor?",
       "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "❌ **\"Xiaomi Monitor - PINK (6)\"** not found. Try a different name.",
+      "actualResponse": "⚙️ **Specifications for Xiaomi Monitor - PINK (6):**\n\n• **Color**: pink\n• **Size**: 6\n• **Model Year**: 2026",
       "actualIntent": "GET_PRODUCT",
       "actualActions": [],
       "intentMatch": true,
@@ -2490,14 +3190,14 @@
       "contextMaintained": true,
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
+      "confidenceScore": 10
     },
     {
       "testId": "DETAILS_047",
       "category": "Product Details",
       "query": "Show details for OnePlus camera",
       "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "❌ **\"OnePlus Camera - BLACK (S)\"** not found. Try a different name.",
+      "actualResponse": "⚙️ **Specifications for OnePlus Camera - BLACK (S):**\n\n• **Color**: black\n• **Size**: S\n• **Model Year**: 2026",
       "actualIntent": "GET_PRODUCT",
       "actualActions": [],
       "intentMatch": true,
@@ -2507,7 +3207,7 @@
       "contextMaintained": true,
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
+      "confidenceScore": 10
     },
     {
       "testId": "DETAILS_048",
@@ -2735,7 +3435,7 @@
       "category": "Product Details",
       "query": "What are the specs of the Nvidia laptop?",
       "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "❌ **\"Nvidia Laptop - BLUE (L)\"** not found. Try a different name.",
+      "actualResponse": "⚙️ **Specifications for Nvidia Laptop - BLUE (L):**\n\n• **Color**: blue\n• **Size**: L\n• **Model Year**: 2026",
       "actualIntent": "GET_PRODUCT",
       "actualActions": [],
       "intentMatch": true,
@@ -2745,7 +3445,7 @@
       "contextMaintained": true,
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
+      "confidenceScore": 10
     },
     {
       "testId": "DETAILS_062",
@@ -2820,7 +3520,7 @@
       "category": "Product Details",
       "query": "What are the specs of the Samsung monitor?",
       "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "❌ **\"Samsung Monitor - PINK (6)\"** not found. Try a different name.",
+      "actualResponse": "⚙️ **Specifications for Samsung Monitor - PINK (6):**\n\n• **Color**: pink\n• **Size**: 6\n• **Model Year**: 2026",
       "actualIntent": "GET_PRODUCT",
       "actualActions": [],
       "intentMatch": true,
@@ -2830,14 +3530,14 @@
       "contextMaintained": true,
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
+      "confidenceScore": 10
     },
     {
       "testId": "DETAILS_067",
       "category": "Product Details",
       "query": "Show details for Sony camera",
       "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "❌ **\"Sony Camera - BLACK (S)\"** not found. Try a different name.",
+      "actualResponse": "⚙️ **Specifications for Sony Camera - BLACK (S):**\n\n• **Color**: black\n• **Size**: S\n• **Model Year**: 2026",
       "actualIntent": "GET_PRODUCT",
       "actualActions": [],
       "intentMatch": true,
@@ -2847,7 +3547,7 @@
       "contextMaintained": true,
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
+      "confidenceScore": 10
     },
     {
       "testId": "DETAILS_068",
@@ -3058,7 +3758,7 @@
       "category": "Product Details",
       "query": "Give me specifications of Microsoft graphics card",
       "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "❌ **\"Microsoft Graphics card - BLACK (S)\"** not found. Try a different name.",
+      "actualResponse": "⚙️ **Specifications for Microsoft Graphics card - BLACK (S):**\n\n• **Color**: black\n• **Size**: S\n• **Model Year**: 2026",
       "actualIntent": "GET_PRODUCT",
       "actualActions": [],
       "intentMatch": true,
@@ -3068,7 +3768,7 @@
       "contextMaintained": true,
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
+      "confidenceScore": 10
     },
     {
       "testId": "DETAILS_081",
@@ -3398,7 +4098,7 @@
       "category": "Product Details",
       "query": "Give me specifications of Dell graphics card",
       "expectedGoal": "GET_PRODUCT",
-      "actualResponse": "❌ **\"Dell Graphics card - BLACK (S)\"** not found. Try a different name.",
+      "actualResponse": "⚙️ **Specifications for Dell Graphics card - BLACK (S):**\n\n• **Color**: black\n• **Size**: S\n• **Model Year**: 2026",
       "actualIntent": "GET_PRODUCT",
       "actualActions": [],
       "intentMatch": true,
@@ -3408,7 +4108,7 @@
       "contextMaintained": true,
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 5
+      "confidenceScore": 10
     },
     {
       "testId": "COMPARE_001",
@@ -4962,102 +5662,102 @@
       "category": "Comparison",
       "query": "Which is better: AMD cable or Nvidia cable?",
       "expectedGoal": "COMPARE",
-      "actualResponse": "⚖️ **Product Comparison Table:**\n\n| Feature | AMD Cable - SILVER (9) | Nvidia Cable - SILVER (9) |\n|---|---|---|\n| **Price** | $190 | $485 |\n| **Rating** | 4.7⭐ | 4.3⭐ |\n| **Reviews** | 0 reviews | 0 reviews |\n| **Stock** | In Stock | In Stock |\n\n\n💡 **ApexStore AI Recommendation:**\n• **Best Value (Lowest Price)**: **AMD Cable - SILVER (9)** ($190)\n• **Top Rated**: **AMD Cable - SILVER (9)** (4.7⭐)",
-      "actualIntent": "COMPARE",
+      "actualResponse": "Failed to contact Chatbot API: ECONNREFUSED",
+      "actualIntent": "ERROR_OR_TIMEOUT",
       "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 10
+      "intentMatch": false,
+      "actionMatch": false,
+      "relevanceMatch": false,
+      "empathyMatch": false,
+      "contextMaintained": false,
+      "result": "FAIL",
+      "analysis": "Network or Server error: ECONNREFUSED",
+      "confidenceScore": 0
     },
     {
       "testId": "COMPARE_093",
       "category": "Comparison",
       "query": "Show me the difference between Nvidia and Xiaomi backpack",
       "expectedGoal": "COMPARE",
-      "actualResponse": "⚖️ **Product Comparison Table:**\n\n| Feature | Nvidia Backpack - GREEN (10) | Xiaomi Backpack - GREEN (10) |\n|---|---|---|\n| **Price** | $980 | $14900 |\n| **Rating** | 4.4⭐ | 4.6⭐ |\n| **Reviews** | 0 reviews | 0 reviews |\n| **Stock** | In Stock | In Stock |\n\n\n💡 **ApexStore AI Recommendation:**\n• **Best Value (Lowest Price)**: **Nvidia Backpack - GREEN (10)** ($980)\n• **Top Rated**: **Xiaomi Backpack - GREEN (10)** (4.6⭐)",
-      "actualIntent": "COMPARE",
+      "actualResponse": "Failed to contact Chatbot API: ECONNREFUSED",
+      "actualIntent": "ERROR_OR_TIMEOUT",
       "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 10
+      "intentMatch": false,
+      "actionMatch": false,
+      "relevanceMatch": false,
+      "empathyMatch": false,
+      "contextMaintained": false,
+      "result": "FAIL",
+      "analysis": "Network or Server error: ECONNREFUSED",
+      "confidenceScore": 0
     },
     {
       "testId": "COMPARE_094",
       "category": "Comparison",
       "query": "Comparison of Xiaomi desk lamp versus OnePlus desk lamp",
       "expectedGoal": "COMPARE",
-      "actualResponse": "⚖️ **Product Comparison Table:**\n\n| Feature | Xiaomi Desk lamp - YELLOW (8) | OnePlus Desk lamp - YELLOW (8) |\n|---|---|---|\n| **Price** | $19800 | $14600 |\n| **Rating** | 4.7⭐ | 4.9⭐ |\n| **Reviews** | 0 reviews | 0 reviews |\n| **Stock** | In Stock | In Stock |\n\n\n💡 **ApexStore AI Recommendation:**\n• **Best Value (Lowest Price)**: **OnePlus Desk lamp - YELLOW (8)** ($14600)\n• **Top Rated**: **OnePlus Desk lamp - YELLOW (8)** (4.9⭐)",
-      "actualIntent": "COMPARE",
+      "actualResponse": "Failed to contact Chatbot API: ECONNREFUSED",
+      "actualIntent": "ERROR_OR_TIMEOUT",
       "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 10
+      "intentMatch": false,
+      "actionMatch": false,
+      "relevanceMatch": false,
+      "empathyMatch": false,
+      "contextMaintained": false,
+      "result": "FAIL",
+      "analysis": "Network or Server error: ECONNREFUSED",
+      "confidenceScore": 0
     },
     {
       "testId": "COMPARE_095",
       "category": "Comparison",
       "query": "Should I buy OnePlus router or Microsoft router?",
       "expectedGoal": "COMPARE",
-      "actualResponse": "⚖️ **Product Comparison Table:**\n\n| Feature | OnePlus Router - PINK (6) | Microsoft Router - PINK (6) |\n|---|---|---|\n| **Price** | $20000 | $49800 |\n| **Rating** | 4⭐ | 4.2⭐ |\n| **Reviews** | 0 reviews | 0 reviews |\n| **Stock** | In Stock | In Stock |\n\n\n💡 **ApexStore AI Recommendation:**\n• **Best Value (Lowest Price)**: **OnePlus Router - PINK (6)** ($20000)\n• **Top Rated**: **Microsoft Router - PINK (6)** (4.2⭐)",
-      "actualIntent": "COMPARE",
+      "actualResponse": "Failed to contact Chatbot API: ECONNREFUSED",
+      "actualIntent": "ERROR_OR_TIMEOUT",
       "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 10
+      "intentMatch": false,
+      "actionMatch": false,
+      "relevanceMatch": false,
+      "empathyMatch": false,
+      "contextMaintained": false,
+      "result": "FAIL",
+      "analysis": "Network or Server error: ECONNREFUSED",
+      "confidenceScore": 0
     },
     {
       "testId": "COMPARE_096",
       "category": "Comparison",
       "query": "Compare Microsoft microphone vs Apple microphone",
       "expectedGoal": "COMPARE",
-      "actualResponse": "⚖️ **Product Comparison Table:**\n\n| Feature | Microsoft Microphone - GRAY (7) | Apple Microphone - GRAY (7) |\n|---|---|---|\n| **Price** | $85 | $49600 |\n| **Rating** | 4.3⭐ | 4.9⭐ |\n| **Reviews** | 0 reviews | 0 reviews |\n| **Stock** | In Stock | In Stock |\n\n\n💡 **ApexStore AI Recommendation:**\n• **Best Value (Lowest Price)**: **Microsoft Microphone - GRAY (7)** ($85)\n• **Top Rated**: **Apple Microphone - GRAY (7)** (4.9⭐)",
-      "actualIntent": "COMPARE",
+      "actualResponse": "Failed to contact Chatbot API: ECONNREFUSED",
+      "actualIntent": "ERROR_OR_TIMEOUT",
       "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 10
+      "intentMatch": false,
+      "actionMatch": false,
+      "relevanceMatch": false,
+      "empathyMatch": false,
+      "contextMaintained": false,
+      "result": "FAIL",
+      "analysis": "Network or Server error: ECONNREFUSED",
+      "confidenceScore": 0
     },
     {
       "testId": "COMPARE_097",
       "category": "Comparison",
       "query": "Which is better: Apple projector or Samsung projector?",
       "expectedGoal": "COMPARE",
-      "actualResponse": "⚖️ **Product Comparison Table:**\n\n| Feature | Apple Projector - PURPLE (11) | Samsung Projector - PURPLE (11) |\n|---|---|---|\n| **Price** | $100 | $49600 |\n| **Rating** | 4⭐ | 4.4⭐ |\n| **Reviews** | 0 reviews | 0 reviews |\n| **Stock** | In Stock | In Stock |\n\n\n💡 **ApexStore AI Recommendation:**\n• **Best Value (Lowest Price)**: **Apple Projector - PURPLE (11)** ($100)\n• **Top Rated**: **Samsung Projector - PURPLE (11)** (4.4⭐)",
-      "actualIntent": "COMPARE",
+      "actualResponse": "Failed to contact Chatbot API: ECONNREFUSED",
+      "actualIntent": "ERROR_OR_TIMEOUT",
       "actualActions": [],
-      "intentMatch": true,
-      "actionMatch": true,
-      "relevanceMatch": true,
-      "empathyMatch": true,
-      "contextMaintained": true,
-      "result": "PASS",
-      "analysis": "The chatbot understood the user intent and responded appropriately.",
-      "confidenceScore": 10
+      "intentMatch": false,
+      "actionMatch": false,
+      "relevanceMatch": false,
+      "empathyMatch": false,
+      "contextMaintained": false,
+      "result": "FAIL",
+      "analysis": "Network or Server error: ECONNREFUSED",
+      "confidenceScore": 0
     },
     {
       "testId": "COMPARE_098",
@@ -5251,7 +5951,7 @@
       "query": "Show my cart items",
       "expectedGoal": "VIEW_CART",
       "expectedAction": "VIEW_CART",
-      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 5 — $949.95\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 14 — $2730.00\n• **LG Tablet - WHITE (M)** x 4 — $1940.00\n• **Intel Charger - GOLD (XXL)** x 17 — $850000.00\n• **Sony Hard drive - ORANGE (12)** x 3 — $1470.00\n• **Dell Graphics card - BLACK (S)** x 5 — $249500.00\n• **AMD Smartwatch - RED (XL)** x 1 — $50000.00\n• **Nvidia Speaker - PINK (6)** x 4 — $1960.00\n• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00\n• **HP Projector - PURPLE (11)** x 5 — $100000.00\n• **Xiaomi Monitor - PINK (6)** x 4 — $780.00\n• **OnePlus Camera - BLACK (S)** x 2 — $100000.00\n• **Asus Router - PINK (6)** x 7 — $1295.00\n• **Logitech Microphone - GRAY (7)** x 6 — $2910.00\n• **Apple Mouse - RED (XL)** x 6 — $87600.00\n• **Bose Backpack - GREEN (10)** x 5 — $475.00\n• **LG Desk lamp - YELLOW (8)** x 5 — $249500.00\n• **Sony Headphones - BLUE (L)** x 8 — $680.00\n• **AMD Cable - SILVER (9)** x 11 — $2090.00\n• **HP Mouse - RED (XL)** x 5 — $2400.00\n• **Dell Keyboard - YELLOW (8)** x 6 — $5880.00\n• **Lenovo Monitor - PINK (6)** x 5 — $249000.00\n• **Bose Speaker - PINK (6)** x 5 — $248000.00\n• **Logitech Watch - SILVER (9)** x 5 — $2500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 5 — $99000.00\n• **Nvidia Backpack - GREEN (10)** x 6 — $5880.00\n• **OnePlus Router - PINK (6)** x 5 — $100000.00\n• **Microsoft Phone - WHITE (M)** x 5 — $4975.00\n• **Apple Projector - PURPLE (11)** x 5 — $500.00\n• **Samsung Earbuds - YELLOW (8)** x 5 — $450.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 19 — $1520.00\n\n💵 **Total**: $2511379.95",
+      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 2 — $379.98\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 18 — $3510.00\n• **LG Tablet - WHITE (M)** x 4 — $1940.00\n• **Intel Charger - GOLD (XXL)** x 23 — $1150000.00\n• **Sony Hard drive - ORANGE (12)** x 3 — $1470.00\n• **Dell Graphics card - BLACK (S)** x 6 — $299400.00\n• **AMD Smartwatch - RED (XL)** x 1 — $50000.00\n• **Nvidia Speaker - PINK (6)** x 4 — $1960.00\n• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00\n• **HP Projector - PURPLE (11)** x 5 — $100000.00\n• **Xiaomi Monitor - PINK (6)** x 5 — $975.00\n• **OnePlus Camera - BLACK (S)** x 1 — $50000.00\n• **Asus Router - PINK (6)** x 9 — $1665.00\n• **Logitech Microphone - GRAY (7)** x 6 — $2910.00\n• **Apple Mouse - RED (XL)** x 8 — $116800.00\n• **Bose Backpack - GREEN (10)** x 7 — $665.00\n• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00\n• **Sony Headphones - BLUE (L)** x 10 — $850.00\n• **AMD Cable - SILVER (9)** x 14 — $2660.00\n• **HP Mouse - RED (XL)** x 7 — $3360.00\n• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00\n• **Lenovo Monitor - PINK (6)** x 7 — $348600.00\n• **Bose Speaker - PINK (6)** x 7 — $347200.00\n• **Logitech Watch - SILVER (9)** x 7 — $3500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00\n• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00\n• **OnePlus Router - PINK (6)** x 7 — $140000.00\n• **Microsoft Phone - WHITE (M)** x 7 — $6965.00\n• **Apple Projector - PURPLE (11)** x 7 — $700.00\n• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00\n\n💵 **Total**: $3228714.98",
       "actualIntent": "VIEW_CART",
       "actualActions": [
         {
@@ -5273,7 +5973,7 @@
       "query": "View my shopping cart",
       "expectedGoal": "VIEW_CART",
       "expectedAction": "VIEW_CART",
-      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 5 — $949.95\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 14 — $2730.00\n• **LG Tablet - WHITE (M)** x 4 — $1940.00\n• **Intel Charger - GOLD (XXL)** x 17 — $850000.00\n• **Sony Hard drive - ORANGE (12)** x 3 — $1470.00\n• **Dell Graphics card - BLACK (S)** x 5 — $249500.00\n• **AMD Smartwatch - RED (XL)** x 1 — $50000.00\n• **Nvidia Speaker - PINK (6)** x 4 — $1960.00\n• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00\n• **HP Projector - PURPLE (11)** x 5 — $100000.00\n• **Xiaomi Monitor - PINK (6)** x 4 — $780.00\n• **OnePlus Camera - BLACK (S)** x 2 — $100000.00\n• **Asus Router - PINK (6)** x 7 — $1295.00\n• **Logitech Microphone - GRAY (7)** x 6 — $2910.00\n• **Apple Mouse - RED (XL)** x 6 — $87600.00\n• **Bose Backpack - GREEN (10)** x 5 — $475.00\n• **LG Desk lamp - YELLOW (8)** x 5 — $249500.00\n• **Sony Headphones - BLUE (L)** x 8 — $680.00\n• **AMD Cable - SILVER (9)** x 11 — $2090.00\n• **HP Mouse - RED (XL)** x 5 — $2400.00\n• **Dell Keyboard - YELLOW (8)** x 6 — $5880.00\n• **Lenovo Monitor - PINK (6)** x 5 — $249000.00\n• **Bose Speaker - PINK (6)** x 5 — $248000.00\n• **Logitech Watch - SILVER (9)** x 5 — $2500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 5 — $99000.00\n• **Nvidia Backpack - GREEN (10)** x 6 — $5880.00\n• **OnePlus Router - PINK (6)** x 5 — $100000.00\n• **Microsoft Phone - WHITE (M)** x 5 — $4975.00\n• **Apple Projector - PURPLE (11)** x 5 — $500.00\n• **Samsung Earbuds - YELLOW (8)** x 5 — $450.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 19 — $1520.00\n\n💵 **Total**: $2511379.95",
+      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 5 — $949.95\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 18 — $3510.00\n• **LG Tablet - WHITE (M)** x 4 — $1940.00\n• **Intel Charger - GOLD (XXL)** x 23 — $1150000.00\n• **Sony Hard drive - ORANGE (12)** x 3 — $1470.00\n• **Dell Graphics card - BLACK (S)** x 4 — $199600.00\n• **AMD Smartwatch - RED (XL)** x 1 — $50000.00\n• **Nvidia Speaker - PINK (6)** x 4 — $1960.00\n• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00\n• **HP Projector - PURPLE (11)** x 5 — $100000.00\n• **Xiaomi Monitor - PINK (6)** x 5 — $975.00\n• **OnePlus Camera - BLACK (S)** x 1 — $50000.00\n• **Asus Router - PINK (6)** x 9 — $1665.00\n• **Logitech Microphone - GRAY (7)** x 6 — $2910.00\n• **Apple Mouse - RED (XL)** x 8 — $116800.00\n• **Bose Backpack - GREEN (10)** x 7 — $665.00\n• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00\n• **Sony Headphones - BLUE (L)** x 10 — $850.00\n• **AMD Cable - SILVER (9)** x 14 — $2660.00\n• **HP Mouse - RED (XL)** x 7 — $3360.00\n• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00\n• **Lenovo Monitor - PINK (6)** x 7 — $348600.00\n• **Bose Speaker - PINK (6)** x 7 — $347200.00\n• **Logitech Watch - SILVER (9)** x 7 — $3500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00\n• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00\n• **OnePlus Router - PINK (6)** x 7 — $140000.00\n• **Microsoft Phone - WHITE (M)** x 7 — $6965.00\n• **Apple Projector - PURPLE (11)** x 7 — $700.00\n• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00\n\n💵 **Total**: $3129484.95",
       "actualIntent": "VIEW_CART",
       "actualActions": [
         {
@@ -5480,7 +6180,7 @@
       "query": "Show my cart items",
       "expectedGoal": "VIEW_CART",
       "expectedAction": "VIEW_CART",
-      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 5 — $949.95\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 14 — $2730.00\n• **LG Tablet - WHITE (M)** x 5 — $2425.00\n• **Intel Charger - GOLD (XXL)** x 17 — $850000.00\n• **Sony Hard drive - ORANGE (12)** x 3 — $1470.00\n• **Dell Graphics card - BLACK (S)** x 5 — $249500.00\n• **AMD Smartwatch - RED (XL)** x 1 — $50000.00\n• **Nvidia Speaker - PINK (6)** x 4 — $1960.00\n• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00\n• **HP Projector - PURPLE (11)** x 5 — $100000.00\n• **Xiaomi Monitor - PINK (6)** x 4 — $780.00\n• **OnePlus Camera - BLACK (S)** x 2 — $100000.00\n• **Asus Router - PINK (6)** x 7 — $1295.00\n• **Logitech Microphone - GRAY (7)** x 6 — $2910.00\n• **Apple Mouse - RED (XL)** x 6 — $87600.00\n• **Bose Backpack - GREEN (10)** x 5 — $475.00\n• **LG Desk lamp - YELLOW (8)** x 5 — $249500.00\n• **Sony Headphones - BLUE (L)** x 8 — $680.00\n• **AMD Cable - SILVER (9)** x 11 — $2090.00\n• **HP Mouse - RED (XL)** x 5 — $2400.00\n• **Dell Keyboard - YELLOW (8)** x 6 — $5880.00\n• **Lenovo Monitor - PINK (6)** x 5 — $249000.00\n• **Bose Speaker - PINK (6)** x 5 — $248000.00\n• **Logitech Watch - SILVER (9)** x 5 — $2500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 5 — $99000.00\n• **Nvidia Backpack - GREEN (10)** x 6 — $5880.00\n• **OnePlus Router - PINK (6)** x 5 — $100000.00\n• **Microsoft Phone - WHITE (M)** x 5 — $4975.00\n• **Apple Projector - PURPLE (11)** x 5 — $500.00\n• **Samsung Earbuds - YELLOW (8)** x 5 — $450.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 19 — $1520.00\n\n💵 **Total**: $2511864.95",
+      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 5 — $949.95\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 18 — $3510.00\n• **LG Tablet - WHITE (M)** x 5 — $2425.00\n• **Intel Charger - GOLD (XXL)** x 24 — $1200000.00\n• **Sony Hard drive - ORANGE (12)** x 3 — $1470.00\n• **Dell Graphics card - BLACK (S)** x 4 — $199600.00\n• **AMD Smartwatch - RED (XL)** x 1 — $50000.00\n• **Nvidia Speaker - PINK (6)** x 4 — $1960.00\n• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00\n• **HP Projector - PURPLE (11)** x 5 — $100000.00\n• **Xiaomi Monitor - PINK (6)** x 5 — $975.00\n• **OnePlus Camera - BLACK (S)** x 1 — $50000.00\n• **Asus Router - PINK (6)** x 9 — $1665.00\n• **Logitech Microphone - GRAY (7)** x 6 — $2910.00\n• **Apple Mouse - RED (XL)** x 8 — $116800.00\n• **Bose Backpack - GREEN (10)** x 7 — $665.00\n• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00\n• **Sony Headphones - BLUE (L)** x 10 — $850.00\n• **AMD Cable - SILVER (9)** x 14 — $2660.00\n• **HP Mouse - RED (XL)** x 7 — $3360.00\n• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00\n• **Lenovo Monitor - PINK (6)** x 7 — $348600.00\n• **Bose Speaker - PINK (6)** x 7 — $347200.00\n• **Logitech Watch - SILVER (9)** x 7 — $3500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00\n• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00\n• **OnePlus Router - PINK (6)** x 7 — $140000.00\n• **Microsoft Phone - WHITE (M)** x 7 — $6965.00\n• **Apple Projector - PURPLE (11)** x 7 — $700.00\n• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00\n\n💵 **Total**: $3179969.95",
       "actualIntent": "VIEW_CART",
       "actualActions": [
         {
@@ -5502,7 +6202,7 @@
       "query": "View my shopping cart",
       "expectedGoal": "VIEW_CART",
       "expectedAction": "VIEW_CART",
-      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 4 — $759.96\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 14 — $2730.00\n• **LG Tablet - WHITE (M)** x 5 — $2425.00\n• **Intel Charger - GOLD (XXL)** x 18 — $900000.00\n• **Sony Hard drive - ORANGE (12)** x 3 — $1470.00\n• **Dell Graphics card - BLACK (S)** x 5 — $249500.00\n• **AMD Smartwatch - RED (XL)** x 1 — $50000.00\n• **Nvidia Speaker - PINK (6)** x 3 — $1470.00\n• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00\n• **HP Projector - PURPLE (11)** x 5 — $100000.00\n• **Xiaomi Monitor - PINK (6)** x 4 — $780.00\n• **OnePlus Camera - BLACK (S)** x 2 — $100000.00\n• **Asus Router - PINK (6)** x 7 — $1295.00\n• **Logitech Microphone - GRAY (7)** x 6 — $2910.00\n• **Apple Mouse - RED (XL)** x 6 — $87600.00\n• **Bose Backpack - GREEN (10)** x 5 — $475.00\n• **LG Desk lamp - YELLOW (8)** x 5 — $249500.00\n• **Sony Headphones - BLUE (L)** x 8 — $680.00\n• **AMD Cable - SILVER (9)** x 11 — $2090.00\n• **HP Mouse - RED (XL)** x 5 — $2400.00\n• **Dell Keyboard - YELLOW (8)** x 6 — $5880.00\n• **Lenovo Monitor - PINK (6)** x 5 — $249000.00\n• **Bose Speaker - PINK (6)** x 5 — $248000.00\n• **Logitech Watch - SILVER (9)** x 5 — $2500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 5 — $99000.00\n• **Nvidia Backpack - GREEN (10)** x 6 — $5880.00\n• **OnePlus Router - PINK (6)** x 5 — $100000.00\n• **Microsoft Phone - WHITE (M)** x 5 — $4975.00\n• **Apple Projector - PURPLE (11)** x 5 — $500.00\n• **Samsung Earbuds - YELLOW (8)** x 5 — $450.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 19 — $1520.00\n\n💵 **Total**: $2561184.96",
+      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 4 — $759.96\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 18 — $3510.00\n• **LG Tablet - WHITE (M)** x 5 — $2425.00\n• **Intel Charger - GOLD (XXL)** x 24 — $1200000.00\n• **Sony Hard drive - ORANGE (12)** x 3 — $1470.00\n• **Dell Graphics card - BLACK (S)** x 4 — $199600.00\n• **AMD Smartwatch - RED (XL)** x 1 — $50000.00\n• **Nvidia Speaker - PINK (6)** x 3 — $1470.00\n• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00\n• **HP Projector - PURPLE (11)** x 5 — $100000.00\n• **Xiaomi Monitor - PINK (6)** x 5 — $975.00\n• **OnePlus Camera - BLACK (S)** x 1 — $50000.00\n• **Asus Router - PINK (6)** x 9 — $1665.00\n• **Logitech Microphone - GRAY (7)** x 6 — $2910.00\n• **Apple Mouse - RED (XL)** x 8 — $116800.00\n• **Bose Backpack - GREEN (10)** x 7 — $665.00\n• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00\n• **Sony Headphones - BLUE (L)** x 10 — $850.00\n• **AMD Cable - SILVER (9)** x 14 — $2660.00\n• **HP Mouse - RED (XL)** x 7 — $3360.00\n• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00\n• **Lenovo Monitor - PINK (6)** x 7 — $348600.00\n• **Bose Speaker - PINK (6)** x 7 — $347200.00\n• **Logitech Watch - SILVER (9)** x 7 — $3500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00\n• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00\n• **OnePlus Router - PINK (6)** x 7 — $140000.00\n• **Microsoft Phone - WHITE (M)** x 7 — $6965.00\n• **Apple Projector - PURPLE (11)** x 7 — $700.00\n• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00\n\n💵 **Total**: $3179289.96",
       "actualIntent": "VIEW_CART",
       "actualActions": [
         {
@@ -5625,6 +6325,947 @@
       "result": "PASS",
       "analysis": "The chatbot understood the user intent and responded appropriately.",
       "confidenceScore": 10
+    },
+    {
+      "testId": "CART_021",
+      "category": "Cart",
+      "query": "Remove HP laptop from cart",
+      "expectedGoal": "REMOVE_CART",
+      "expectedAction": "REMOVE_FROM_CART",
+      "actualResponse": "🗑️ **Removed from Cart!**\n\n❌ **Microsoft Laptop - BLUE (L)** has been removed from your cart.",
+      "actualIntent": "REMOVE_CART",
+      "actualActions": [
+        {
+          "type": "REMOVE_FROM_CART",
+          "payload": {
+            "id": "6a23ad49e3ab29f4cd518bb0"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 9
+    },
+    {
+      "testId": "CART_022",
+      "category": "Cart",
+      "query": "Update quantity of Lenovo phone to 2",
+      "expectedGoal": "UPDATE_CART_QUANTITY",
+      "expectedAction": "UPDATE_CART_QUANTITY",
+      "actualResponse": "✅ Updated quantity for **Lenovo Earbuds - YELLOW (8)** to **2** in your cart.",
+      "actualIntent": "UPDATE_CART_QUANTITY",
+      "actualActions": [
+        {
+          "type": "UPDATE_CART_QUANTITY",
+          "payload": {
+            "productId": "6a23ad49e3ab29f4cd518879",
+            "quantity": 2
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_023",
+      "category": "Cart",
+      "query": "Change qty of headphones to 3",
+      "expectedGoal": "UPDATE_CART_QUANTITY",
+      "expectedAction": "UPDATE_CART_QUANTITY",
+      "actualResponse": "✅ Updated quantity for **item** to **3** in your cart.",
+      "actualIntent": "UPDATE_CART_QUANTITY",
+      "actualActions": [
+        {
+          "type": "UPDATE_CART_QUANTITY",
+          "payload": {
+            "productId": "6a23ad49e3ab29f4cd518774",
+            "quantity": 3
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_024",
+      "category": "Cart",
+      "query": "Show my cart items",
+      "expectedGoal": "VIEW_CART",
+      "expectedAction": "VIEW_CART",
+      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 4 — $759.96\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 18 — $3510.00\n• **LG Tablet - WHITE (M)** x 5 — $2425.00\n• **Intel Charger - GOLD (XXL)** x 24 — $1200000.00\n• **Sony Hard drive - ORANGE (12)** x 4 — $1960.00\n• **Dell Graphics card - BLACK (S)** x 5 — $249500.00\n• **AMD Smartwatch - RED (XL)** x 1 — $50000.00\n• **Nvidia Speaker - PINK (6)** x 3 — $1470.00\n• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00\n• **HP Projector - PURPLE (11)** x 5 — $100000.00\n• **Xiaomi Monitor - PINK (6)** x 5 — $975.00\n• **OnePlus Camera - BLACK (S)** x 1 — $50000.00\n• **Asus Router - PINK (6)** x 9 — $1665.00\n• **Logitech Microphone - GRAY (7)** x 6 — $2910.00\n• **Apple Mouse - RED (XL)** x 8 — $116800.00\n• **Bose Backpack - GREEN (10)** x 7 — $665.00\n• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00\n• **Sony Headphones - BLUE (L)** x 10 — $850.00\n• **AMD Cable - SILVER (9)** x 14 — $2660.00\n• **HP Mouse - RED (XL)** x 7 — $3360.00\n• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00\n• **Lenovo Monitor - PINK (6)** x 7 — $348600.00\n• **Bose Speaker - PINK (6)** x 7 — $347200.00\n• **Logitech Watch - SILVER (9)** x 7 — $3500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00\n• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00\n• **OnePlus Router - PINK (6)** x 7 — $140000.00\n• **Microsoft Phone - WHITE (M)** x 7 — $6965.00\n• **Apple Projector - PURPLE (11)** x 7 — $700.00\n• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00\n\n💵 **Total**: $3229679.96",
+      "actualIntent": "VIEW_CART",
+      "actualActions": [
+        {
+          "type": "VIEW_CART"
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_025",
+      "category": "Cart",
+      "query": "View my shopping cart",
+      "expectedGoal": "VIEW_CART",
+      "expectedAction": "VIEW_CART",
+      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 3 — $569.97\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 18 — $3510.00\n• **LG Tablet - WHITE (M)** x 5 — $2425.00\n• **Intel Charger - GOLD (XXL)** x 24 — $1200000.00\n• **Sony Hard drive - ORANGE (12)** x 4 — $1960.00\n• **Dell Graphics card - BLACK (S)** x 5 — $249500.00\n• **AMD Smartwatch - RED (XL)** x 1 — $50000.00\n• **Nvidia Speaker - PINK (6)** x 3 — $1470.00\n• **Lenovo Earbuds - YELLOW (8)** x 2 — $160.00\n• **HP Projector - PURPLE (11)** x 5 — $100000.00\n• **Xiaomi Monitor - PINK (6)** x 5 — $975.00\n• **OnePlus Camera - BLACK (S)** x 1 — $50000.00\n• **Asus Router - PINK (6)** x 9 — $1665.00\n• **Logitech Microphone - GRAY (7)** x 6 — $2910.00\n• **Apple Mouse - RED (XL)** x 8 — $116800.00\n• **Bose Backpack - GREEN (10)** x 7 — $665.00\n• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00\n• **Sony Headphones - BLUE (L)** x 10 — $850.00\n• **AMD Cable - SILVER (9)** x 14 — $2660.00\n• **HP Mouse - RED (XL)** x 7 — $3360.00\n• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00\n• **Lenovo Monitor - PINK (6)** x 7 — $348600.00\n• **Bose Speaker - PINK (6)** x 7 — $347200.00\n• **Logitech Watch - SILVER (9)** x 7 — $3500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00\n• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00\n• **OnePlus Router - PINK (6)** x 7 — $140000.00\n• **Microsoft Phone - WHITE (M)** x 7 — $6965.00\n• **Apple Projector - PURPLE (11)** x 7 — $700.00\n• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00\n\n💵 **Total**: $3229409.97",
+      "actualIntent": "VIEW_CART",
+      "actualActions": [
+        {
+          "type": "VIEW_CART"
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_026",
+      "category": "Cart",
+      "query": "Clear my entire cart",
+      "expectedGoal": "REMOVE_CART",
+      "expectedAction": "REMOVE_FROM_CART",
+      "actualResponse": "🗑️ **Are you sure you want to clear all items from your cart?**",
+      "actualIntent": "REMOVE_CART",
+      "actualActions": [
+        {
+          "type": "REMOVE_FROM_CART",
+          "payload": {
+            "all": true
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_027",
+      "category": "Cart",
+      "query": "Empty the cart",
+      "expectedGoal": "REMOVE_CART",
+      "expectedAction": "REMOVE_FROM_CART",
+      "actualResponse": "🗑️ **Are you sure you want to clear all items from your cart?**",
+      "actualIntent": "REMOVE_CART",
+      "actualActions": [
+        {
+          "type": "REMOVE_FROM_CART",
+          "payload": {
+            "all": true
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_028",
+      "category": "Cart",
+      "query": "Add AMD smartwatch to my cart",
+      "expectedGoal": "ADD_CART",
+      "expectedAction": "ADD_TO_CART",
+      "actualResponse": "🛒 **Added to Cart!**\n\n✅ **AMD Smartwatch - RED (XL)** ($50000.00) has been added to your cart.\n\nWould you like to **checkout now** or continue shopping?",
+      "actualIntent": "ADD_CART",
+      "actualActions": [
+        {
+          "type": "ADD_TO_CART",
+          "payload": {
+            "id": "6a23ad49e3ab29f4cd518b81",
+            "title": "AMD Smartwatch - RED (XL)",
+            "price": 50000,
+            "image": "https://loremflickr.com/600/600/smartwatch,watch?lock=1035",
+            "variantKey": ""
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_029",
+      "category": "Cart",
+      "query": "Put the Nvidia speaker in cart",
+      "expectedGoal": "ADD_CART",
+      "expectedAction": "ADD_TO_CART",
+      "actualResponse": "🛒 **Added to Cart!**\n\n✅ **Nvidia Speaker - PINK (6)** ($490.00) has been added to your cart.\n\nWould you like to **checkout now** or continue shopping?",
+      "actualIntent": "ADD_CART",
+      "actualActions": [
+        {
+          "type": "ADD_TO_CART",
+          "payload": {
+            "id": "6a23ad49e3ab29f4cd518b92",
+            "title": "Nvidia Speaker - PINK (6)",
+            "price": 490,
+            "image": "https://loremflickr.com/600/600/speaker,audio?lock=1052",
+            "variantKey": ""
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_030",
+      "category": "Cart",
+      "query": "Remove Xiaomi tablet from cart",
+      "expectedGoal": "REMOVE_CART",
+      "expectedAction": "REMOVE_FROM_CART",
+      "actualResponse": "🗑️ **Removed from Cart!**\n\n❌ **Microsoft Tablet - WHITE (M)** has been removed from your cart.",
+      "actualIntent": "REMOVE_CART",
+      "actualActions": [
+        {
+          "type": "REMOVE_FROM_CART",
+          "payload": {
+            "id": "6a23ad49e3ab29f4cd518bbb"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 9
+    },
+    {
+      "testId": "CART_031",
+      "category": "Cart",
+      "query": "Update quantity of OnePlus charger to 1",
+      "expectedGoal": "UPDATE_CART_QUANTITY",
+      "expectedAction": "UPDATE_CART_QUANTITY",
+      "actualResponse": "✅ Updated quantity for **OnePlus Camera - BLACK (S)** to **1** in your cart.",
+      "actualIntent": "UPDATE_CART_QUANTITY",
+      "actualActions": [
+        {
+          "type": "UPDATE_CART_QUANTITY",
+          "payload": {
+            "productId": "6a23ad49e3ab29f4cd5188a2",
+            "quantity": 1
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_032",
+      "category": "Cart",
+      "query": "Change qty of cable to 2",
+      "expectedGoal": "UPDATE_CART_QUANTITY",
+      "expectedAction": "UPDATE_CART_QUANTITY",
+      "actualResponse": "✅ Updated quantity for **item** to **2** in your cart.",
+      "actualIntent": "UPDATE_CART_QUANTITY",
+      "actualActions": [
+        {
+          "type": "UPDATE_CART_QUANTITY",
+          "payload": {
+            "productId": "6a23ad49e3ab29f4cd518774",
+            "quantity": 2
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_033",
+      "category": "Cart",
+      "query": "Show my cart items",
+      "expectedGoal": "VIEW_CART",
+      "expectedAction": "VIEW_CART",
+      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 3 — $569.97\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 18 — $3510.00\n• **LG Tablet - WHITE (M)** x 5 — $2425.00\n• **Intel Charger - GOLD (XXL)** x 24 — $1200000.00\n• **Sony Hard drive - ORANGE (12)** x 4 — $1960.00\n• **Dell Graphics card - BLACK (S)** x 5 — $249500.00\n• **AMD Smartwatch - RED (XL)** x 2 — $100000.00\n• **Nvidia Speaker - PINK (6)** x 4 — $1960.00\n• **Lenovo Earbuds - YELLOW (8)** x 2 — $160.00\n• **HP Projector - PURPLE (11)** x 5 — $100000.00\n• **Xiaomi Monitor - PINK (6)** x 5 — $975.00\n• **OnePlus Camera - BLACK (S)** x 1 — $50000.00\n• **Asus Router - PINK (6)** x 9 — $1665.00\n• **Logitech Microphone - GRAY (7)** x 6 — $2910.00\n• **Apple Mouse - RED (XL)** x 8 — $116800.00\n• **Bose Backpack - GREEN (10)** x 7 — $665.00\n• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00\n• **Sony Headphones - BLUE (L)** x 10 — $850.00\n• **AMD Cable - SILVER (9)** x 14 — $2660.00\n• **HP Mouse - RED (XL)** x 7 — $3360.00\n• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00\n• **Lenovo Monitor - PINK (6)** x 7 — $348600.00\n• **Bose Speaker - PINK (6)** x 7 — $347200.00\n• **Logitech Watch - SILVER (9)** x 7 — $3500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00\n• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00\n• **OnePlus Router - PINK (6)** x 7 — $140000.00\n• **Microsoft Phone - WHITE (M)** x 7 — $6965.00\n• **Apple Projector - PURPLE (11)** x 7 — $700.00\n• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00\n\n💵 **Total**: $3279899.97",
+      "actualIntent": "VIEW_CART",
+      "actualActions": [
+        {
+          "type": "VIEW_CART"
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_034",
+      "category": "Cart",
+      "query": "View my shopping cart",
+      "expectedGoal": "VIEW_CART",
+      "expectedAction": "VIEW_CART",
+      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 2 — $379.98\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 18 — $3510.00\n• **LG Tablet - WHITE (M)** x 5 — $2425.00\n• **Intel Charger - GOLD (XXL)** x 24 — $1200000.00\n• **Sony Hard drive - ORANGE (12)** x 4 — $1960.00\n• **Dell Graphics card - BLACK (S)** x 5 — $249500.00\n• **AMD Smartwatch - RED (XL)** x 2 — $100000.00\n• **Nvidia Speaker - PINK (6)** x 4 — $1960.00\n• **Lenovo Earbuds - YELLOW (8)** x 2 — $160.00\n• **HP Projector - PURPLE (11)** x 5 — $100000.00\n• **Xiaomi Monitor - PINK (6)** x 5 — $975.00\n• **OnePlus Camera - BLACK (S)** x 1 — $50000.00\n• **Asus Router - PINK (6)** x 9 — $1665.00\n• **Logitech Microphone - GRAY (7)** x 6 — $2910.00\n• **Apple Mouse - RED (XL)** x 8 — $116800.00\n• **Bose Backpack - GREEN (10)** x 7 — $665.00\n• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00\n• **Sony Headphones - BLUE (L)** x 10 — $850.00\n• **AMD Cable - SILVER (9)** x 14 — $2660.00\n• **HP Mouse - RED (XL)** x 7 — $3360.00\n• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00\n• **Lenovo Monitor - PINK (6)** x 7 — $348600.00\n• **Bose Speaker - PINK (6)** x 7 — $347200.00\n• **Logitech Watch - SILVER (9)** x 7 — $3500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00\n• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00\n• **OnePlus Router - PINK (6)** x 7 — $140000.00\n• **Microsoft Phone - WHITE (M)** x 7 — $6965.00\n• **Apple Projector - PURPLE (11)** x 7 — $700.00\n• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00\n\n💵 **Total**: $3279709.98",
+      "actualIntent": "VIEW_CART",
+      "actualActions": [
+        {
+          "type": "VIEW_CART"
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_035",
+      "category": "Cart",
+      "query": "Clear my entire cart",
+      "expectedGoal": "REMOVE_CART",
+      "expectedAction": "REMOVE_FROM_CART",
+      "actualResponse": "🗑️ **Are you sure you want to clear all items from your cart?**",
+      "actualIntent": "REMOVE_CART",
+      "actualActions": [
+        {
+          "type": "REMOVE_FROM_CART",
+          "payload": {
+            "all": true
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_036",
+      "category": "Cart",
+      "query": "Empty the cart",
+      "expectedGoal": "REMOVE_CART",
+      "expectedAction": "REMOVE_FROM_CART",
+      "actualResponse": "🗑️ **Are you sure you want to clear all items from your cart?**",
+      "actualIntent": "REMOVE_CART",
+      "actualActions": [
+        {
+          "type": "REMOVE_FROM_CART",
+          "payload": {
+            "all": true
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_037",
+      "category": "Cart",
+      "query": "Add HP projector to my cart",
+      "expectedGoal": "ADD_CART",
+      "expectedAction": "ADD_TO_CART",
+      "actualResponse": "🛒 **Added to Cart!**\n\n✅ **HP Projector - PURPLE (11)** ($20000.00) has been added to your cart.\n\nWould you like to **checkout now** or continue shopping?",
+      "actualIntent": "ADD_CART",
+      "actualActions": [
+        {
+          "type": "ADD_TO_CART",
+          "payload": {
+            "id": "6a23ad49e3ab29f4cd518870",
+            "title": "HP Projector - PURPLE (11)",
+            "price": 20000,
+            "image": "https://loremflickr.com/600/600/projector,video?lock=250",
+            "variantKey": ""
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_038",
+      "category": "Cart",
+      "query": "Put the Lenovo earbuds in cart",
+      "expectedGoal": "ADD_CART",
+      "expectedAction": "ADD_TO_CART",
+      "actualResponse": "🛒 **Added to Cart!**\n\n✅ **Lenovo Earbuds - YELLOW (8)** ($80.00) has been added to your cart.\n\nWould you like to **checkout now** or continue shopping?",
+      "actualIntent": "ADD_CART",
+      "actualActions": [
+        {
+          "type": "ADD_TO_CART",
+          "payload": {
+            "id": "6a23ad49e3ab29f4cd518879",
+            "title": "Lenovo Earbuds - YELLOW (8)",
+            "price": 80,
+            "image": "https://loremflickr.com/600/600/earbuds,audio?lock=259",
+            "variantKey": ""
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_039",
+      "category": "Cart",
+      "query": "Remove Asus hard drive from cart",
+      "expectedGoal": "REMOVE_CART",
+      "expectedAction": "REMOVE_FROM_CART",
+      "actualResponse": "🗑️ **Removed from Cart!**\n\n❌ **Microsoft Hard drive - ORANGE (12)** has been removed from your cart.",
+      "actualIntent": "REMOVE_CART",
+      "actualActions": [
+        {
+          "type": "REMOVE_FROM_CART",
+          "payload": {
+            "id": "6a23ad49e3ab29f4cd518bd1"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 9
+    },
+    {
+      "testId": "CART_040",
+      "category": "Cart",
+      "query": "Update quantity of Logitech graphics card to 5",
+      "expectedGoal": "UPDATE_CART_QUANTITY",
+      "expectedAction": "UPDATE_CART_QUANTITY",
+      "actualResponse": "✅ Updated quantity for **Logitech Microphone - GRAY (7)** to **5** in your cart.",
+      "actualIntent": "UPDATE_CART_QUANTITY",
+      "actualActions": [
+        {
+          "type": "UPDATE_CART_QUANTITY",
+          "payload": {
+            "productId": "6a23ad49e3ab29f4cd518b1b",
+            "quantity": 5
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_041",
+      "category": "Cart",
+      "query": "Change qty of laptop to 1",
+      "expectedGoal": "UPDATE_CART_QUANTITY",
+      "expectedAction": "UPDATE_CART_QUANTITY",
+      "actualResponse": "✅ Updated quantity for **item** to **1** in your cart.",
+      "actualIntent": "UPDATE_CART_QUANTITY",
+      "actualActions": [
+        {
+          "type": "UPDATE_CART_QUANTITY",
+          "payload": {
+            "productId": "6a23ad49e3ab29f4cd518774",
+            "quantity": 1
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_042",
+      "category": "Cart",
+      "query": "Show my cart items",
+      "expectedGoal": "VIEW_CART",
+      "expectedAction": "VIEW_CART",
+      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 2 — $379.98\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 18 — $3510.00\n• **LG Tablet - WHITE (M)** x 5 — $2425.00\n• **Intel Charger - GOLD (XXL)** x 24 — $1200000.00\n• **Sony Hard drive - ORANGE (12)** x 4 — $1960.00\n• **Dell Graphics card - BLACK (S)** x 5 — $249500.00\n• **AMD Smartwatch - RED (XL)** x 2 — $100000.00\n• **Nvidia Speaker - PINK (6)** x 4 — $1960.00\n• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00\n• **HP Projector - PURPLE (11)** x 6 — $120000.00\n• **Xiaomi Monitor - PINK (6)** x 5 — $975.00\n• **OnePlus Camera - BLACK (S)** x 1 — $50000.00\n• **Asus Router - PINK (6)** x 9 — $1665.00\n• **Logitech Microphone - GRAY (7)** x 6 — $2910.00\n• **Apple Mouse - RED (XL)** x 8 — $116800.00\n• **Bose Backpack - GREEN (10)** x 7 — $665.00\n• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00\n• **Sony Headphones - BLUE (L)** x 10 — $850.00\n• **AMD Cable - SILVER (9)** x 14 — $2660.00\n• **HP Mouse - RED (XL)** x 7 — $3360.00\n• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00\n• **Lenovo Monitor - PINK (6)** x 7 — $348600.00\n• **Bose Speaker - PINK (6)** x 7 — $347200.00\n• **Logitech Watch - SILVER (9)** x 7 — $3500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00\n• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00\n• **OnePlus Router - PINK (6)** x 7 — $140000.00\n• **Microsoft Phone - WHITE (M)** x 7 — $6965.00\n• **Apple Projector - PURPLE (11)** x 7 — $700.00\n• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00\n\n💵 **Total**: $3299789.98",
+      "actualIntent": "VIEW_CART",
+      "actualActions": [
+        {
+          "type": "VIEW_CART"
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_043",
+      "category": "Cart",
+      "query": "View my shopping cart",
+      "expectedGoal": "VIEW_CART",
+      "expectedAction": "VIEW_CART",
+      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 1 — $189.99\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 18 — $3510.00\n• **LG Tablet - WHITE (M)** x 5 — $2425.00\n• **Intel Charger - GOLD (XXL)** x 24 — $1200000.00\n• **Sony Hard drive - ORANGE (12)** x 4 — $1960.00\n• **Dell Graphics card - BLACK (S)** x 5 — $249500.00\n• **AMD Smartwatch - RED (XL)** x 2 — $100000.00\n• **Nvidia Speaker - PINK (6)** x 4 — $1960.00\n• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00\n• **HP Projector - PURPLE (11)** x 6 — $120000.00\n• **Xiaomi Monitor - PINK (6)** x 5 — $975.00\n• **OnePlus Camera - BLACK (S)** x 1 — $50000.00\n• **Asus Router - PINK (6)** x 9 — $1665.00\n• **Logitech Microphone - GRAY (7)** x 5 — $2425.00\n• **Apple Mouse - RED (XL)** x 8 — $116800.00\n• **Bose Backpack - GREEN (10)** x 7 — $665.00\n• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00\n• **Sony Headphones - BLUE (L)** x 10 — $850.00\n• **AMD Cable - SILVER (9)** x 14 — $2660.00\n• **HP Mouse - RED (XL)** x 7 — $3360.00\n• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00\n• **Lenovo Monitor - PINK (6)** x 7 — $348600.00\n• **Bose Speaker - PINK (6)** x 7 — $347200.00\n• **Logitech Watch - SILVER (9)** x 7 — $3500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00\n• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00\n• **OnePlus Router - PINK (6)** x 7 — $140000.00\n• **Microsoft Phone - WHITE (M)** x 7 — $6965.00\n• **Apple Projector - PURPLE (11)** x 7 — $700.00\n• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00\n\n💵 **Total**: $3299114.99",
+      "actualIntent": "VIEW_CART",
+      "actualActions": [
+        {
+          "type": "VIEW_CART"
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_044",
+      "category": "Cart",
+      "query": "Clear my entire cart",
+      "expectedGoal": "REMOVE_CART",
+      "expectedAction": "REMOVE_FROM_CART",
+      "actualResponse": "🗑️ **Are you sure you want to clear all items from your cart?**",
+      "actualIntent": "REMOVE_CART",
+      "actualActions": [
+        {
+          "type": "REMOVE_FROM_CART",
+          "payload": {
+            "all": true
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_045",
+      "category": "Cart",
+      "query": "Empty the cart",
+      "expectedGoal": "REMOVE_CART",
+      "expectedAction": "REMOVE_FROM_CART",
+      "actualResponse": "🗑️ **Are you sure you want to clear all items from your cart?**",
+      "actualIntent": "REMOVE_CART",
+      "actualActions": [
+        {
+          "type": "REMOVE_FROM_CART",
+          "payload": {
+            "all": true
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_046",
+      "category": "Cart",
+      "query": "Add Xiaomi monitor to my cart",
+      "expectedGoal": "ADD_CART",
+      "expectedAction": "ADD_TO_CART",
+      "actualResponse": "🛒 **Added to Cart!**\n\n✅ **Xiaomi Monitor - PINK (6)** ($195.00) has been added to your cart.\n\nWould you like to **checkout now** or continue shopping?",
+      "actualIntent": "ADD_CART",
+      "actualActions": [
+        {
+          "type": "ADD_TO_CART",
+          "payload": {
+            "id": "6a23ad49e3ab29f4cd5189ca",
+            "title": "Xiaomi Monitor - PINK (6)",
+            "price": 195,
+            "image": "https://loremflickr.com/600/600/monitor,screen?lock=596",
+            "variantKey": ""
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_047",
+      "category": "Cart",
+      "query": "Put the OnePlus camera in cart",
+      "expectedGoal": "ADD_CART",
+      "expectedAction": "ADD_TO_CART",
+      "actualResponse": "🛒 **Added to Cart!**\n\n✅ **OnePlus Camera - BLACK (S)** ($50000.00) has been added to your cart.\n\nWould you like to **checkout now** or continue shopping?",
+      "actualIntent": "ADD_CART",
+      "actualActions": [
+        {
+          "type": "ADD_TO_CART",
+          "payload": {
+            "id": "6a23ad49e3ab29f4cd5188a2",
+            "title": "OnePlus Camera - BLACK (S)",
+            "price": 50000,
+            "image": "https://loremflickr.com/600/600/camera?lock=300",
+            "variantKey": ""
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_048",
+      "category": "Cart",
+      "query": "Remove Microsoft smartwatch from cart",
+      "expectedGoal": "REMOVE_CART",
+      "expectedAction": "REMOVE_FROM_CART",
+      "actualResponse": "🗑️ **Removed from Cart!**\n\n❌ **Microsoft Smartwatch - RED (XL)** has been removed from your cart.",
+      "actualIntent": "REMOVE_CART",
+      "actualActions": [
+        {
+          "type": "REMOVE_FROM_CART",
+          "payload": {
+            "id": "6a23ad49e3ab29f4cd518bc9"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 9
+    },
+    {
+      "testId": "CART_049",
+      "category": "Cart",
+      "query": "Update quantity of Apple speaker to 4",
+      "expectedGoal": "UPDATE_CART_QUANTITY",
+      "expectedAction": "UPDATE_CART_QUANTITY",
+      "actualResponse": "✅ Updated quantity for **Apple Laptop - BLUE (L)** to **4** in your cart.",
+      "actualIntent": "UPDATE_CART_QUANTITY",
+      "actualActions": [
+        {
+          "type": "UPDATE_CART_QUANTITY",
+          "payload": {
+            "productId": "6a23ad49e3ab29f4cd51879c",
+            "quantity": 4
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_050",
+      "category": "Cart",
+      "query": "Change qty of tablet to 5",
+      "expectedGoal": "UPDATE_CART_QUANTITY",
+      "expectedAction": "UPDATE_CART_QUANTITY",
+      "actualResponse": "✅ Updated quantity for **item** to **5** in your cart.",
+      "actualIntent": "UPDATE_CART_QUANTITY",
+      "actualActions": [
+        {
+          "type": "UPDATE_CART_QUANTITY",
+          "payload": {
+            "productId": "6a23ad49e3ab29f4cd518774",
+            "quantity": 5
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_051",
+      "category": "Cart",
+      "query": "Show my cart items",
+      "expectedGoal": "VIEW_CART",
+      "expectedAction": "VIEW_CART",
+      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 1 — $189.99\n• **Apple Laptop - BLUE (L)** x 6 — $5910.00\n• **Samsung Phone - WHITE (M)** x 18 — $3510.00\n• **LG Tablet - WHITE (M)** x 5 — $2425.00\n• **Intel Charger - GOLD (XXL)** x 24 — $1200000.00\n• **Sony Hard drive - ORANGE (12)** x 4 — $1960.00\n• **Dell Graphics card - BLACK (S)** x 5 — $249500.00\n• **AMD Smartwatch - RED (XL)** x 2 — $100000.00\n• **Nvidia Speaker - PINK (6)** x 4 — $1960.00\n• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00\n• **HP Projector - PURPLE (11)** x 6 — $120000.00\n• **Xiaomi Monitor - PINK (6)** x 6 — $1170.00\n• **OnePlus Camera - BLACK (S)** x 2 — $100000.00\n• **Asus Router - PINK (6)** x 9 — $1665.00\n• **Logitech Microphone - GRAY (7)** x 5 — $2425.00\n• **Apple Mouse - RED (XL)** x 8 — $116800.00\n• **Bose Backpack - GREEN (10)** x 7 — $665.00\n• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00\n• **Sony Headphones - BLUE (L)** x 10 — $850.00\n• **AMD Cable - SILVER (9)** x 14 — $2660.00\n• **HP Mouse - RED (XL)** x 7 — $3360.00\n• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00\n• **Lenovo Monitor - PINK (6)** x 7 — $348600.00\n• **Bose Speaker - PINK (6)** x 7 — $347200.00\n• **Logitech Watch - SILVER (9)** x 7 — $3500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00\n• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00\n• **OnePlus Router - PINK (6)** x 7 — $140000.00\n• **Microsoft Phone - WHITE (M)** x 7 — $6965.00\n• **Apple Projector - PURPLE (11)** x 7 — $700.00\n• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00\n\n💵 **Total**: $3349309.99",
+      "actualIntent": "VIEW_CART",
+      "actualActions": [
+        {
+          "type": "VIEW_CART"
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_052",
+      "category": "Cart",
+      "query": "View my shopping cart",
+      "expectedGoal": "VIEW_CART",
+      "expectedAction": "VIEW_CART",
+      "actualResponse": "🛒 **Your Shopping Cart:**\n\n• **Nexa Smart Multi-Cooker XL** x 5 — $949.95\n• **Apple Laptop - BLUE (L)** x 4 — $3940.00\n• **Samsung Phone - WHITE (M)** x 18 — $3510.00\n• **LG Tablet - WHITE (M)** x 5 — $2425.00\n• **Intel Charger - GOLD (XXL)** x 24 — $1200000.00\n• **Sony Hard drive - ORANGE (12)** x 4 — $1960.00\n• **Dell Graphics card - BLACK (S)** x 5 — $249500.00\n• **AMD Smartwatch - RED (XL)** x 2 — $100000.00\n• **Nvidia Speaker - PINK (6)** x 4 — $1960.00\n• **Lenovo Earbuds - YELLOW (8)** x 3 — $240.00\n• **HP Projector - PURPLE (11)** x 6 — $120000.00\n• **Xiaomi Monitor - PINK (6)** x 6 — $1170.00\n• **OnePlus Camera - BLACK (S)** x 2 — $100000.00\n• **Asus Router - PINK (6)** x 9 — $1665.00\n• **Logitech Microphone - GRAY (7)** x 5 — $2425.00\n• **Apple Mouse - RED (XL)** x 8 — $116800.00\n• **Bose Backpack - GREEN (10)** x 7 — $665.00\n• **LG Desk lamp - YELLOW (8)** x 7 — $349300.00\n• **Sony Headphones - BLUE (L)** x 10 — $850.00\n• **AMD Cable - SILVER (9)** x 14 — $2660.00\n• **HP Mouse - RED (XL)** x 7 — $3360.00\n• **Dell Keyboard - YELLOW (8)** x 8 — $7840.00\n• **Lenovo Monitor - PINK (6)** x 7 — $348600.00\n• **Bose Speaker - PINK (6)** x 7 — $347200.00\n• **Logitech Watch - SILVER (9)** x 7 — $3500.00\n• **Xiaomi Desk lamp - YELLOW (8)** x 7 — $138600.00\n• **Nvidia Backpack - GREEN (10)** x 8 — $7840.00\n• **OnePlus Router - PINK (6)** x 7 — $140000.00\n• **Microsoft Phone - WHITE (M)** x 7 — $6965.00\n• **Apple Projector - PURPLE (11)** x 7 — $700.00\n• **Samsung Earbuds - YELLOW (8)** x 7 — $630.00\n• **HP Laptop - BLUE (L)** x 1 — $185.00\n• **Xiaomi Tablet - WHITE (M)** x 1 — $180.00\n• **Asus Hard drive - ORANGE (12)** x 1 — $14900.00\n• **Bose Projector - PURPLE (11)** x 1 — $15000.00\n• **Samsung Monitor - PINK (6)** x 1 — $50000.00\n• **Intel Router - PINK (6)** x 1 — $980.00\n• **Microsoft Keyboard - YELLOW (8)** x 20 — $1600.00\n\n💵 **Total**: $3348099.95",
+      "actualIntent": "VIEW_CART",
+      "actualActions": [
+        {
+          "type": "VIEW_CART"
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_053",
+      "category": "Cart",
+      "query": "Clear my entire cart",
+      "expectedGoal": "REMOVE_CART",
+      "expectedAction": "REMOVE_FROM_CART",
+      "actualResponse": "🗑️ **Are you sure you want to clear all items from your cart?**",
+      "actualIntent": "REMOVE_CART",
+      "actualActions": [
+        {
+          "type": "REMOVE_FROM_CART",
+          "payload": {
+            "all": true
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_054",
+      "category": "Cart",
+      "query": "Empty the cart",
+      "expectedGoal": "REMOVE_CART",
+      "expectedAction": "REMOVE_FROM_CART",
+      "actualResponse": "🗑️ **Are you sure you want to clear all items from your cart?**",
+      "actualIntent": "REMOVE_CART",
+      "actualActions": [
+        {
+          "type": "REMOVE_FROM_CART",
+          "payload": {
+            "all": true
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_055",
+      "category": "Cart",
+      "query": "Add Asus router to my cart",
+      "expectedGoal": "ADD_CART",
+      "expectedAction": "ADD_TO_CART",
+      "actualResponse": "🛒 **Added to Cart!**\n\n✅ **Asus Router - PINK (6)** ($185.00) has been added to your cart.\n\nWould you like to **checkout now** or continue shopping?",
+      "actualIntent": "ADD_CART",
+      "actualActions": [
+        {
+          "type": "ADD_TO_CART",
+          "payload": {
+            "id": "6a23ad49e3ab29f4cd518922",
+            "title": "Asus Router - PINK (6)",
+            "price": 185,
+            "image": "https://loremflickr.com/600/600/router,wifi?lock=428",
+            "variantKey": ""
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_056",
+      "category": "Cart",
+      "query": "Put the Logitech microphone in cart",
+      "expectedGoal": "ADD_CART",
+      "expectedAction": "ADD_TO_CART",
+      "actualResponse": "🛒 **Added to Cart!**\n\n✅ **Logitech Microphone - GRAY (7)** ($485.00) has been added to your cart.\n\nWould you like to **checkout now** or continue shopping?",
+      "actualIntent": "ADD_CART",
+      "actualActions": [
+        {
+          "type": "ADD_TO_CART",
+          "payload": {
+            "id": "6a23ad49e3ab29f4cd518b1b",
+            "title": "Logitech Microphone - GRAY (7)",
+            "price": 485,
+            "image": "https://loremflickr.com/600/600/microphone,audio?lock=933",
+            "variantKey": ""
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 10
+    },
+    {
+      "testId": "CART_057",
+      "category": "Cart",
+      "query": "Remove Bose projector from cart",
+      "expectedGoal": "REMOVE_CART",
+      "expectedAction": "REMOVE_FROM_CART",
+      "actualResponse": "🗑️ **Removed from Cart!**\n\n❌ **Microsoft Projector - PURPLE (11)** has been removed from your cart.",
+      "actualIntent": "REMOVE_CART",
+      "actualActions": [
+        {
+          "type": "REMOVE_FROM_CART",
+          "payload": {
+            "id": "6a23ad49e3ab29f4cd518bd0"
+          }
+        }
+      ],
+      "intentMatch": true,
+      "actionMatch": true,
+      "relevanceMatch": true,
+      "empathyMatch": true,
+      "contextMaintained": true,
+      "result": "PASS",
+      "analysis": "The chatbot understood the user intent and responded appropriately.",
+      "confidenceScore": 9
     }
   ]
 }

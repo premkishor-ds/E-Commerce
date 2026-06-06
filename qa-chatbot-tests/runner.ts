@@ -6,10 +6,18 @@ import * as path from 'path';
 
 const BACKEND_URL = 'http://localhost:5001/api/v1/agent/message';
 
-// Batch size to throttle requests and avoid NestJS connection pooling bottlenecks
-const BATCH_SIZE = 5;
+// Reduced batch size to prevent overwhelming NestJS connection pool
+const BATCH_SIZE = 3;
+// Inter-batch delay (ms) to allow NestJS to recover between concurrent bursts
+const BATCH_DELAY_MS = 200;
+// Max retries on network error
+const MAX_RETRIES = 3;
 
-async function runTestCase(testCase: TestCase): Promise<TestResult> {
+async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function runTestCase(testCase: TestCase, retryCount = 0): Promise<TestResult> {
   const sessionId = testCase.sessionId || `session-${testCase.id}`;
   console.log(`[RUNNER] Sending query: "${testCase.query}" (ID: ${testCase.id})`);
   
@@ -22,15 +30,27 @@ async function runTestCase(testCase: TestCase): Promise<TestResult> {
       headers: {
         'Content-Type': 'application/json'
       },
-      timeout: 15000 // 15 seconds timeout
+      timeout: 20000 // 20 seconds timeout
     });
 
     console.log(`[RUNNER] Got response for ID: ${testCase.id}`);
     return evaluateResponse(testCase, response.data);
   } catch (error: any) {
+    const errorCode = error.code;
+    const isRetryable = ['ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND', 'socket hang up'].some(
+      code => errorCode === code || (error.message || '').includes(code)
+    );
+
+    if (isRetryable && retryCount < MAX_RETRIES) {
+      const waitMs = 500 * Math.pow(2, retryCount); // exponential backoff
+      console.log(`[RUNNER] Retrying ID: ${testCase.id} (attempt ${retryCount + 1}/${MAX_RETRIES}) after ${waitMs}ms`);
+      await sleep(waitMs);
+      return runTestCase(testCase, retryCount + 1);
+    }
+
     const errorMsg = error.response
       ? `HTTP ${error.response.status}: ${JSON.stringify(error.response.data)}`
-      : error.message;
+      : (error.message || error.code || 'Unknown Error');
 
     console.log(`[RUNNER] Error for ID: ${testCase.id} -> ${errorMsg}`);
 
@@ -65,7 +85,7 @@ async function main() {
   console.log(`Generated ${dataset.length} test cases successfully.\n`);
 
   console.log(`Starting execution against: ${BACKEND_URL}`);
-  console.log(`Throttling execution with Batch Size = ${BATCH_SIZE}\n`);
+  console.log(`Throttling execution with Batch Size = ${BATCH_SIZE}, Delay = ${BATCH_DELAY_MS}ms\n`);
 
   const results: TestResult[] = [];
   const startTime = Date.now();
@@ -105,6 +125,11 @@ async function main() {
     
     // Write reports in real time
     exportReports(results, outputDir);
+
+    // Small delay between batches to avoid overwhelming NestJS
+    if (i + BATCH_SIZE < singleTurnCases.length) {
+      await sleep(BATCH_DELAY_MS);
+    }
 
     if ((i + BATCH_SIZE) % 100 === 0 || i + BATCH_SIZE >= singleTurnCases.length) {
       const progress = Math.min(100, Math.round(((i + batch.length) / singleTurnCases.length) * 100));

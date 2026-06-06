@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useStore } from '../store/store';
-import { ShoppingCart, Heart, User, LogOut, LayoutDashboard, Shield, Headphones, ShoppingBag, Sun, Moon, Search } from 'lucide-react';
+import { ShoppingCart, Heart, User, LogOut, LayoutDashboard, Shield, Headphones, ShoppingBag, Sun, Moon, Search, Trash2 } from 'lucide-react';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PRODUCTS } from '../data/mockData';
@@ -17,7 +17,7 @@ const placeholders = [
 ];
 
 export default function Header() {
-  const { cart, wishlist, user, logout, theme, toggleTheme } = useStore();
+  const { cart, wishlist, user, logout, theme, toggleTheme, removeFromCart, updateCartQuantity } = useStore();
   const [showCartDrawer, setShowCartDrawer] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -236,12 +236,36 @@ export default function Header() {
                 ) : (
                   <div className="mt-4 space-y-4 overflow-y-auto max-h-[60vh]">
                     {cart.map((item) => (
-                      <div key={item.id} className="flex gap-4 border-b pb-4 dark:border-zinc-800">
+                      <div key={item.id} className="flex gap-4 border-b pb-4 dark:border-zinc-800 items-center">
                         <img src={item.image} alt={item.title} className="h-16 w-16 rounded object-cover" />
                         <div className="flex-1">
-                          <h4 className="text-sm font-semibold text-zinc-900 dark:text-white">{item.title}</h4>
-                          <p className="text-xs text-zinc-500">${item.price} x {item.quantity}</p>
+                          <h4 className="text-sm font-semibold text-zinc-900 dark:text-white truncate max-w-[200px]">{item.title}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-zinc-500 font-medium">${item.price}</span>
+                            <div className="flex items-center border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900 overflow-hidden select-none">
+                              <button
+                                onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
+                                className="px-2 py-0.5 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-xs font-bold"
+                              >
+                                -
+                              </button>
+                              <span className="px-1.5 text-xs font-semibold text-zinc-800 dark:text-zinc-200 min-w-[12px] text-center">{item.quantity}</span>
+                              <button
+                                onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
+                                className="px-2 py-0.5 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-xs font-bold"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
                         </div>
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg transition-colors shrink-0"
+                          aria-label="Remove item from cart"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     ))}
                   </div>

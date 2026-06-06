@@ -3,7 +3,7 @@
 import React, { use } from 'react';
 import { PRODUCTS } from '../../../data/mockData';
 import { useStore } from '../../../store/store';
-import { Star, ShoppingCart, Heart, ShieldCheck, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Star, ShoppingCart, Heart, ShieldCheck, CheckCircle2, ChevronRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface PageProps {
@@ -15,7 +15,32 @@ export default function ProductDetail({ params }: PageProps) {
   const productId = resolvedParams.id;
   const { addToCart, toggleWishlist, wishlist } = useStore();
 
-  const product = PRODUCTS.find((p) => p.id === productId);
+  const [product, setProduct] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    setLoading(true);
+    fetch(`http://127.0.0.1:5001/api/v1/catalog/products/${productId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setProduct(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        // Fallback to static mock data
+        const prod = PRODUCTS.find((p) => p.id === productId);
+        setProduct(prod || null);
+        setLoading(false);
+      });
+  }, [productId]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-1 items-center justify-center py-24 text-center text-zinc-500">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -29,9 +54,18 @@ export default function ProductDetail({ params }: PageProps) {
     );
   }
 
+  const catName = typeof product.category === 'object' && product.category !== null ? (product.category.name || '') : product.category;
+  const brandName = typeof product.brand === 'object' && product.brand !== null ? (product.brand.name || '') : product.brand;
+  const pId = product.id || product._id;
+  const imgUrl = product.images?.[0] || 'https://picsum.photos/seed/product/600/600';
+
+  const reviews = product.reviews || [];
+  const specifications = product.specifications || [];
+  const faqs = product.faqs || [];
+
   // Related products logic (same category)
-  const relatedProducts = PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id);
-  const isWishlisted = wishlist.includes(product.id);
+  const relatedProducts = PRODUCTS.filter((p) => p.category === catName && p.id !== pId);
+  const isWishlisted = wishlist.includes(pId);
 
   return (
     <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 py-12">
@@ -40,7 +74,7 @@ export default function ProductDetail({ params }: PageProps) {
         <nav className="flex items-center gap-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
           <Link href="/">Catalog</Link>
           <ChevronRight className="h-3 w-3" />
-          <span>{product.category}</span>
+          <span>{catName}</span>
           <ChevronRight className="h-3 w-3" />
           <span className="text-zinc-900 dark:text-white">{product.title}</span>
         </nav>
@@ -50,7 +84,7 @@ export default function ProductDetail({ params }: PageProps) {
           {/* Zoomable Image Panel */}
           <div className="relative aspect-square overflow-hidden rounded-2xl bg-zinc-100">
             <img
-              src={product.images[0]}
+              src={imgUrl}
               alt={product.title}
               className="h-full w-full object-cover object-center transform hover:scale-105 transition-transform duration-500 cursor-zoom-in"
             />
@@ -60,7 +94,7 @@ export default function ProductDetail({ params }: PageProps) {
           <div className="space-y-6 flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">{product.brand}</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">{brandName}</span>
                 <span className="text-xs text-zinc-400">SKU: {product.sku}</span>
               </div>
               <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">{product.title}</h1>
@@ -71,7 +105,7 @@ export default function ProductDetail({ params }: PageProps) {
                   <span>{product.averageRating}</span>
                 </div>
                 <span className="text-zinc-300">|</span>
-                <span className="text-xs text-zinc-500">{product.reviews.length} Customer Reviews</span>
+                <span className="text-xs text-zinc-500">{reviews.length} Customer Reviews</span>
               </div>
 
               <div className="text-3xl font-black text-zinc-900 dark:text-white">${product.price.toFixed(2)}</div>
@@ -83,14 +117,14 @@ export default function ProductDetail({ params }: PageProps) {
             <div className="space-y-4 pt-6 border-t">
               <div className="flex gap-4">
                 <button
-                  onClick={() => addToCart({ id: product.id, title: product.title, price: product.price, image: product.images[0] })}
+                  onClick={() => addToCart({ id: pId, title: product.title, price: product.price, image: imgUrl })}
                   className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-semibold text-white hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 active:scale-95 transition-all"
                 >
                   <ShoppingCart className="h-5 w-5" />
                   <span>Add To Cart</span>
                 </button>
                 <button
-                  onClick={() => toggleWishlist(product.id)}
+                  onClick={() => toggleWishlist(pId)}
                   className={`rounded-xl border p-3 flex items-center justify-center transition-all active:scale-95 ${
                     isWishlisted ? 'border-red-500 text-red-500 bg-red-50/50' : 'border-zinc-200 text-zinc-400 hover:text-red-500'
                   }`}
@@ -113,7 +147,7 @@ export default function ProductDetail({ params }: PageProps) {
             <h3 className="font-bold text-lg border-b pb-2">Technical Specifications</h3>
             <table className="w-full text-sm text-left">
               <tbody>
-                {product.specifications.map((spec) => (
+                {specifications.map((spec: any) => (
                   <tr key={spec.name} className="border-b last:border-0">
                     <td className="py-2.5 font-semibold text-zinc-500 w-1/3">{spec.name}</td>
                     <td className="py-2.5 text-zinc-900 dark:text-white">{spec.value}</td>
@@ -126,7 +160,7 @@ export default function ProductDetail({ params }: PageProps) {
           {/* Customer Reviews */}
           <div className="bg-white p-6 rounded-2xl border border-zinc-200/80 dark:bg-zinc-900 dark:border-zinc-800 shadow-sm space-y-4">
             <h3 className="font-bold text-lg border-b pb-2">Customer Reviews</h3>
-            {product.reviews.map((rev, index) => (
+            {reviews.map((rev: any, index: number) => (
               <div key={index} className="space-y-2 border-b last:border-0 pb-4 last:pb-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">

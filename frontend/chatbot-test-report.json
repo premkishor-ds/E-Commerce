@@ -1,7 +1,7 @@
 {
-  "totalTests": 3,
-  "passed": 2,
-  "failed": 1,
+  "totalTests": 4,
+  "passed": 4,
+  "failed": 0,
   "capabilities": {
     "search": "Fail",
     "cart": "Fail",
@@ -12,9 +12,7 @@
     "payment": "Fail",
     "orders": "Fail",
     "returns": "Fail",
-    "memory": "Fail"
+    "memory": "Pass"
   },
-  "failures": [
-    "Memory context test (Add and add one more) failed: \u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-  ]
+  "failures": []
 }

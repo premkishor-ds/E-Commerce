@@ -15,12 +15,7 @@
 Error: expect(received).toContain(expected) // indexOf
 
 Expected substring: "Apex Sound-Pro ANC Headphones"
-Received string:    "🔍 **Found 63 products** for \"headphones\":·
-• **Microsoft Headphones - BLUE (L)** — $95.00 ⭐4.6
-• **Microsoft Headphone - ORANGE (12)** — $49900.00 ⭐4.1
-• **Nvidia Headphones - BLUE (L)** — $50000.00 ⭐4
-• **Nvidia Headphone - ORANGE (12)** — $20000.00 ⭐4.5·
-Type the **product name** to see details, or **\"add [name] to cart\"** to purchase!04:18 PM"
+Received string:    "🔍 Found 63 products for \"headphones\":• Microsoft Headphones - BLUE (L) — $95.00 ⭐4.6• Microsoft Headphone - ORANGE (12) — $49900.00 ⭐4.1• Nvidia Headphones - BLUE (L) — $50000.00 ⭐4• Nvidia Headphone - ORANGE (12) — $20000.00 ⭐4.5Type the product name to see details, or \"add [name] to cart\" to purchase!04:29 PM"
 ```
 
 # Test source

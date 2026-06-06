@@ -261,7 +261,7 @@ export function generateDataset(): TestCase[] {
     { query: 'compere dell vs hp', goal: 'COMPARE', keyword: 'compare' },
     { query: 'where is my pakage', goal: 'TRACK_ORDER', keyword: 'track' },
     { query: 'support tickt', goal: 'CREATE_TICKET', keyword: 'ticket' },
-    { query: 'human agentt', goal: 'ESCALATE', keyword: 'agent' }
+    { query: 'human agentt', goal: 'LIVE_AGENT', keyword: 'agent' }
   ];
 
   for (let i = 0; i < 100; i++) {

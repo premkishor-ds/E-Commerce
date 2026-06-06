@@ -15,9 +15,7 @@
 Error: expect(received).toContain(expected) // indexOf
 
 Expected substring: "login"
-Received string:    "🛒 **Added to Cart!**·
-✅ **Microsoft Headphones - BLUE (L)** ($95.00) has been added to your cart.·
-Would you like to **checkout now** or continue shopping?04:18 PM"
+Received string:    "🛒 Added to Cart!✅ Microsoft Headphones - BLUE (L) ($95.00) has been added to your cart.Would you like to checkout now or continue shopping?04:29 PM"
 ```
 
 # Test source

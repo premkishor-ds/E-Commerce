@@ -15,10 +15,7 @@
 Error: expect(received).toContain(expected) // indexOf
 
 Expected substring: "valid"
-Received string:    "🏷️ To apply a coupon, type: **\"apply coupon [CODE]\"**·
-Example: *\"apply coupon SAVE20\"*·
-Active codes you can try:
-• **SAVE20** — 20% off your order04:19 PM"
+Received string:    "🏷️ To apply a coupon, type: \"apply coupon [CODE]\"Example: *\"apply coupon SAVE20\"*Active codes you can try:• SAVE20 — 20% off your order04:30 PM"
 ```
 
 # Test source

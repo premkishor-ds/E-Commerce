@@ -596,7 +596,9 @@ Enhanced Reply:`;
     const originalEntities = { ...ruleMatch.entities, ...resolvedEntities };
 
     // 2. Route message through the Chatbot Intelligence Layer
-    const intelResult = this.chatbotIntelligenceService.processQuery(sessionId, resolvedWorkMessage);
+    // Use typo-corrected text so semantic search matches correctly (e.g. "retrn my ordr" → "return my order")
+    const intelQueryText = typoFixed !== resolvedWorkMessage ? typoFixed : resolvedWorkMessage;
+    const intelResult = this.chatbotIntelligenceService.processQuery(sessionId, intelQueryText);
 
     if (message.includes('Dell') || message.includes('checkout')) {
       console.log(`[DEBUG_CHATBOT] message="${message}" ruleMatch=${JSON.stringify(ruleMatch)} intelResult=${JSON.stringify(intelResult)}`);
@@ -656,8 +658,10 @@ Enhanced Reply:`;
     }
 
     // 2. Product Detail Follow-ups
+    // Only force GET_PRODUCT if the message doesn't contain explicit search signals
     const detailFollowUpKeywords = /battery|weight|camera|spec|color|size|variant|warrant|available|screen|display/i;
-    if (detailFollowUpKeywords.test(resolvedWorkMessage) && (intelContext.selectedProduct || state.selectedProduct)) {
+    const hasExplicitSearchSignal = /\b(show me|find|search|looking for|browse|display|list|filter)\b/i.test(resolvedWorkMessage);
+    if (detailFollowUpKeywords.test(resolvedWorkMessage) && !hasExplicitSearchSignal && (intelContext.selectedProduct || state.selectedProduct)) {
       intent = 'GET_PRODUCT';
       score = 10;
       forceMapped = true;
@@ -3812,7 +3816,7 @@ Enhanced Reply:`;
             reply: `🔍 **Found ${filtered.length} products** for "${searchQuery}":\n\n${list}\n\nType the **product name** to see details, or **"add [name] to cart"** to purchase!`,
             intent,
             confidence: 10,
-            actions: [],
+            actions: [{ type: 'NAVIGATE' as any, payload: { path: `/search?q=${encodeURIComponent(searchQuery)}` } }],
             data: { products: top, ids },
             suggestions: top
               .slice(0, 2)

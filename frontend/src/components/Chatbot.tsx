@@ -5,6 +5,7 @@ import { MessageCircle, X, Send, Bot, Loader2, ShieldCheck, Wifi, WifiOff, Zap }
 import { useStore } from '../store/store';
 import { PRODUCTS } from '../data/mockData';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -75,12 +76,14 @@ function getOrCreateSessionId(): string {
   return sessionId;
 }
 
+
+
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
 
 export default function Chatbot() {
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { user, cart, wishlist, addToCart, orders, addOrder, clearCart, login, logout, toggleTheme } = useStore();
+  const { user, cart, wishlist, addToCart, removeFromCart, updateCartQuantity, orders, addOrder, clearCart, login, logout, toggleTheme } = useStore();
   const router = useRouter();
 
   // Mount effect
@@ -241,6 +244,24 @@ export default function Chatbot() {
         case 'CLEAR_CART':
           clearCart();
           break;
+        case 'REMOVE_FROM_CART': {
+          const p = action.payload;
+          if (p) {
+            if (p.all) {
+              clearCart();
+            } else if (p.id) {
+              removeFromCart(p.id);
+            }
+          }
+          break;
+        }
+        case 'UPDATE_CART_QUANTITY': {
+          const p = action.payload;
+          if (p && p.productId && p.quantity !== undefined) {
+            updateCartQuantity(p.productId, p.quantity);
+          }
+          break;
+        }
         case 'LOGIN': {
           const { user: u, token } = action.payload;
           if (u && token) {
@@ -275,7 +296,7 @@ export default function Chatbot() {
           break;
       }
     }
-  }, [addToCart, clearCart, login, logout, router, guestId, toggleTheme]);
+  }, [addToCart, clearCart, login, logout, router, guestId, toggleTheme, removeFromCart, updateCartQuantity]);
 
   // ─── AGENT API CALL ───────────────────────────────────────────────────────
 
@@ -374,7 +395,7 @@ export default function Chatbot() {
       const list = matched.map(p => `• **${p.title}** — $${p.price} ⭐${p.averageRating}`).join('\n');
       return {
         reply: `🔍 Found **${matched.length}** products:\n\n${list}\n\nType **"add [product]"** to add to cart!`,
-        intent: 'SEARCH_PRODUCT', confidence: 7, actions: [],
+        intent: 'SEARCH_PRODUCT', confidence: 7, actions: [{ type: 'NAVIGATE' as any, payload: { path: `/search?q=${encodeURIComponent(q)}` } }],
         data: { products: matched },
         suggestions: matched.slice(0, 2).map(p => `Add ${p.title.split(' ').slice(0, 2).join(' ')} to cart`),
       };
@@ -683,6 +704,91 @@ export default function Chatbot() {
     }
   }, [isTyping, isOnline, activeStep, stepData, callAgent, handleLocalStep, localFallback, executeActions, user]);
 
+  const renderMessageText = (text: string) => {
+    const lines = text.split('\n');
+    return lines.map((line, lineIdx) => {
+      const elements: React.ReactNode[] = [];
+      let currentIdx = 0;
+      const combinedRegex = /(\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)]+)\))/g;
+      let match;
+
+      while ((match = combinedRegex.exec(line)) !== null) {
+        const matchIndex = match.index;
+        if (matchIndex > currentIdx) {
+          elements.push(line.substring(currentIdx, matchIndex));
+        }
+
+        if (match[2]) {
+          const boldText = match[2];
+          const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/;
+          const linkMatch = boldText.match(linkRegex);
+          if (linkMatch) {
+            const linkText = linkMatch[1];
+            const linkUrl = linkMatch[2];
+            elements.push(
+              <strong key={matchIndex} className="font-bold">
+                {linkUrl.startsWith('/') ? (
+                  <Link
+                    href={linkUrl}
+                    onClick={() => {
+                      handleSendMessage(linkText);
+                    }}
+                    className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                  >
+                    {linkText}
+                  </Link>
+                ) : (
+                  <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+                    {linkText}
+                  </a>
+                )}
+              </strong>,
+            );
+          } else {
+            elements.push(
+              <strong key={matchIndex} className="font-bold">
+                {boldText}
+              </strong>,
+            );
+          }
+        } else if (match[3] && match[4]) {
+          const linkText = match[3];
+          const linkUrl = match[4];
+          elements.push(
+            linkUrl.startsWith('/') ? (
+              <Link
+                key={matchIndex}
+                href={linkUrl}
+                onClick={() => {
+                  handleSendMessage(linkText);
+                }}
+                className="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold"
+              >
+                {linkText}
+              </Link>
+            ) : (
+              <a key={matchIndex} href={linkUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">
+                {linkText}
+              </a>
+            ),
+          );
+        }
+
+        currentIdx = combinedRegex.lastIndex;
+      }
+
+      if (currentIdx < line.length) {
+        elements.push(line.substring(currentIdx));
+      }
+
+      return (
+        <span key={lineIdx} className="block min-h-[1em]">
+          {elements.length > 0 ? elements : line}
+        </span>
+      );
+    });
+  };
+
   // Position/Dragging and Resizing state
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -864,7 +970,7 @@ export default function Chatbot() {
                     ? 'bg-indigo-600 text-white rounded-tr-none shadow-sm'
                     : `${msg.isError ? 'bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800' : 'bg-white dark:bg-zinc-900 border dark:border-zinc-800'} text-zinc-800 dark:text-zinc-200 rounded-tl-none shadow-sm border border-zinc-100`
                 }`}>
-                  <p className="whitespace-pre-line break-words">{msg.text}</p>
+                  <div className="whitespace-pre-line break-words text-zinc-800 dark:text-zinc-200">{renderMessageText(msg.text)}</div>
                   <span className="text-[9px] opacity-50 mt-1 block text-right">{msg.timestamp}</span>
                 </div>
               </div>

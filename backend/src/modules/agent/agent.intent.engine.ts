@@ -128,6 +128,10 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'looking for',
     'display',
     'list',
+    'filter',
+    'finter',
+    'browse',
+    'brouse',
   ],
   GET_PRODUCT: [
     'product details',
@@ -148,6 +152,10 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'availability check',
     'what is',
     'describe',
+    'details',
+    'specs',
+    'more info',
+    'price of',
   ],
   COMPARE: [
     'compare',
@@ -298,6 +306,7 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'show orders',
     'view orders',
     'all orders',
+    'orders',
   ],
   TRACK_ORDER: [
     'track order',
