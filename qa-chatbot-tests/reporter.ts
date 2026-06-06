@@ -9,6 +9,10 @@ export function exportReports(results: TestResult[], outputDir: string) {
 
   // 1. Calculate Summary Metrics
   const total = results.length;
+  if (total === 0) {
+    console.log('[Reporter] No results to export yet.');
+    return;
+  }
   const passed = results.filter((r) => r.result === 'PASS').length;
   const partial = results.filter((r) => r.result === 'PARTIAL').length;
   const failed = results.filter((r) => r.result === 'FAIL').length;

@@ -93,6 +93,8 @@ async function main() {
     multiTurnGroups[sessionKey].sort((a, b) => (a.stepIndex || 0) - (b.stepIndex || 0));
   }
 
+  const outputDir = path.join(__dirname, 'reports');
+
   console.log(`Processing ${singleTurnCases.length} single-turn scenarios...`);
   // Run single-turn cases in batches
   for (let i = 0; i < singleTurnCases.length; i += BATCH_SIZE) {
@@ -101,6 +103,9 @@ async function main() {
     const batchResults = await Promise.all(batchPromises);
     results.push(...batchResults);
     
+    // Write reports in real time
+    exportReports(results, outputDir);
+
     if ((i + BATCH_SIZE) % 100 === 0 || i + BATCH_SIZE >= singleTurnCases.length) {
       const progress = Math.min(100, Math.round(((i + batch.length) / singleTurnCases.length) * 100));
       console.log(`  Single-turn Progress: ${progress}% (${results.length}/${singleTurnCases.length} done)`);
@@ -124,6 +129,9 @@ async function main() {
       }
     }));
 
+    // Write reports in real time
+    exportReports(results, outputDir);
+
     const progress = Math.min(100, Math.round(((i + sessionBatch.length) / sessions.length) * 100));
     console.log(`  Multi-turn Progress: ${progress}% (${i + sessionBatch.length}/${sessions.length} sessions completed)`);
   }
@@ -131,10 +139,6 @@ async function main() {
   const durationSec = ((Date.now() - startTime) / 1000).toFixed(1);
   console.log(`\nExecution finished in ${durationSec} seconds.`);
   console.log(`Total tests run: ${results.length}`);
-
-  // Export results
-  const outputDir = path.join(__dirname, 'reports');
-  exportReports(results, outputDir);
 
   const passed = results.filter(r => r.result === 'PASS').length;
   const partial = results.filter(r => r.result === 'PARTIAL').length;

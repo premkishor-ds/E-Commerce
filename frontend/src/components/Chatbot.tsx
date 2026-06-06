@@ -33,7 +33,7 @@ interface AgentResponse {
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
-const AGENT_URL = 'http://localhost:5001/api/v1/agent/message';
+const AGENT_URL = 'http://127.0.0.1:5001/api/v1/agent/message';
 
 const DEFAULT_SUGGESTIONS = [
   'Search headphones',
@@ -217,7 +217,7 @@ export default function Chatbot() {
   useEffect(() => {
     const checkOnline = async () => {
       try {
-        const resp = await fetch('http://localhost:5001/api/v1', { method: 'GET', signal: AbortSignal.timeout(2000) });
+        const resp = await fetch('http://127.0.0.1:5001/api/v1', { method: 'GET', signal: AbortSignal.timeout(2000) });
         setIsOnline(true);
       } catch {
         setIsOnline(false);
@@ -251,7 +251,7 @@ export default function Chatbot() {
             }
             // Merge guest data into account
             if (guestId) {
-              fetch('http://localhost:5001/api/v1/agent/merge', {
+              fetch('http://127.0.0.1:5001/api/v1/agent/merge', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ guestId }),
@@ -864,21 +864,6 @@ export default function Chatbot() {
                   <p className="whitespace-pre-line break-words">{msg.text}</p>
                   <span className="text-[9px] opacity-50 mt-1 block text-right">{msg.timestamp}</span>
                 </div>
-
-                {/* Inline suggestions below bot messages */}
-                {msg.sender === 'bot' && msg.suggestions && msg.suggestions.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-1.5 max-w-[88%]">
-                    {msg.suggestions.map((s, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handleSendMessage(s)}
-                        className="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60 dark:text-indigo-300 px-2.5 py-1 rounded-full border border-indigo-100 dark:border-indigo-800 transition-colors whitespace-nowrap"
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             ))}
 

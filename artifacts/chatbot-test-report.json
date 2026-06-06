@@ -1,18 +1,20 @@
 {
-  "totalTests": 13,
-  "passed": 13,
-  "failed": 0,
+  "totalTests": 2,
+  "passed": 1,
+  "failed": 1,
   "capabilities": {
-    "search": "Pass",
-    "cart": "Pass",
+    "search": "Fail",
+    "cart": "Fail",
     "wishlist": "Pass",
-    "profile": "Pass",
-    "address": "Pass",
-    "checkout": "Pass",
-    "payment": "Pass",
-    "orders": "Pass",
+    "profile": "Fail",
+    "address": "Fail",
+    "checkout": "Fail",
+    "payment": "Fail",
+    "orders": "Fail",
     "returns": "Fail",
-    "memory": "Pass"
+    "memory": "Fail"
   },
-  "failures": []
+  "failures": [
+    "Memory context test (Add and add one more) failed: Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"Added to Cart\"\u001b[39m\nReceived string:    \u001b[31m\"[Live Agent Active] Message sent to support representative.03:42 PM\"\u001b[39m"
+  ]
 }

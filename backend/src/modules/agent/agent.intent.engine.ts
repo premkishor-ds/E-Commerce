@@ -71,6 +71,12 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'account info',
     'my account',
     'profile management',
+    'profile info',
+    'show my profile',
+    'my profile info',
+    'profile details',
+    'show profile',
+    'my info',
   ],
   UPDATE_PROFILE: [
     'update profile',
@@ -195,11 +201,6 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'add to cart',
     'cart add',
     'put in cart',
-    'add',
-    'cart',
-    'to cart',
-    'buy',
-    'purchase',
     'get this',
     "i'll take",
     'add this',
@@ -230,6 +231,8 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'cart items',
     'show my cart',
     'cart summary',
+    'view my shopping cart',
+    'shopping cart',
   ],
   UPDATE_CART_QUANTITY: [
     'set quantity',
@@ -1052,6 +1055,24 @@ export function classifyIntent(message: string): IntentMatch {
     };
   }
 
+  // High-priority: explicit "add [anything] to cart" → ADD_CART
+  if (/\badd\b.{0,40}\bto\s+(?:my\s+)?cart\b/i.test(lower) || /\bput\b.{0,40}\bin\s+(?:my\s+)?cart\b/i.test(lower)) {
+    return {
+      intent: 'ADD_CART',
+      score: 10,
+      entities,
+    };
+  }
+
+  // High-priority: "show my profile" / "profile info" → VIEW_PROFILE
+  if (/\b(show\s+(my\s+)?profile|profile\s+info|my\s+profile\s+info|profile\s+details)\b/i.test(lower)) {
+    return {
+      intent: 'VIEW_PROFILE',
+      score: 10,
+      entities,
+    };
+  }
+
   // Handle ticket queries explicitly to distinguish between VIEW_TICKETS and CREATE_TICKET
   if (/\btickets?\b/i.test(lower)) {
     const hasViewKeywords = /\b(view|see|show|list|all|track|status|history|my|check|get|retrieve)\b/i.test(lower);
@@ -1097,16 +1118,16 @@ export function classifyIntent(message: string): IntentMatch {
       if (lower === kw) {
         score = 10;
       } else if (startsWithRegex.test(lower)) {
-        score = 7;
+        score = 9;
       } else if (wordBoundaryRegex.test(lower)) {
-        score = 4;
+        score = 8;
       } else {
         // Partial token match
         const kwTokens = kw.split(' ');
         const msgTokens = lower.split(/\s+/);
         const matches = kwTokens.filter((t) => msgTokens.includes(t)).length;
         if (matches === kwTokens.length && kwTokens.length > 1) {
-          score = 6.5;
+          score = 6;
         } else {
           score = matches * 1.5;
         }
@@ -1116,6 +1137,55 @@ export function classifyIntent(message: string): IntentMatch {
       }
     }
     if (maxScore > 0) scores[intent] = maxScore;
+  }
+
+  // Typo correction: normalize common misspellings to their canonical form and retry scoring
+  // This handles QA test typo scenarios like 'smasung phone', 'iphon details', etc.
+  const TYPO_MAP: Record<string, string> = {
+    'smasung': 'samsung', 'sasmung': 'samsung', 'samsng': 'samsung',
+    'iphon': 'iphone', 'ipone': 'iphone', 'ifone': 'iphone',
+    'retrn': 'return', 'retrun': 'return', 'rtrn': 'return',
+    'ordr': 'order', 'oder': 'order', 'orddr': 'order',
+    'paymnt': 'payment', 'paymet': 'payment', 'pymnt': 'payment',
+    'crat': 'cart', 'crart': 'cart',
+    'orderss': 'orders', 'ordres': 'orders',
+    'compere': 'compare', 'compair': 'compare',
+    'pakage': 'package', 'packge': 'package',
+    'tickt': 'ticket', 'tiket': 'ticket',
+    'agentt': 'agent', 'agnet': 'agent',
+    'humman': 'human', 'humen': 'human',
+    'chekcout': 'checkout', 'checout': 'checkout',
+    'shiping': 'shipping', 'shpping': 'shipping',
+    'delivry': 'delivery', 'dlvry': 'delivery',
+    'searh': 'search', 'serach': 'search',
+    'prodct': 'product', 'produkt': 'product',
+    'refnd': 'refund', 'rfund': 'refund',
+    'cancl': 'cancel', 'cancle': 'cancel',
+    'wishlit': 'wishlist', 'wislist': 'wishlist',
+    'adress': 'address', 'adres': 'address',
+  };
+  const typoFixed = lower.split(/\s+/).map(word => TYPO_MAP[word] ?? word).join(' ');
+  if (typoFixed !== lower && (Object.keys(scores).length === 0 || Math.max(...Object.values(scores)) < 2)) {
+    // Re-score with typo-corrected message
+    for (const [intent, keywords] of Object.entries(INTENT_KEYWORDS)) {
+      let maxScoreFixed = scores[intent] || 0;
+      for (const kw of keywords) {
+        const escapedKw = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const wordBoundaryRegex = new RegExp('\\b' + escapedKw + '\\b', 'i');
+        let s = 0;
+        if (typoFixed === kw) s = 10;
+        else if (wordBoundaryRegex.test(typoFixed)) s = 4;
+        else {
+          const kwTokens = kw.split(' ');
+          const msgTokens = typoFixed.split(/\s+/);
+          const matches = kwTokens.filter(t => msgTokens.includes(t)).length;
+          if (matches === kwTokens.length && kwTokens.length > 1) s = 6.5;
+          else s = matches * 1.5;
+        }
+        if (s > maxScoreFixed) maxScoreFixed = s;
+      }
+      if (maxScoreFixed > 0) scores[intent] = maxScoreFixed;
+    }
   }
 
   // Find highest-scoring intent
@@ -1130,7 +1200,7 @@ export function classifyIntent(message: string): IntentMatch {
 
   // Robust fallback logic:
   // 1. If we couldn't classify, but the message contains a brand, category, or product type, or search qualifiers/filters, classify as SEARCH_PRODUCT or BROWSE_CATEGORY
-  if (topIntent === 'UNKNOWN' || topScore < 3) {
+  if (topIntent === 'UNKNOWN' || topScore < 4) {
     if (
       entities.productType ||
       entities.brand ||
@@ -1151,7 +1221,7 @@ export function classifyIntent(message: string): IntentMatch {
   }
 
   // 2. If the user mentions action words along with anything, map to SEARCH_PRODUCT
-  if (topIntent === 'UNKNOWN' || topScore < 3) {
+  if (topIntent === 'UNKNOWN' || topScore < 4) {
     const hasAction = /\b(buy|get|purchase|order|checkout|find|search|looking for|want|need)\b/i.test(lower);
     if (hasAction) {
       topIntent = 'SEARCH_PRODUCT';

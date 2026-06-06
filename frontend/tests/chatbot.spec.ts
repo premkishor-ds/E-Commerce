@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const DB_URI = 'mongodb+srv://premkishor:Hsndehzd6oFmbvHA@cluster0.x1ez0rp.mongodb.net/test';
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://localhost:3001';
 
 let mongoClient: MongoClient;
 
@@ -72,7 +72,7 @@ async function openChatbot(page: Page) {
 // Helper: send message to chatbot and wait for loader to disappear
 async function sendChatMessage(page: Page, message: string) {
   const chatbotForm = page.locator('form:has(button[aria-label="Send message"])');
-  const input = chatbotForm.locator('input[type="text"]');
+  const input = chatbotForm.locator('textarea');
   await input.fill(message);
   const sendBtn = chatbotForm.locator('button[aria-label="Send message"]');
   
