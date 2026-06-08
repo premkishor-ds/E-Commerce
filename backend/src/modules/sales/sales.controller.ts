@@ -157,6 +157,16 @@ export class SalesController {
     return this.recoveryService.getRecoveryAnalytics();
   }
 
+  // --- VENDOR SETTLEMENTS ---
+
+  @Get('vendor/settlements')
+  @UseGuards(RolesGuard)
+  @Roles('Vendor', 'Seller', 'Admin', 'Super Admin')
+  @ApiOperation({ summary: 'Get vendor settlement balances and history' })
+  async getVendorSettlements(@Request() req: any) {
+    return this.salesService.getVendorSettlements(req.user.id);
+  }
+
   // --- REVIEWS & MODERATION ---
 
   @Post('reviews')

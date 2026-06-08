@@ -287,22 +287,22 @@ export class CatalogService {
   // --- VENDOR ANALYTICS ---
 
   async getVendorAnalytics(vendorId: string) {
+    const vendor = await this.vendorRepository.findOne({
+      userId: new Types.ObjectId(vendorId),
+    });
+
     const products = await this.productRepository.find({
       vendorId: new Types.ObjectId(vendorId),
     });
     const productIds = products.map((p) => p._id.toString());
 
-    // Analytics: Product Views
     const totalViews = products.reduce((sum, p) => sum + (p.views || 0), 0);
     const totalSales = products.reduce(
       (sum, p) => sum + (p.salesCount || 0),
       0,
     );
-
-    // Simulated Conversion Rate
     const conversionRate = totalViews > 0 ? (totalSales / totalViews) * 100 : 0;
 
-    // Revenue and Orders
     const orders = await this.orderRepository.find({});
     let vendorRevenue = 0;
     let vendorOrdersCount = 0;
@@ -333,6 +333,7 @@ export class CatalogService {
       revenue: vendorRevenue,
       orders: vendorOrdersCount,
       topProducts,
+      commissionRate: vendor?.commissionRate ?? 10,
     };
   }
 

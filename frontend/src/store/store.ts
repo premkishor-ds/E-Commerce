@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export interface CartItem {
   id: string;
@@ -57,20 +58,10 @@ interface ECommerceState {
   updateOrderStatus: (id: string, status: 'Pending' | 'Shipped' | 'Delivered') => void;
 }
 
-export const useStore = create<ECommerceState>((set) => ({
+export const useStore = create<ECommerceState>()(persist((set) => ({
   user: null,
-  login: (email, role, token, id) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('apex_token', token);
-    }
-    set({ user: { id, email, role, token } });
-  },
-  logout: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('apex_token');
-    }
-    set({ user: null, cart: [], wishlist: [], appliedCoupon: null, orders: [] });
-  },
+  login: (email, role, token, id) => set({ user: { id, email, role, token } }),
+  logout: () => set({ user: null, cart: [], wishlist: [], appliedCoupon: null, orders: [] }),
 
   cart: [],
   addToCart: (item) => set((state) => {
@@ -156,5 +147,5 @@ export const useStore = create<ECommerceState>((set) => ({
   updateOrderStatus: (id, status) => set((state) => ({
     orders: state.orders.map((o) => o.id === id ? { ...o, status } : o)
   }))
-}));
+}), { name: 'apex-store' }));
 
