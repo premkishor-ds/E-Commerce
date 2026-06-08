@@ -1115,5 +1115,245 @@ export class AnalyticsCache extends Document {
 }
 export const AnalyticsCacheSchema = SchemaFactory.createForClass(AnalyticsCache);
 
+// --- API LOG ---
+@Schema({ timestamps: true })
+export class ApiLog extends Document {
+  @Prop({ required: true, index: true })
+  endpoint: string;
+
+  @Prop({ required: true, index: true })
+  method: string;
+
+  @Prop({ required: true })
+  requestTime: Date;
+
+  @Prop({ required: true })
+  responseTime: Date;
+
+  @Prop({ required: true })
+  latencyMs: number;
+
+  @Prop({ required: true, index: true })
+  status: number;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', index: true, default: null })
+  userId: Types.ObjectId | null;
+
+  @Prop({ default: 'Guest' })
+  userRole: string;
+
+  @Prop({ default: 'Guest' })
+  userType: string;
+
+  @Prop({ default: '' })
+  ipAddress: string;
+
+  @Prop({ default: '' })
+  userAgent: string;
+
+  @Prop({ default: '' })
+  device: string;
+
+  @Prop({ default: '' })
+  browser: string;
+
+  @Prop({ default: 0 })
+  requestSize: number;
+
+  @Prop({ default: 0 })
+  responseSize: number;
+}
+export const ApiLogSchema = SchemaFactory.createForClass(ApiLog);
+
+// --- SECURITY LOG ---
+@Schema({ timestamps: true })
+export class SecurityLog extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', index: true, default: null })
+  userId: Types.ObjectId | null;
+
+  @Prop({ required: true, index: true })
+  action: string;
+
+  @Prop({ default: '' })
+  details: string;
+
+  @Prop({ default: 'Medium' })
+  severity: string; // Low, Medium, High, Critical
+
+  @Prop({ default: '', index: true })
+  ipAddress: string;
+
+  @Prop({ default: '' })
+  userAgent: string;
+
+  @Prop({ default: '' })
+  device: string;
+
+  @Prop({ default: '' })
+  browser: string;
+
+  @Prop({ default: 'Alert', index: true })
+  status: string; // Blocked, Alert, Logged
+}
+export const SecurityLogSchema = SchemaFactory.createForClass(SecurityLog);
+
+// --- LOGIN LOG ---
+@Schema({ timestamps: true })
+export class LoginLog extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', index: true, default: null })
+  userId: Types.ObjectId | null;
+
+  @Prop({ required: true, index: true })
+  email: string;
+
+  @Prop({ default: 'Customer' })
+  userRole: string;
+
+  @Prop({ required: true, index: true })
+  status: string; // Success, Failed, Locked, Unlocked
+
+  @Prop({ default: '' })
+  ipAddress: string;
+
+  @Prop({ default: '' })
+  browser: string;
+
+  @Prop({ default: '' })
+  device: string;
+
+  @Prop({ default: '' })
+  os: string;
+
+  @Prop({ default: '' })
+  failureReason: string;
+
+  @Prop({ default: false })
+  mfaUsed: boolean;
+}
+export const LoginLogSchema = SchemaFactory.createForClass(LoginLog);
+
+// --- IMPORT LOG ---
+@Schema({ timestamps: true })
+export class ImportLog extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', index: true, default: null })
+  userId: Types.ObjectId | null;
+
+  @Prop({ required: true, index: true })
+  module: string; // Customer, Seller, Product, Order, etc.
+
+  @Prop({ required: true })
+  fileName: string;
+
+  @Prop({ default: 0 })
+  fileSize: number;
+
+  @Prop({ default: 0 })
+  totalRecords: number;
+
+  @Prop({ default: 0 })
+  successRecords: number;
+
+  @Prop({ default: 0 })
+  failedRecords: number;
+
+  @Prop({ default: 'Success', index: true })
+  status: string;
+}
+export const ImportLogSchema = SchemaFactory.createForClass(ImportLog);
+
+// --- EXPORT LOG ---
+@Schema({ timestamps: true })
+export class ExportLog extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', index: true, default: null })
+  userId: Types.ObjectId | null;
+
+  @Prop({ required: true })
+  exportType: string; // CSV, JSON
+
+  @Prop({ required: true, index: true })
+  exportModule: string; // Customer, Seller, Product, Order
+
+  @Prop({ default: 'csv' })
+  fileFormat: string;
+
+  @Prop({ default: 0 })
+  numberOfRecords: number;
+
+  @Prop({ default: 'Success', index: true })
+  status: string;
+}
+export const ExportLogSchema = SchemaFactory.createForClass(ExportLog);
+
+// --- GUEST LOG ---
+@Schema({ timestamps: true })
+export class GuestLog extends Document {
+  @Prop({ required: true, index: true })
+  sessionId: string;
+
+  @Prop({ default: '', index: true })
+  ipAddress: string;
+
+  @Prop({ default: '' })
+  device: string;
+
+  @Prop({ default: '' })
+  browser: string;
+
+  @Prop({ default: '' })
+  country: string;
+
+  @Prop({ default: '' })
+  state: string;
+
+  @Prop({ default: '' })
+  city: string;
+
+  @Prop({ default: '' })
+  landingPage: string;
+
+  @Prop({ default: '' })
+  exitPage: string;
+
+  @Prop({ type: [String], default: [] })
+  pagesVisited: string[];
+
+  @Prop({ type: [String], default: [] })
+  searchQueries: string[];
+
+  @Prop({ default: 0 })
+  timeOnSite: number; // in seconds
+}
+export const GuestLogSchema = SchemaFactory.createForClass(GuestLog);
+
+// --- CHANGE HISTORY ---
+@Schema({ timestamps: true })
+export class ChangeHistory extends Document {
+  @Prop({ required: true, index: true })
+  entityType: string; // User, Product, Vendor, SystemSetting, Order, Coupon, Review, etc.
+
+  @Prop({ required: true, index: true })
+  entityId: string;
+
+  @Prop({ required: true, index: true })
+  changedField: string;
+
+  @Prop({ default: '' })
+  previousValue: string;
+
+  @Prop({ default: '' })
+  newValue: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', index: true, default: null })
+  changedBy: Types.ObjectId | null;
+
+  @Prop({ default: '' })
+  changedByName: string; // operator email/name
+
+  @Prop({ default: '' })
+  changedRole: string;
+}
+export const ChangeHistorySchema = SchemaFactory.createForClass(ChangeHistory);
+
+
 
 

@@ -16,6 +16,13 @@ import {
   ActivityLogRepository,
   ChatbotLogRepository,
   AnalyticsCacheRepository,
+  ApiLogRepository,
+  SecurityLogRepository,
+  LoginLogRepository,
+  ImportLogRepository,
+  ExportLogRepository,
+  GuestLogRepository,
+  ChangeHistoryRepository,
 } from '../../repositories/concrete.repositories';
 
 @Injectable()
@@ -34,6 +41,13 @@ export class AdminService {
     private readonly activityRepository: ActivityLogRepository,
     private readonly chatbotRepository: ChatbotLogRepository,
     private readonly cacheRepository: AnalyticsCacheRepository,
+    private readonly apiLogRepository: ApiLogRepository,
+    private readonly securityLogRepository: SecurityLogRepository,
+    private readonly loginLogRepository: LoginLogRepository,
+    private readonly importLogRepository: ImportLogRepository,
+    private readonly exportLogRepository: ExportLogRepository,
+    private readonly guestLogRepository: GuestLogRepository,
+    private readonly changeHistoryRepository: ChangeHistoryRepository,
     @InjectModel(ChatSession.name) private readonly chatSessionModel: Model<ChatSession>,
   ) {}
 
@@ -324,5 +338,131 @@ export class AdminService {
     });
 
     return csvRows.join('\n');
+  }
+
+  // --- NEW AUDITING LOGS QUERYING METHODS ---
+  async getApiLogs() {
+    let logs = await this.apiLogRepository.find({}, { populate: 'userId', sort: { createdAt: -1 } });
+    if (logs.length === 0) {
+      // Seed some test API logs
+      await this.apiLogRepository.create({ endpoint: '/api/v1/auth/login', method: 'POST', requestTime: new Date(), responseTime: new Date(), latencyMs: 45, status: 200, userRole: 'Guest', userType: 'Guest', ipAddress: '192.168.1.1', userAgent: 'Mozilla/5.0', device: 'Desktop', browser: 'Chrome', requestSize: 128, responseSize: 512 });
+      await this.apiLogRepository.create({ endpoint: '/api/v1/catalog/products', method: 'GET', requestTime: new Date(), responseTime: new Date(), latencyMs: 120, status: 200, userRole: 'Customer', userType: 'Customer', ipAddress: '192.168.1.25', userAgent: 'Mozilla/5.0', device: 'Mobile', browser: 'Chrome', requestSize: 0, responseSize: 4512 });
+      await this.apiLogRepository.create({ endpoint: '/admin/settings/general', method: 'PUT', requestTime: new Date(), responseTime: new Date(), latencyMs: 80, status: 200, userRole: 'Admin', userType: 'Admin', ipAddress: '192.168.1.10', userAgent: 'Mozilla/5.0', device: 'Desktop', browser: 'Safari', requestSize: 256, responseSize: 128 });
+      await this.apiLogRepository.create({ endpoint: '/api/v1/checkout/pay', method: 'POST', requestTime: new Date(), responseTime: new Date(), latencyMs: 350, status: 400, userRole: 'Customer', userType: 'Customer', ipAddress: '192.168.1.50', userAgent: 'Mozilla/5.0', device: 'Desktop', browser: 'Firefox', requestSize: 512, responseSize: 64 });
+      logs = await this.apiLogRepository.find({}, { populate: 'userId', sort: { createdAt: -1 } });
+    }
+    return logs;
+  }
+
+  async getSecurityLogs() {
+    let logs = await this.securityLogRepository.find({}, { populate: 'userId', sort: { createdAt: -1 } });
+    if (logs.length === 0) {
+      await this.securityLogRepository.create({ action: 'Failed Login Attempt', details: 'Invalid credentials entered for admin@example.com', severity: 'High', ipAddress: '192.168.1.15', userAgent: 'Mozilla/5.0', device: 'Desktop', browser: 'Chrome', status: 'Logged' });
+      await this.securityLogRepository.create({ action: 'Permission Violation', details: 'User tried to access settings page without logs permission', severity: 'Critical', ipAddress: '192.168.1.45', userAgent: 'Mozilla/5.0', device: 'Desktop', browser: 'Firefox', status: 'Blocked' });
+      await this.securityLogRepository.create({ action: 'API Abuse', details: 'Rate limit hit for IP 192.168.1.99', severity: 'Medium', ipAddress: '192.168.1.99', userAgent: 'Mozilla/5.0', device: 'Mobile', browser: 'Chrome', status: 'Blocked' });
+      logs = await this.securityLogRepository.find({}, { populate: 'userId', sort: { createdAt: -1 } });
+    }
+    return logs;
+  }
+
+  async getImportLogs() {
+    let logs = await this.importLogRepository.find({}, { populate: 'userId', sort: { createdAt: -1 } });
+    if (logs.length === 0) {
+      await this.importLogRepository.create({ module: 'Product', fileName: 'products_update_june.csv', fileSize: 1048576, totalRecords: 150, successRecords: 145, failedRecords: 5, status: 'Success' });
+      await this.importLogRepository.create({ module: 'Customer', fileName: 'customers_bulk_v1.csv', fileSize: 51200, totalRecords: 20, successRecords: 20, failedRecords: 0, status: 'Success' });
+      logs = await this.importLogRepository.find({}, { populate: 'userId', sort: { createdAt: -1 } });
+    }
+    return logs;
+  }
+
+  async getExportLogs() {
+    let logs = await this.exportLogRepository.find({}, { populate: 'userId', sort: { createdAt: -1 } });
+    if (logs.length === 0) {
+      await this.exportLogRepository.create({ exportType: 'CSV', exportModule: 'Product', fileFormat: 'csv', numberOfRecords: 250, status: 'Success' });
+      await this.exportLogRepository.create({ exportType: 'CSV', exportModule: 'Order', fileFormat: 'csv', numberOfRecords: 95, status: 'Success' });
+      logs = await this.exportLogRepository.find({}, { populate: 'userId', sort: { createdAt: -1 } });
+    }
+    return logs;
+  }
+
+  async getGuestLogs() {
+    let logs = await this.guestLogRepository.find({}, { sort: { createdAt: -1 } });
+    if (logs.length === 0) {
+      await this.guestLogRepository.create({ sessionId: 'guest-sess-001', ipAddress: '103.45.12.80', device: 'Mobile', browser: 'Chrome', country: 'India', state: 'Delhi', city: 'Delhi', landingPage: '/home', exitPage: '/catalog', pagesVisited: ['/home', '/catalog', '/product/123'], searchQueries: ['running shoes'], timeOnSite: 240 });
+      await this.guestLogRepository.create({ sessionId: 'guest-sess-002', ipAddress: '8.8.8.8', device: 'Desktop', browser: 'Chrome', country: 'United States', state: 'California', city: 'Mountain View', landingPage: '/home', exitPage: '/home', pagesVisited: ['/home'], searchQueries: [], timeOnSite: 15 });
+      logs = await this.guestLogRepository.find({}, { sort: { createdAt: -1 } });
+    }
+    return logs;
+  }
+
+  async getChangeHistoryLogs() {
+    let logs = await this.changeHistoryRepository.find({}, { populate: 'changedBy', sort: { createdAt: -1 } });
+    if (logs.length === 0) {
+      await this.changeHistoryRepository.create({ entityType: 'Product', entityId: 'prod-001', changedField: 'price', previousValue: '999', newValue: '1299', changedByName: 'admin@example.com', changedRole: 'Admin' });
+      await this.changeHistoryRepository.create({ entityType: 'SystemSetting', entityId: 'setting-general', changedField: 'pageSize', previousValue: '10', newValue: '20', changedByName: 'admin@example.com', changedRole: 'Admin' });
+      await this.changeHistoryRepository.create({ entityType: 'Vendor', entityId: 'vendor-002', changedField: 'accountStatus', previousValue: 'Inactive', newValue: 'Active', changedByName: 'admin@example.com', changedRole: 'Admin' });
+      logs = await this.changeHistoryRepository.find({}, { populate: 'changedBy', sort: { createdAt: -1 } });
+    }
+    return logs;
+  }
+
+  async getLogsAnalyticsSummary() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const totalLogsToday = await this.auditRepository.count({ createdAt: { $gte: today } }) +
+                           await this.activityRepository.count({ createdAt: { $gte: today } }) +
+                           await this.apiLogRepository.count({ createdAt: { $gte: today } });
+
+    const totalAdminActions = await this.activityRepository.count({ userRole: { $in: ['Admin', 'Super Admin'] } });
+    const totalCustomerActions = await this.activityRepository.count({ userRole: 'Customer' });
+    const totalSellerActions = await this.activityRepository.count({ userRole: { $in: ['Seller', 'Vendor'] } });
+
+    const totalApiCalls = await this.apiLogRepository.count({});
+    const failedApiCalls = await this.apiLogRepository.count({ status: { $gte: 400 } });
+
+    const failedLogins = await this.securityLogRepository.count({ action: 'Failed Login Attempt' });
+    const securityAlerts = await this.securityLogRepository.count({});
+
+    // Graph Data Mocks/Averages
+    const activityTimeline = [
+      { date: 'Mon', value: 120 },
+      { date: 'Tue', value: 150 },
+      { date: 'Wed', value: 180 },
+      { date: 'Thu', value: 240 },
+      { date: 'Fri', value: 210 },
+      { date: 'Sat', value: 95 },
+      { date: 'Sun', value: 110 }
+    ];
+
+    const apiRequestsGraph = [
+      { time: '09:00', requests: 450, latency: 85 },
+      { time: '12:00', requests: 890, latency: 112 },
+      { time: '15:00', requests: 1200, latency: 145 },
+      { time: '18:00', requests: 750, latency: 98 },
+      { time: '21:00', requests: 510, latency: 90 }
+    ];
+
+    const loginActivityGraph = [
+      { date: '06/04', success: 120, failed: 8 },
+      { date: '06/05', success: 145, failed: 12 },
+      { date: '06/06', success: 190, failed: 24 },
+      { date: '06/07', success: 220, failed: 15 },
+      { date: '06/08', success: 175, failed: 10 }
+    ];
+
+    return {
+      totalLogsToday,
+      totalAdminActions,
+      totalCustomerActions,
+      totalSellerActions,
+      totalApiCalls,
+      failedApiCalls,
+      failedLogins,
+      securityAlerts,
+      activityTimeline,
+      apiRequestsGraph,
+      loginActivityGraph
+    };
   }
 }

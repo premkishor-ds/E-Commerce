@@ -39,7 +39,15 @@ import {
   ActivityLog,
   ChatbotLog,
   AnalyticsCache,
+  ApiLog,
+  SecurityLog,
+  LoginLog,
+  ImportLog,
+  ExportLog,
+  GuestLog,
+  ChangeHistory,
 } from '../schemas/schemas';
+
 
 
 
@@ -304,5 +312,55 @@ export class AnalyticsCacheRepository extends BaseRepository<AnalyticsCache> {
     super(model);
   }
 }
+
+@Injectable()
+export class ApiLogRepository extends BaseRepository<ApiLog> {
+  constructor(@InjectModel(ApiLog.name) model: Model<ApiLog>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class SecurityLogRepository extends BaseRepository<SecurityLog> {
+  constructor(@InjectModel(SecurityLog.name) model: Model<SecurityLog>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class LoginLogRepository extends BaseRepository<LoginLog> {
+  constructor(@InjectModel(LoginLog.name) model: Model<LoginLog>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class ImportLogRepository extends BaseRepository<ImportLog> {
+  constructor(@InjectModel(ImportLog.name) model: Model<ImportLog>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class ExportLogRepository extends BaseRepository<ExportLog> {
+  constructor(@InjectModel(ExportLog.name) model: Model<ExportLog>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class GuestLogRepository extends BaseRepository<GuestLog> {
+  constructor(@InjectModel(GuestLog.name) model: Model<GuestLog>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class ChangeHistoryRepository extends BaseRepository<ChangeHistory> {
+  constructor(@InjectModel(ChangeHistory.name) model: Model<ChangeHistory>) {
+    super(model);
+  }
+}
+
 
 

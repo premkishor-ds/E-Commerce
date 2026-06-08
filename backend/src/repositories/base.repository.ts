@@ -27,4 +27,12 @@ export abstract class BaseRepository<T extends mongoose.Document> {
   async delete(id: string): Promise<any> {
     return this.model.findByIdAndDelete(id).exec();
   }
+
+  async count(filter: any = {}): Promise<number> {
+    return this.model.countDocuments(filter).exec();
+  }
+
+  async deleteMany(filter: any = {}): Promise<any> {
+    return this.model.deleteMany(filter).exec();
+  }
 }

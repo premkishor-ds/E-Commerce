@@ -14,6 +14,7 @@ import {
   TicketRepository,
 } from '../../repositories/concrete.repositories';
 import { AdminService } from './admin.service';
+import { AuditService } from './audit.service';
 
 @ApiTags('Admin Dashboard')
 @Controller('admin')
@@ -31,6 +32,7 @@ export class AdminController {
     private readonly couponRepository: CouponRepository,
     private readonly ticketRepository: TicketRepository,
     private readonly adminService: AdminService,
+    private readonly auditService: AuditService,
   ) {}
 
   // --- OVERVIEW STATS ---
@@ -436,5 +438,55 @@ export class AdminController {
   @ApiOperation({ summary: 'Get computed overview metrics' })
   async getAnalytics() {
     return this.adminService.getAnalyticsSummary();
+  }
+
+  // --- NEW LOG SYSTEM ROUTES ---
+  @Get('api-logs')
+  @ApiOperation({ summary: 'Get all API request audit logs' })
+  async getApiLogs() {
+    return this.adminService.getApiLogs();
+  }
+
+  @Get('security-logs')
+  @ApiOperation({ summary: 'Get all platform security alert logs' })
+  async getSecurityLogs() {
+    return this.adminService.getSecurityLogs();
+  }
+
+  @Get('import-logs')
+  @ApiOperation({ summary: 'Get all bulk data import logs' })
+  async getImportLogs() {
+    return this.adminService.getImportLogs();
+  }
+
+  @Get('export-logs')
+  @ApiOperation({ summary: 'Get all data export logs' })
+  async getExportLogs() {
+    return this.adminService.getExportLogs();
+  }
+
+  @Get('guest-logs')
+  @ApiOperation({ summary: 'Get anonymous guest visitors tracking' })
+  async getGuestLogs() {
+    return this.adminService.getGuestLogs();
+  }
+
+  @Get('change-history')
+  @ApiOperation({ summary: 'Get before/after state diff change histories' })
+  async getChangeHistoryLogs() {
+    return this.adminService.getChangeHistoryLogs();
+  }
+
+  @Get('logs/analytics')
+  @ApiOperation({ summary: 'Get computed log analytics and graphs summary' })
+  async getLogsAnalyticsSummary() {
+    return this.adminService.getLogsAnalyticsSummary();
+  }
+
+  @Put('logs/retention')
+  @ApiOperation({ summary: 'Save log retention settings and trigger auto-purge' })
+  async updateLogsRetention(@Body() body: { daysLimit: number }) {
+    const result = await this.auditService.runRetentionPurge(body.daysLimit);
+    return { success: true, purgedCount: result.purged };
   }
 }

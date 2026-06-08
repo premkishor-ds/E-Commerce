@@ -90,17 +90,31 @@ export default function AdminPage() {
   const [ticketPage, setTicketPage] = useState(1);
 
   // Logs States
-  const [logSubTab, setLogSubTab] = useState<'audit' | 'search' | 'activity' | 'chatbot'>('audit');
+  const [logSubTab, setLogSubTab] = useState<'audit' | 'search' | 'activity' | 'chatbot' | 'api' | 'security' | 'importexport' | 'guest' | 'changehistory' | 'analytics' | 'retention'>('audit');
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [searchLogs, setSearchLogs] = useState<any[]>([]);
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
   const [chatbotLogs, setChatbotLogs] = useState<any[]>([]);
+  const [apiLogs, setApiLogs] = useState<any[]>([]);
+  const [securityLogs, setSecurityLogs] = useState<any[]>([]);
+  const [importLogs, setImportLogs] = useState<any[]>([]);
+  const [exportLogs, setExportLogs] = useState<any[]>([]);
+  const [guestLogs, setGuestLogs] = useState<any[]>([]);
+  const [changeHistoryLogs, setChangeHistoryLogs] = useState<any[]>([]);
+  const [logAnalytics, setLogAnalytics] = useState<any | null>(null);
   const [selectedChatLog, setSelectedChatLog] = useState<any | null>(null);
   const [selectedLogDetail, setSelectedLogDetail] = useState<any | null>(null);
   const [auditPage, setAuditPage] = useState(1);
   const [searchPage, setSearchPage] = useState(1);
   const [activityPage, setActivityPage] = useState(1);
   const [chatbotPage, setChatbotPage] = useState(1);
+  const [apiPage, setApiPage] = useState(1);
+  const [securityPage, setSecurityPage] = useState(1);
+  const [importPage, setImportPage] = useState(1);
+  const [exportPage, setExportPage] = useState(1);
+  const [guestPage, setGuestPage] = useState(1);
+  const [changeHistoryPage, setChangeHistoryPage] = useState(1);
+  const [retentionDays, setRetentionDays] = useState(90);
   const [analyticsSubTab, setAnalyticsSubTab] = useState<'overview' | 'sales' | 'chatbot' | 'demographics'>('overview');
   const [apiError, setApiError] = useState<string>('');
 
@@ -503,6 +517,15 @@ export default function AdminPage() {
       if (logSubTab === 'search') setSearchLogs(await apiFetch('/admin/search-logs'));
       if (logSubTab === 'activity') setActivityLogs(await apiFetch('/admin/activity-logs'));
       if (logSubTab === 'chatbot') setChatbotLogs(await apiFetch('/admin/chatbot-logs'));
+      if (logSubTab === 'api') setApiLogs(await apiFetch('/admin/api-logs'));
+      if (logSubTab === 'security') setSecurityLogs(await apiFetch('/admin/security-logs'));
+      if (logSubTab === 'importexport') {
+        setImportLogs(await apiFetch('/admin/import-logs'));
+        setExportLogs(await apiFetch('/admin/export-logs'));
+      }
+      if (logSubTab === 'guest') setGuestLogs(await apiFetch('/admin/guest-logs'));
+      if (logSubTab === 'changehistory') setChangeHistoryLogs(await apiFetch('/admin/change-history'));
+      if (logSubTab === 'analytics') setLogAnalytics(await apiFetch('/admin/logs/analytics'));
     } catch { /* */ }
     finally { setLoading(false); }
   }, [apiFetch, logSubTab]);
@@ -958,6 +981,36 @@ export default function AdminPage() {
     return filteredSessions.slice((chatbotPage - 1) * limit, chatbotPage * limit);
   }, [filteredSessions, chatbotPage, limit]);
 
+  const totalApiPages = Math.ceil(apiLogs.length / limit) || 1;
+  const paginatedApis = useMemo(() => {
+    return apiLogs.slice((apiPage - 1) * limit, apiPage * limit);
+  }, [apiLogs, apiPage, limit]);
+
+  const totalSecurityPages = Math.ceil(securityLogs.length / limit) || 1;
+  const paginatedSecurities = useMemo(() => {
+    return securityLogs.slice((securityPage - 1) * limit, securityPage * limit);
+  }, [securityLogs, securityPage, limit]);
+
+  const totalImportPages = Math.ceil(importLogs.length / limit) || 1;
+  const paginatedImports = useMemo(() => {
+    return importLogs.slice((importPage - 1) * limit, importPage * limit);
+  }, [importLogs, importPage, limit]);
+
+  const totalExportPages = Math.ceil(exportLogs.length / limit) || 1;
+  const paginatedExports = useMemo(() => {
+    return exportLogs.slice((exportPage - 1) * limit, exportPage * limit);
+  }, [exportLogs, exportPage, limit]);
+
+  const totalGuestPages = Math.ceil(guestLogs.length / limit) || 1;
+  const paginatedGuests = useMemo(() => {
+    return guestLogs.slice((guestPage - 1) * limit, guestPage * limit);
+  }, [guestLogs, guestPage, limit]);
+
+  const totalChangeHistoryPages = Math.ceil(changeHistoryLogs.length / limit) || 1;
+  const paginatedChangeHistories = useMemo(() => {
+    return changeHistoryLogs.slice((changeHistoryPage - 1) * limit, changeHistoryPage * limit);
+  }, [changeHistoryLogs, changeHistoryPage, limit]);
+
   useEffect(() => {
     if (auditPage > totalAuditPages) setAuditPage(1);
   }, [filteredAudits.length, totalAuditPages, auditPage]);
@@ -973,6 +1026,30 @@ export default function AdminPage() {
   useEffect(() => {
     if (chatbotPage > totalChatbotPages) setChatbotPage(1);
   }, [filteredSessions.length, totalChatbotPages, chatbotPage]);
+
+  useEffect(() => {
+    if (apiPage > totalApiPages) setApiPage(1);
+  }, [apiLogs.length, totalApiPages, apiPage]);
+
+  useEffect(() => {
+    if (securityPage > totalSecurityPages) setSecurityPage(1);
+  }, [securityLogs.length, totalSecurityPages, securityPage]);
+
+  useEffect(() => {
+    if (importPage > totalImportPages) setImportPage(1);
+  }, [importLogs.length, totalImportPages, importPage]);
+
+  useEffect(() => {
+    if (exportPage > totalExportPages) setExportPage(1);
+  }, [exportLogs.length, totalExportPages, exportPage]);
+
+  useEffect(() => {
+    if (guestPage > totalGuestPages) setGuestPage(1);
+  }, [guestLogs.length, totalGuestPages, guestPage]);
+
+  useEffect(() => {
+    if (changeHistoryPage > totalChangeHistoryPages) setChangeHistoryPage(1);
+  }, [changeHistoryLogs.length, totalChangeHistoryPages, changeHistoryPage]);
 
   const breadcrumbs = useMemo(() => {
     const list = [{ label: 'Admin Console', onClick: () => setActiveTab('overview') }];
@@ -1022,6 +1099,13 @@ export default function AdminPage() {
         search: 'Searches Log',
         activity: 'User Activities',
         chatbot: 'Chatbot Conversations',
+        api: 'API Requests',
+        security: 'Security Alerts',
+        importexport: 'Import/Export Activity',
+        guest: 'Guest Visitors',
+        changehistory: 'Change Differential Diffs',
+        analytics: 'Activity Analytics',
+        retention: 'Retention Controls',
       };
       list.push({
         label: subLabels[logSubTab] || logSubTab,
@@ -2938,7 +3022,71 @@ export default function AdminPage() {
                         <span className="text-sm font-semibold mt-1 block text-zinc-800 dark:text-zinc-200">{selectedLogDetail.device}</span>
                       </div>
                     )}
+                    {/* API request details if applicable */}
+                    {selectedLogDetail.endpoint && (
+                      <>
+                        <div className="bg-zinc-50/50 dark:bg-zinc-900/40 p-4 border dark:border-zinc-800 rounded-2xl shadow-sm">
+                          <span className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400">HTTP Method & Path</span>
+                          <span className="text-sm font-bold mt-1 block text-zinc-900 dark:text-zinc-100">
+                            {badge(selectedLogDetail.method === 'GET' ? 'green' : 'blue', selectedLogDetail.method)} {selectedLogDetail.endpoint}
+                          </span>
+                        </div>
+                        <div className="bg-zinc-50/50 dark:bg-zinc-900/40 p-4 border dark:border-zinc-800 rounded-2xl shadow-sm">
+                          <span className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400">Status & Latency</span>
+                          <span className="text-sm font-semibold mt-1 block">
+                            {badge(selectedLogDetail.status < 400 ? 'green' : 'red', String(selectedLogDetail.status))} in {selectedLogDetail.latencyMs} ms
+                          </span>
+                        </div>
+                        <div className="bg-zinc-50/50 dark:bg-zinc-900/40 p-4 border dark:border-zinc-800 rounded-2xl shadow-sm">
+                          <span className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400">Payload Sizes</span>
+                          <span className="text-sm font-semibold mt-1 block text-zinc-500">
+                            Req: {selectedLogDetail.requestSize} B | Res: {selectedLogDetail.responseSize} B
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    {/* ChangeHistory details if applicable */}
+                    {selectedLogDetail.changedField && (
+                      <>
+                        <div className="bg-zinc-50/50 dark:bg-zinc-900/40 p-4 border dark:border-zinc-800 rounded-2xl shadow-sm">
+                          <span className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400">Entity Type & ID</span>
+                          <span className="text-sm font-bold mt-1 block font-mono text-zinc-800 dark:text-zinc-200">
+                            {selectedLogDetail.entityType} ({selectedLogDetail.entityId})
+                          </span>
+                        </div>
+                        <div className="bg-zinc-50/50 dark:bg-zinc-900/40 p-4 border dark:border-zinc-800 rounded-2xl shadow-sm">
+                          <span className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400">Changed Field Name</span>
+                          <span className="text-sm font-bold mt-1 block text-indigo-600 dark:text-indigo-400 font-mono">
+                            {selectedLogDetail.changedField}
+                          </span>
+                        </div>
+                        <div className="bg-zinc-50/50 dark:bg-zinc-900/40 p-4 border dark:border-zinc-800 rounded-2xl shadow-sm">
+                          <span className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 font-bold">Operator Profile</span>
+                          <span className="text-sm font-semibold mt-1 block">
+                            {selectedLogDetail.changedByName} ({selectedLogDetail.changedRole})
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
+
+                  {/* Change History Before / After Diff Inspector */}
+                  {selectedLogDetail.changedField && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-zinc-50/50 dark:bg-zinc-900/40 border dark:border-zinc-800 rounded-2xl p-5 shadow-sm">
+                      <div>
+                        <span className="block text-[10px] uppercase font-bold tracking-wider text-red-500 mb-2">Before Change (Old Value)</span>
+                        <pre className="bg-red-50/50 dark:bg-red-950/10 p-4 rounded-xl border border-red-100 dark:border-red-900/30 font-mono text-xs overflow-x-auto whitespace-pre-wrap text-red-800 dark:text-red-300">
+                          {selectedLogDetail.previousValue}
+                        </pre>
+                      </div>
+                      <div>
+                        <span className="block text-[10px] uppercase font-bold tracking-wider text-emerald-500 mb-2">After Change (New Value)</span>
+                        <pre className="bg-emerald-50/50 dark:bg-emerald-950/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 font-mono text-xs overflow-x-auto whitespace-pre-wrap text-emerald-800 dark:text-emerald-300">
+                          {selectedLogDetail.newValue}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
 
                   {selectedLogDetail.details && (
                     <div className="bg-zinc-50/50 dark:bg-zinc-900/40 border dark:border-zinc-800 rounded-2xl p-5 space-y-2 shadow-sm">
@@ -2951,7 +3099,7 @@ export default function AdminPage() {
                 </div>
               ) : (
                 <>
-                  <SectionHeader title="Database Log Registries" desc="Audit trails, keyword searches, and chatbot intelligence queries."
+                  <SectionHeader title="Enterprise Log Registries" desc="Audit trails, keyword searches, and platform database activity."
                     right={
                       <button onClick={async()=>{const res = await apiFetch('/admin/logs/export'); const blob = new Blob([res.csv], { type: 'text/csv' }); const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = res.filename; a.click();}}
                         className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold shadow cursor-pointer">
@@ -2960,12 +3108,19 @@ export default function AdminPage() {
                     } />
                   
                   {/* Tabs */}
-                  <div className="flex border-b dark:border-zinc-800 px-6 bg-zinc-50/30 dark:bg-zinc-900/10">
+                  <div className="flex border-b dark:border-zinc-800 px-6 bg-zinc-50/30 dark:bg-zinc-900/10 overflow-x-auto whitespace-nowrap scrollbar-thin">
                     {[
+                      { key: 'analytics', label: 'Dashboard' },
                       { key: 'audit', label: 'System Audits' },
-                      { key: 'search', label: 'Queries Searched' },
-                      { key: 'activity', label: 'User Activities' },
-                      { key: 'chatbot', label: 'Chatbot Intents Log' }
+                      { key: 'activity', label: 'Activities' },
+                      { key: 'api', label: 'API Logs' },
+                      { key: 'changehistory', label: 'Change History' },
+                      { key: 'security', label: 'Security' },
+                      { key: 'importexport', label: 'Imports/Exports' },
+                      { key: 'search', label: 'Searches' },
+                      { key: 'guest', label: 'Guest Visits' },
+                      { key: 'chatbot', label: 'Chatbot Conversations' },
+                      { key: 'retention', label: 'Retention' }
                     ].map(t => (
                       <button key={t.key} onClick={() => setLogSubTab(t.key as any)}
                         className={`px-4 py-3 text-xs font-bold border-b-2 -mb-[2px] transition-all cursor-pointer ${
@@ -2980,9 +3135,55 @@ export default function AdminPage() {
 
                   {loading ? <Loading /> : (
                     <div className="p-4">
+                      {/* 1. ANALYTICS DASHBOARD SUBTAB */}
+                      {logSubTab === 'analytics' && logAnalytics && (
+                        <div className="space-y-6">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <StatCard label="Logs Created Today" value={logAnalytics.totalLogsToday} icon={<Database className="h-4 w-4"/>} color="indigo" />
+                            <StatCard label="API Requests (Total)" value={logAnalytics.totalApiCalls} icon={<Activity className="h-4 w-4"/>} color="blue" />
+                            <StatCard label="Security Alerts Triggered" value={logAnalytics.securityAlerts} icon={<ShieldAlert className="h-4 w-4"/>} color="rose" />
+                            <StatCard label="Failed Login Records" value={logAnalytics.failedLogins} icon={<Lock className="h-4 w-4"/>} color="amber" />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Actions by Role Card */}
+                            <div className="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-2xl p-5 shadow-sm space-y-4">
+                              <h4 className="font-bold text-xs uppercase tracking-wider text-zinc-400 border-b pb-2 dark:border-zinc-800">Actions By Role Profile</h4>
+                              <div className="space-y-3 pt-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="font-medium text-zinc-600 dark:text-zinc-400">Admin Actions</span>
+                                  <span className="font-bold text-zinc-900 dark:text-white">{logAnalytics.totalAdminActions}</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="font-medium text-zinc-600 dark:text-zinc-400">Customer Actions</span>
+                                  <span className="font-bold text-zinc-900 dark:text-white">{logAnalytics.totalCustomerActions}</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="font-medium text-zinc-600 dark:text-zinc-400">Seller/Vendor Actions</span>
+                                  <span className="font-bold text-zinc-900 dark:text-white">{logAnalytics.totalSellerActions}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Activity Rate Mock graph */}
+                            <div className="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-2xl p-5 shadow-sm md:col-span-2 space-y-4">
+                              <h4 className="font-bold text-xs uppercase tracking-wider text-zinc-400 border-b pb-2 dark:border-zinc-800">Weekly System Activity Graph</h4>
+                              <div className="flex items-end justify-between h-[120px] pt-4 px-2">
+                                {logAnalytics.activityTimeline?.map((item: any) => (
+                                  <div key={item.date} className="flex flex-col items-center gap-1.5 flex-1">
+                                    <div className="w-6 bg-indigo-500 rounded-t h-20" style={{ height: `${(item.value / 250) * 100}px` }} title={`${item.value} logs`}></div>
+                                    <span className="text-[10px] text-zinc-400 font-mono">{item.date}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 2. SYSTEM AUDIT SUBTAB */}
                       {logSubTab === 'audit' && (
                         <div className="space-y-4">
-                          {/* Filter Row */}
                           <div className="flex flex-wrap gap-3 p-3 bg-zinc-50 dark:bg-zinc-900/40 border dark:border-zinc-800 rounded-xl text-xs">
                             <input type="text" value={auditSearch} onChange={e=>setAuditSearch(e.target.value)}
                               placeholder="Search action, resource, email, IP..."
@@ -2995,7 +3196,6 @@ export default function AdminPage() {
                               <option value="Manager">Manager</option>
                             </select>
                           </div>
-                          {/* Count display */}
                           <div className="flex justify-between items-center text-xs text-zinc-500 font-semibold px-2">
                             <span>Showing {filteredAudits.length > 0 ? (auditPage - 1) * limit + 1 : 0}-{Math.min(filteredAudits.length, auditPage * limit)} of {filteredAudits.length} Audits</span>
                           </div>
@@ -3028,9 +3228,225 @@ export default function AdminPage() {
                         </div>
                       )}
 
+                      {/* 3. USER ACTIVITY SUBTAB */}
+                      {logSubTab === 'activity' && (
+                        <div className="space-y-4">
+                          <div className="flex flex-wrap gap-3 p-3 bg-zinc-50 dark:bg-zinc-900/40 border dark:border-zinc-800 rounded-xl text-xs">
+                            <input type="text" value={activitySearch} onChange={e=>setActivitySearch(e.target.value)}
+                              placeholder="Search action or details..."
+                              className="px-3 py-1.5 border dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-800 dark:text-zinc-100 flex-1 min-w-[200px]" />
+                            <select value={activityCategory} onChange={e=>setActivityCategory(e.target.value)}
+                              className="px-3 py-1.5 border dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-800 dark:text-zinc-100 cursor-pointer">
+                              <option value="all">All Categories</option>
+                              <option value="Login">Authentication</option>
+                              <option value="Profile">Profile / Address</option>
+                              <option value="Product">Catalog / Search</option>
+                              <option value="Order">Cart / Order / Review</option>
+                              <option value="Vendors">KYC / Payouts</option>
+                              <option value="Settings">Configuration</option>
+                            </select>
+                          </div>
+                          <div className="flex justify-between items-center text-xs text-zinc-500 font-semibold px-2">
+                            <span>Showing {filteredActivities.length > 0 ? (activityPage - 1) * limit + 1 : 0}-{Math.min(filteredActivities.length, activityPage * limit)} of {filteredActivities.length} Activities</span>
+                          </div>
+                          <Table>
+                            <Thead><tr>
+                              {renderSortableHeader('Action', 'action', activitySortField, activitySortOrder, (f, o) => { setActivitySortField(f); setActivitySortOrder(o); })}
+                              {renderSortableHeader('Category', 'category', activitySortField, activitySortOrder, (f, o) => { setActivitySortField(f); setActivitySortOrder(o); })}
+                              {renderSortableHeader('Details', 'details', activitySortField, activitySortOrder, (f, o) => { setActivitySortField(f); setActivitySortOrder(o); })}
+                              {renderSortableHeader('Timestamp', 'createdAt', activitySortField, activitySortOrder, (f, o) => { setActivitySortField(f); setActivitySortOrder(o); })}
+                            </tr></Thead>
+                            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                              {paginatedActivities.map((l: any) => (
+                                <tr key={l._id} className="text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800/40 cursor-pointer" onClick={() => setSelectedLogDetail(l)}>
+                                  <td className="px-4 py-3 font-semibold text-zinc-800 dark:text-zinc-200">{l.action}</td>
+                                  <td className="px-4 py-3">{badge('blue', l.category)}</td>
+                                  <td className="px-4 py-3 text-zinc-500">{l.details}</td>
+                                  <td className="px-4 py-3 text-zinc-400">{new Date(l.createdAt).toLocaleTimeString()}</td>
+                                </tr>
+                              ))}
+                              {filteredActivities.length === 0 && (
+                                <tr>
+                                  <td colSpan={4} className="text-center py-6 text-zinc-400">No activities found matching filters.</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </Table>
+                          <Pagination currentPage={activityPage} totalPages={totalActivityPages} onPageChange={setActivityPage} />
+                        </div>
+                      )}
+
+                      {/* 4. API REQUESTS SUBTAB */}
+                      {logSubTab === 'api' && (
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center text-xs text-zinc-500 font-semibold px-2">
+                            <span>Showing {apiLogs.length > 0 ? (apiPage - 1) * limit + 1 : 0}-{Math.min(apiLogs.length, apiPage * limit)} of {apiLogs.length} API Requests</span>
+                          </div>
+                          <Table>
+                            <Thead><tr>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Method</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Endpoint</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Status</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Latency</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Size (Req/Res)</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">IP Address</th>
+                            </tr></Thead>
+                            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                              {paginatedApis.map((l: any) => (
+                                <tr key={l._id} className="text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800/40 cursor-pointer" onClick={() => setSelectedLogDetail(l)}>
+                                  <td className="px-4 py-3">{badge(l.method === 'GET' ? 'green' : 'blue', l.method)}</td>
+                                  <td className="px-4 py-3 font-mono text-zinc-800 dark:text-zinc-200 font-semibold truncate max-w-[200px]" title={l.endpoint}>{l.endpoint}</td>
+                                  <td className="px-4 py-3">{badge(l.status < 400 ? 'green' : 'red', String(l.status))}</td>
+                                  <td className="px-4 py-3 text-zinc-500 font-semibold">{l.latencyMs} ms</td>
+                                  <td className="px-4 py-3 text-zinc-400 font-mono">{l.requestSize}B / {l.responseSize}B</td>
+                                  <td className="px-4 py-3 text-zinc-400 font-mono">{l.ipAddress}</td>
+                                </tr>
+                              ))}
+                              {apiLogs.length === 0 && (
+                                <tr>
+                                  <td colSpan={6} className="text-center py-6 text-zinc-400">No API audit logs recorded.</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </Table>
+                          <Pagination currentPage={apiPage} totalPages={totalApiPages} onPageChange={setApiPage} />
+                        </div>
+                      )}
+
+                      {/* 5. CHANGE HISTORY DIFF SUBTAB */}
+                      {logSubTab === 'changehistory' && (
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center text-xs text-zinc-500 font-semibold px-2">
+                            <span>Showing {changeHistoryLogs.length > 0 ? (changeHistoryPage - 1) * limit + 1 : 0}-{Math.min(changeHistoryLogs.length, changeHistoryPage * limit)} of {changeHistoryLogs.length} Document Changes</span>
+                          </div>
+                          <Table>
+                            <Thead><tr>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Entity</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">ID</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Field</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Previous Value</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">New Value</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Operator</th>
+                            </tr></Thead>
+                            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800 font-mono text-[11px]">
+                              {paginatedChangeHistories.map((l: any) => (
+                                <tr key={l._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 cursor-pointer" onClick={() => setSelectedLogDetail(l)}>
+                                  <td className="px-4 py-3 text-zinc-800 dark:text-zinc-200 font-bold">{l.entityType}</td>
+                                  <td className="px-4 py-3 text-zinc-400 truncate max-w-[80px]">{l.entityId}</td>
+                                  <td className="px-4 py-3 text-indigo-600 dark:text-indigo-400 font-semibold">{l.changedField}</td>
+                                  <td className="px-4 py-3 text-red-500 line-through truncate max-w-[120px]">{l.previousValue}</td>
+                                  <td className="px-4 py-3 text-emerald-600 dark:text-emerald-400 font-bold truncate max-w-[120px]">{l.newValue}</td>
+                                  <td className="px-4 py-3 text-zinc-500 font-sans text-xs">{l.changedByName}</td>
+                                </tr>
+                              ))}
+                              {changeHistoryLogs.length === 0 && (
+                                <tr>
+                                  <td colSpan={6} className="text-center py-6 text-zinc-400">No database document diff logs found.</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </Table>
+                          <Pagination currentPage={changeHistoryPage} totalPages={totalChangeHistoryPages} onPageChange={setChangeHistoryPage} />
+                        </div>
+                      )}
+
+                      {/* 6. SECURITY LOGS SUBTAB */}
+                      {logSubTab === 'security' && (
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center text-xs text-zinc-500 font-semibold px-2">
+                            <span>Showing {securityLogs.length > 0 ? (securityPage - 1) * limit + 1 : 0}-{Math.min(securityLogs.length, securityPage * limit)} of {securityLogs.length} Security Alerts</span>
+                          </div>
+                          <Table>
+                            <Thead><tr>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Severity</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Alert Action</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Details</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">IP Address</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Status</th>
+                            </tr></Thead>
+                            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                              {paginatedSecurities.map((l: any) => (
+                                <tr key={l._id} className="text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800/40 cursor-pointer" onClick={() => setSelectedLogDetail(l)}>
+                                  <td className="px-4 py-3">{badge(l.severity === 'Critical' || l.severity === 'High' ? 'red' : l.severity === 'Medium' ? 'amber' : 'blue', l.severity)}</td>
+                                  <td className="px-4 py-3 font-semibold text-zinc-900 dark:text-white">{l.action}</td>
+                                  <td className="px-4 py-3 text-zinc-500 truncate max-w-[200px]" title={l.details}>{l.details}</td>
+                                  <td className="px-4 py-3 text-zinc-400 font-mono">{l.ipAddress}</td>
+                                  <td className="px-4 py-3">{badge(l.status === 'Blocked' ? 'red' : 'zinc', l.status)}</td>
+                                </tr>
+                              ))}
+                              {securityLogs.length === 0 && (
+                                <tr>
+                                  <td colSpan={5} className="text-center py-6 text-rose-500 font-semibold">No security flags raised. Excellent!</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </Table>
+                          <Pagination currentPage={securityPage} totalPages={totalSecurityPages} onPageChange={setSecurityPage} />
+                        </div>
+                      )}
+
+                      {/* 7. IMPORT/EXPORT RECORDS SUBTAB */}
+                      {logSubTab === 'importexport' && (
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                          {/* Left: Imports log */}
+                          <div className="space-y-3">
+                            <h3 className="font-bold text-xs uppercase tracking-wider text-zinc-400 pl-2">Bulk Import History</h3>
+                            <Table>
+                              <Thead><tr>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Module</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">File Name</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Records (S/F)</th>
+                              </tr></Thead>
+                              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800 text-xs">
+                                {paginatedImports.map((l: any) => (
+                                  <tr key={l._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 cursor-pointer" onClick={() => setSelectedLogDetail(l)}>
+                                    <td className="px-3 py-2 font-bold text-zinc-900 dark:text-zinc-100">{l.module}</td>
+                                    <td className="px-3 py-2 text-zinc-500 truncate max-w-[120px]" title={l.fileName}>{l.fileName}</td>
+                                    <td className="px-3 py-2 font-mono text-zinc-600"><span className="text-emerald-600">{l.successRecords}</span>/<span className="text-red-500">{l.failedRecords}</span></td>
+                                  </tr>
+                                ))}
+                                {importLogs.length === 0 && (
+                                  <tr>
+                                    <td colSpan={3} className="text-center py-6 text-zinc-400">No bulk imports logged.</td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </Table>
+                            <Pagination currentPage={importPage} totalPages={totalImportPages} onPageChange={setImportPage} />
+                          </div>
+
+                          {/* Right: Exports log */}
+                          <div className="space-y-3">
+                            <h3 className="font-bold text-xs uppercase tracking-wider text-zinc-400 pl-2">Data Export History</h3>
+                            <Table>
+                              <Thead><tr>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Module</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Type</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Count</th>
+                              </tr></Thead>
+                              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800 text-xs">
+                                {paginatedExports.map((l: any) => (
+                                  <tr key={l._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 cursor-pointer" onClick={() => setSelectedLogDetail(l)}>
+                                    <td className="px-3 py-2 font-bold text-zinc-900 dark:text-zinc-100">{l.exportModule}</td>
+                                    <td className="px-3 py-2 text-zinc-500">{l.exportType} ({l.fileFormat})</td>
+                                    <td className="px-3 py-2 font-mono text-indigo-600 font-semibold">{l.numberOfRecords} recs</td>
+                                  </tr>
+                                ))}
+                                {exportLogs.length === 0 && (
+                                  <tr>
+                                    <td colSpan={3} className="text-center py-6 text-zinc-400">No data exports logged.</td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </Table>
+                            <Pagination currentPage={exportPage} totalPages={totalExportPages} onPageChange={setExportPage} />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 8. SEARCH QUERIES SUBTAB */}
                       {logSubTab === 'search' && (
                         <div className="space-y-4">
-                          {/* Filter Row */}
                           <div className="flex flex-wrap gap-3 p-3 bg-zinc-50 dark:bg-zinc-900/40 border dark:border-zinc-800 rounded-xl text-xs">
                             <input type="text" value={searchQuery} onChange={e=>setSearchQuery(e.target.value)}
                               placeholder="Search keyword..."
@@ -3048,7 +3464,6 @@ export default function AdminPage() {
                               <option value="mobile">Mobile</option>
                             </select>
                           </div>
-                          {/* Count display */}
                           <div className="flex justify-between items-center text-xs text-zinc-500 font-semibold px-2">
                             <span>Showing {filteredSearches.length > 0 ? (searchPage - 1) * limit + 1 : 0}-{Math.min(filteredSearches.length, searchPage * limit)} of {filteredSearches.length} Searches</span>
                           </div>
@@ -3081,53 +3496,44 @@ export default function AdminPage() {
                         </div>
                       )}
 
-                      {logSubTab === 'activity' && (
+                      {/* 9. GUEST VISITS SUBTAB */}
+                      {logSubTab === 'guest' && (
                         <div className="space-y-4">
-                          {/* Filter Row */}
-                          <div className="flex flex-wrap gap-3 p-3 bg-zinc-50 dark:bg-zinc-900/40 border dark:border-zinc-800 rounded-xl text-xs">
-                            <input type="text" value={activitySearch} onChange={e=>setActivitySearch(e.target.value)}
-                              placeholder="Search action or details..."
-                              className="px-3 py-1.5 border dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-800 dark:text-zinc-100 flex-1 min-w-[200px]" />
-                            <select value={activityCategory} onChange={e=>setActivityCategory(e.target.value)}
-                              className="px-3 py-1.5 border dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-800 dark:text-zinc-100 cursor-pointer">
-                              <option value="all">All Categories</option>
-                              <option value="Login">Login</option>
-                              <option value="Profile">Profile</option>
-                              <option value="Settings">Settings</option>
-                              <option value="Vendors">Vendors</option>
-                            </select>
-                          </div>
-                          {/* Count display */}
                           <div className="flex justify-between items-center text-xs text-zinc-500 font-semibold px-2">
-                            <span>Showing {filteredActivities.length > 0 ? (activityPage - 1) * limit + 1 : 0}-{Math.min(filteredActivities.length, activityPage * limit)} of {filteredActivities.length} Activities</span>
+                            <span>Showing {guestLogs.length > 0 ? (guestPage - 1) * limit + 1 : 0}-{Math.min(guestLogs.length, guestPage * limit)} of {guestLogs.length} Anonymous Guest Visits</span>
                           </div>
                           <Table>
                             <Thead><tr>
-                              {renderSortableHeader('Action', 'action', activitySortField, activitySortOrder, (f, o) => { setActivitySortField(f); setActivitySortOrder(o); })}
-                              {renderSortableHeader('Category', 'category', activitySortField, activitySortOrder, (f, o) => { setActivitySortField(f); setActivitySortOrder(o); })}
-                              {renderSortableHeader('Details', 'details', activitySortField, activitySortOrder, (f, o) => { setActivitySortField(f); setActivitySortOrder(o); })}
-                              {renderSortableHeader('Timestamp', 'createdAt', activitySortField, activitySortOrder, (f, o) => { setActivitySortField(f); setActivitySortOrder(o); })}
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Session ID</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">IP Address</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Browser / Device</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Location</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Landing Page</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Time on Site</th>
                             </tr></Thead>
                             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                              {paginatedActivities.map((l: any) => (
+                              {paginatedGuests.map((l: any) => (
                                 <tr key={l._id} className="text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800/40 cursor-pointer" onClick={() => setSelectedLogDetail(l)}>
-                                  <td className="px-4 py-3 font-semibold text-zinc-800 dark:text-zinc-200">{l.action}</td>
-                                  <td className="px-4 py-3">{badge('blue', l.category)}</td>
-                                  <td className="px-4 py-3 text-zinc-500">{l.details}</td>
-                                  <td className="px-4 py-3 text-zinc-400">{new Date(l.createdAt).toLocaleTimeString()}</td>
+                                  <td className="px-4 py-3 font-mono text-[10px] text-zinc-900 dark:text-white font-semibold">{l.sessionId}</td>
+                                  <td className="px-4 py-3 text-zinc-400 font-mono">{l.ipAddress}</td>
+                                  <td className="px-4 py-3 text-zinc-500">{l.browser} ({l.device})</td>
+                                  <td className="px-4 py-3 text-zinc-500">{l.city || 'Unknown'}, {l.country}</td>
+                                  <td className="px-4 py-3 font-mono text-zinc-500 truncate max-w-[120px]">{l.landingPage}</td>
+                                  <td className="px-4 py-3 font-bold text-zinc-700 dark:text-zinc-300">{l.timeOnSite} sec</td>
                                 </tr>
                               ))}
-                              {filteredActivities.length === 0 && (
+                              {guestLogs.length === 0 && (
                                 <tr>
-                                  <td colSpan={4} className="text-center py-6 text-zinc-400">No activities found matching filters.</td>
+                                  <td colSpan={6} className="text-center py-6 text-zinc-400">No anonymous visitor stats logged.</td>
                                 </tr>
                               )}
                             </tbody>
                           </Table>
-                          <Pagination currentPage={activityPage} totalPages={totalActivityPages} onPageChange={setActivityPage} />
+                          <Pagination currentPage={guestPage} totalPages={totalGuestPages} onPageChange={setGuestPage} />
                         </div>
                       )}
 
+                      {/* 10. CHATBOT INTENTS LOG SUBTAB */}
                       {logSubTab === 'chatbot' && (
                         <div className="space-y-4">
                           {/* Filter Controls Header */}
@@ -3272,6 +3678,56 @@ export default function AdminPage() {
                                   <p className="text-xs text-center">Select a chatbot session from the left to view the entire real-time conversation history.</p>
                                 </div>
                               )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 11. RETENTION CONFIGURATOR SUBTAB */}
+                      {logSubTab === 'retention' && (
+                        <div className="space-y-6 max-w-2xl mx-auto p-4 bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-2xl shadow-sm">
+                          <h3 className="font-bold text-sm text-zinc-900 dark:text-white flex items-center gap-2 border-b pb-3 dark:border-zinc-800">
+                            <Settings className="h-5 w-5 text-indigo-500" /> Log Retention & Archiving Settings
+                          </h3>
+                          
+                          <div className="space-y-4">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400">Retention Period Policy</label>
+                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                              {[
+                                { val: 30, label: '30 Days' },
+                                { val: 90, label: '90 Days' },
+                                { val: 180, label: '180 Days' },
+                                { val: 360, label: '1 Year' },
+                                { val: 0, label: 'Forever' }
+                              ].map(item => (
+                                <button key={item.val}
+                                  onClick={() => setRetentionDays(item.val)}
+                                  className={`px-3 py-2.5 text-xs font-semibold rounded-xl border text-center transition-all ${
+                                    retentionDays === item.val
+                                      ? 'bg-indigo-600 border-indigo-600 text-white shadow'
+                                      : 'bg-zinc-50 border-zinc-200 dark:bg-zinc-800 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100'
+                                  }`}>
+                                  {item.label}
+                                </button>
+                              ))}
+                            </div>
+                            <p className="text-[11px] text-zinc-400">Logs older than the configured period will be automatically cleaned up during background daily tasks.</p>
+                          </div>
+
+                          <div className="pt-4 border-t dark:border-zinc-800 space-y-4">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Manual Archive & Cleanup Actions</h4>
+                            <div className="flex flex-wrap gap-4">
+                              <button onClick={async () => {
+                                try {
+                                  const res = await apiAction('PUT', '/admin/logs/retention', { daysLimit: retentionDays });
+                                  alert(`Successfully triggered manual log retention sweep! Purged ${res.purgedCount || 0} old log entries.`);
+                                  loadLogs();
+                                } catch {
+                                  alert('Failed to trigger logs retention sweep.');
+                                }
+                              }} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow flex items-center gap-1.5 transition-colors cursor-pointer">
+                                <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Run Retention Cleanup Now
+                              </button>
                             </div>
                           </div>
                         </div>

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
+import { AuditService } from './audit.service';
 import { SalesModule } from '../sales/sales.module';
 import { CatalogModule } from '../catalog/catalog.module';
 import { RepositoriesModule } from '../../repositories/repositories.module';
@@ -15,6 +16,7 @@ import { ChatSession, ChatSessionSchema } from '../agent/agent.schemas';
     MongooseModule.forFeature([{ name: ChatSession.name, schema: ChatSessionSchema }]),
   ],
   controllers: [AdminController],
-  providers: [AdminService],
+  providers: [AdminService, AuditService],
+  exports: [AuditService],
 })
 export class AppAdminModule {}

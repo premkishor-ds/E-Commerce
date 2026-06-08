@@ -37,6 +37,13 @@ import {
   ActivityLogRepository,
   ChatbotLogRepository,
   AnalyticsCacheRepository,
+  ApiLogRepository,
+  SecurityLogRepository,
+  LoginLogRepository,
+  ImportLogRepository,
+  ExportLogRepository,
+  GuestLogRepository,
+  ChangeHistoryRepository,
 } from './concrete.repositories';
 
 const REPOSITORIES = [
@@ -76,6 +83,13 @@ const REPOSITORIES = [
   ActivityLogRepository,
   ChatbotLogRepository,
   AnalyticsCacheRepository,
+  ApiLogRepository,
+  SecurityLogRepository,
+  LoginLogRepository,
+  ImportLogRepository,
+  ExportLogRepository,
+  GuestLogRepository,
+  ChangeHistoryRepository,
 ];
 
 

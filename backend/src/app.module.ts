@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
@@ -18,6 +18,7 @@ import { ProfileModule } from './modules/profile/profile.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { VoiceModule } from './modules/voice/voice.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { ApiLoggerMiddleware } from './modules/admin/api-logger.middleware';
 
 @Module({
   imports: [
@@ -63,4 +64,8 @@ import { NotificationModule } from './modules/notification/notification.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ApiLoggerMiddleware).forRoutes('*');
+  }
+}
