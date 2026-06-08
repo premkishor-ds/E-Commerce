@@ -1115,6 +1115,57 @@ export class AnalyticsCache extends Document {
 }
 export const AnalyticsCacheSchema = SchemaFactory.createForClass(AnalyticsCache);
 
+// --- CMS PAGE & BLOG ---
+@Schema({ timestamps: true })
+export class CmsPage extends Document {
+  @Prop({ required: true, unique: true, index: true })
+  slug: string;
+
+  @Prop({ required: true })
+  title: string;
+
+  @Prop({ required: true })
+  content: string;
+
+  @Prop({ default: 'Draft' })
+  status: string; // Draft, Published, Archived
+
+  @Prop({ type: Object, default: {} })
+  seoMeta: Record<string, string>;
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  authorId: Types.ObjectId;
+
+  @Prop({ type: Array, default: [] })
+  history: Array<{ content: string; updatedBy: Types.ObjectId; timestamp: Date }>;
+}
+export const CmsPageSchema = SchemaFactory.createForClass(CmsPage);
+
+@Schema({ timestamps: true })
+export class BlogPost extends Document {
+  @Prop({ required: true, unique: true, index: true })
+  slug: string;
+
+  @Prop({ required: true })
+  title: string;
+
+  @Prop({ required: true })
+  content: string;
+
+  @Prop({ default: 'Draft' })
+  status: string; // Draft, Published, Archived
+
+  @Prop({ type: [String], default: [] })
+  tags: string[];
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  authorId: Types.ObjectId;
+
+  @Prop({ default: '' })
+  featuredImage: string;
+}
+export const BlogPostSchema = SchemaFactory.createForClass(BlogPost);
+
 // --- API LOG ---
 @Schema({ timestamps: true })
 export class ApiLog extends Document {
@@ -1526,6 +1577,306 @@ export class FeedbackActivityLog extends Document {
   newValue: string;
 }
 export const FeedbackActivityLogSchema = SchemaFactory.createForClass(FeedbackActivityLog);
+
+// --- ROLE ---
+@Schema({ timestamps: true })
+export class Role extends Document {
+  @Prop({ required: true, unique: true, index: true })
+  name: string;
+
+  @Prop({ default: '' })
+  description: string;
+}
+export const RoleSchema = SchemaFactory.createForClass(Role);
+
+// --- PERMISSION ---
+@Schema({ timestamps: true })
+export class Permission extends Document {
+  @Prop({ required: true, unique: true, index: true })
+  name: string;
+
+  @Prop({ default: '' })
+  description: string;
+}
+export const PermissionSchema = SchemaFactory.createForClass(Permission);
+
+// --- NEW SAAS ENTERPRISE MODULES (PHASE 21) ---
+
+@Schema({ timestamps: true })
+export class FaqCategory extends Document {
+  @Prop({ required: true, unique: true }) name: string;
+}
+export const FaqCategorySchema = SchemaFactory.createForClass(FaqCategory);
+
+@Schema({ timestamps: true })
+export class FaqItem extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'FaqCategory', required: true }) categoryId: Types.ObjectId;
+  @Prop({ required: true }) question: string;
+  @Prop({ required: true }) answer: string;
+  @Prop({ default: 0 }) helpfulCount: number;
+}
+export const FaqItemSchema = SchemaFactory.createForClass(FaqItem);
+
+@Schema({ timestamps: true })
+export class MediaFolder extends Document {
+  @Prop({ required: true }) name: string;
+  @Prop({ type: Types.ObjectId, ref: 'MediaFolder', default: null }) parentId: Types.ObjectId | null;
+}
+export const MediaFolderSchema = SchemaFactory.createForClass(MediaFolder);
+
+@Schema({ timestamps: true })
+export class Announcement extends Document {
+  @Prop({ required: true }) title: string;
+  @Prop({ required: true }) content: string;
+  @Prop({ type: [String], default: ['All'] }) targetRoles: string[];
+  @Prop({ default: true }) isActive: boolean;
+}
+export const AnnouncementSchema = SchemaFactory.createForClass(Announcement);
+
+@Schema({ timestamps: true })
+export class FeatureFlag extends Document {
+  @Prop({ required: true, unique: true }) name: string;
+  @Prop({ default: false }) isEnabled: boolean;
+  @Prop({ default: 100 }) percentageRollout: number;
+}
+export const FeatureFlagSchema = SchemaFactory.createForClass(FeatureFlag);
+
+@Schema({ timestamps: true })
+export class Experiment extends Document {
+  @Prop({ required: true }) name: string;
+  @Prop({ required: true }) description: string;
+  @Prop({ default: 'Draft' }) status: string;
+}
+export const ExperimentSchema = SchemaFactory.createForClass(Experiment);
+
+@Schema({ timestamps: true })
+export class ExperimentResult extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'Experiment', required: true }) experimentId: Types.ObjectId;
+  @Prop({ required: true }) variant: string;
+  @Prop({ default: 0 }) impressions: number;
+  @Prop({ default: 0 }) conversions: number;
+}
+export const ExperimentResultSchema = SchemaFactory.createForClass(ExperimentResult);
+
+@Schema({ timestamps: true })
+export class Webhook extends Document {
+  @Prop({ required: true }) name: string;
+  @Prop({ required: true }) url: string;
+  @Prop({ required: true }) secret: string;
+  @Prop({ type: [String], default: [] }) events: string[];
+  @Prop({ default: true }) isActive: boolean;
+}
+export const WebhookSchema = SchemaFactory.createForClass(Webhook);
+
+@Schema({ timestamps: true })
+export class WebhookLog extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'Webhook', required: true }) webhookId: Types.ObjectId;
+  @Prop({ required: true }) event: string;
+  @Prop({ required: true }) payload: string;
+  @Prop({ required: true }) status: number;
+  @Prop({ default: '' }) response: string;
+}
+export const WebhookLogSchema = SchemaFactory.createForClass(WebhookLog);
+
+@Schema({ timestamps: true })
+export class Integration extends Document {
+  @Prop({ required: true, unique: true }) name: string;
+  @Prop({ required: true }) provider: string;
+  @Prop({ default: false }) isEnabled: boolean;
+  @Prop({ type: Object, default: {} }) config: Record<string, any>;
+}
+export const IntegrationSchema = SchemaFactory.createForClass(Integration);
+
+@Schema({ timestamps: true })
+export class SeoSetting extends Document {
+  @Prop({ required: true, unique: true }) path: string;
+  @Prop({ required: true }) metaTitle: string;
+  @Prop({ required: true }) metaDescription: string;
+  @Prop({ default: '' }) openGraphImage: string;
+}
+export const SeoSettingSchema = SchemaFactory.createForClass(SeoSetting);
+
+@Schema({ timestamps: true })
+export class Sitemap extends Document {
+  @Prop({ required: true }) url: string;
+  @Prop({ required: true }) lastModified: Date;
+  @Prop({ default: 'weekly' }) changeFreq: string;
+}
+export const SitemapSchema = SchemaFactory.createForClass(Sitemap);
+
+@Schema({ timestamps: true })
+export class RedirectRule extends Document {
+  @Prop({ required: true }) fromPath: string;
+  @Prop({ required: true }) toPath: string;
+  @Prop({ default: 301 }) statusCode: number;
+}
+export const RedirectRuleSchema = SchemaFactory.createForClass(RedirectRule);
+
+@Schema({ timestamps: true })
+export class TaxRule extends Document {
+  @Prop({ required: true }) name: string;
+  @Prop({ required: true }) country: string;
+  @Prop({ default: '' }) state: string;
+  @Prop({ required: true }) ratePercentage: number;
+}
+export const TaxRuleSchema = SchemaFactory.createForClass(TaxRule);
+
+@Schema({ timestamps: true })
+export class CommissionRule extends Document {
+  @Prop({ required: true }) role: string;
+  @Prop({ required: true }) categoryId: string;
+  @Prop({ required: true }) percentage: number;
+}
+export const CommissionRuleSchema = SchemaFactory.createForClass(CommissionRule);
+
+@Schema({ timestamps: true })
+export class FraudCase extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User' }) userId: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'Order' }) orderId: Types.ObjectId;
+  @Prop({ required: true }) riskScore: number;
+  @Prop({ required: true }) reason: string;
+  @Prop({ default: 'Open' }) status: string;
+}
+export const FraudCaseSchema = SchemaFactory.createForClass(FraudCase);
+
+@Schema({ timestamps: true })
+export class InventoryForecast extends Document {
+  @Prop({ required: true }) sku: string;
+  @Prop({ required: true }) predictedDemand: number;
+  @Prop({ required: true }) confidenceScore: number;
+}
+export const InventoryForecastSchema = SchemaFactory.createForClass(InventoryForecast);
+
+@Schema({ timestamps: true })
+export class Translation extends Document {
+  @Prop({ required: true }) languageCode: string;
+  @Prop({ required: true }) key: string;
+  @Prop({ required: true }) value: string;
+}
+export const TranslationSchema = SchemaFactory.createForClass(Translation);
+
+@Schema({ timestamps: true })
+export class Currency extends Document {
+  @Prop({ required: true, unique: true }) code: string;
+  @Prop({ required: true }) symbol: string;
+  @Prop({ required: true }) exchangeRateToUSD: number;
+}
+export const CurrencySchema = SchemaFactory.createForClass(Currency);
+
+@Schema({ timestamps: true })
+export class PrivacyRequest extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true }) userId: Types.ObjectId;
+  @Prop({ required: true }) requestType: string;
+  @Prop({ default: 'Pending' }) status: string;
+}
+export const PrivacyRequestSchema = SchemaFactory.createForClass(PrivacyRequest);
+
+@Schema({ timestamps: true })
+export class RetentionPolicy extends Document {
+  @Prop({ required: true }) collectionName: string;
+  @Prop({ required: true }) retentionDays: number;
+}
+export const RetentionPolicySchema = SchemaFactory.createForClass(RetentionPolicy);
+
+@Schema({ timestamps: true })
+export class BackupLog extends Document {
+  @Prop({ required: true }) fileName: string;
+  @Prop({ required: true }) status: string;
+  @Prop({ required: true }) sizeBytes: number;
+}
+export const BackupLogSchema = SchemaFactory.createForClass(BackupLog);
+
+@Schema({ timestamps: true })
+export class CronLog extends Document {
+  @Prop({ required: true }) jobName: string;
+  @Prop({ required: true }) status: string;
+  @Prop({ default: 0 }) durationMs: number;
+  @Prop({ default: '' }) errorDetail: string;
+}
+export const CronLogSchema = SchemaFactory.createForClass(CronLog);
+
+@Schema({ timestamps: true })
+export class QueueLog extends Document {
+  @Prop({ required: true }) queueName: string;
+  @Prop({ required: true }) jobId: string;
+  @Prop({ required: true }) status: string;
+}
+export const QueueLogSchema = SchemaFactory.createForClass(QueueLog);
+
+@Schema({ timestamps: true })
+export class SystemHealthLog extends Document {
+  @Prop({ required: true }) serviceName: string;
+  @Prop({ required: true }) status: string;
+  @Prop({ type: Object }) metrics: Record<string, any>;
+}
+export const SystemHealthLogSchema = SchemaFactory.createForClass(SystemHealthLog);
+
+@Schema({ timestamps: true })
+export class AiUsageLog extends Document {
+  @Prop({ required: true }) service: string;
+  @Prop({ required: true }) promptTokens: number;
+  @Prop({ required: true }) completionTokens: number;
+  @Prop({ required: true }) cost: number;
+}
+export const AiUsageLogSchema = SchemaFactory.createForClass(AiUsageLog);
+
+@Schema({ timestamps: true })
+export class AiFeedback extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'ChatbotLog' }) sessionId: Types.ObjectId;
+  @Prop({ required: true }) rating: number;
+  @Prop({ default: '' }) comment: string;
+}
+export const AiFeedbackSchema = SchemaFactory.createForClass(AiFeedback);
+
+@Schema({ timestamps: true })
+export class BulkJob extends Document {
+  @Prop({ required: true }) jobType: string;
+  @Prop({ default: 'Processing' }) status: string;
+  @Prop({ default: 0 }) processedCount: number;
+  @Prop({ default: 0 }) totalCount: number;
+}
+export const BulkJobSchema = SchemaFactory.createForClass(BulkJob);
+
+@Schema({ timestamps: true })
+export class KnowledgeBaseArticle extends Document {
+  @Prop({ required: true }) title: string;
+  @Prop({ required: true }) content: string;
+  @Prop({ type: Types.ObjectId, ref: 'FaqCategory' }) categoryId: Types.ObjectId;
+  @Prop({ default: 0 }) views: number;
+}
+export const KnowledgeBaseArticleSchema = SchemaFactory.createForClass(KnowledgeBaseArticle);
+
+@Schema({ timestamps: true })
+export class RoadmapItem extends Document {
+  @Prop({ required: true }) title: string;
+  @Prop({ required: true }) description: string;
+  @Prop({ default: 'Planned' }) status: string;
+  @Prop({ default: 0 }) votes: number;
+}
+export const RoadmapItemSchema = SchemaFactory.createForClass(RoadmapItem);
+
+
+// --- ROLE PERMISSION ---
+@Schema({ timestamps: true })
+export class RolePermission extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'Role', required: true, index: true })
+  roleId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Permission', required: true, index: true })
+  permissionId: Types.ObjectId;
+}
+export const RolePermissionSchema = SchemaFactory.createForClass(RolePermission);
+
+// --- USER ROLE ---
+@Schema({ timestamps: true })
+export class UserRole extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
+  userId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Role', required: true, index: true })
+  roleId: Types.ObjectId;
+}
+export const UserRoleSchema = SchemaFactory.createForClass(UserRole);
 
 
 

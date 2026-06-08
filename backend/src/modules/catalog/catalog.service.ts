@@ -12,6 +12,7 @@ import {
   NotificationRepository,
   OrderRepository,
   VendorRepository,
+  SearchLogRepository,
 } from '../../repositories/concrete.repositories';
 import { Types } from 'mongoose';
 
@@ -29,6 +30,7 @@ export class CatalogService {
     private readonly notificationRepository: NotificationRepository,
     private readonly orderRepository: OrderRepository,
     private readonly vendorRepository: VendorRepository,
+    private readonly searchLogRepository: SearchLogRepository,
   ) {}
 
   private normalizeCategoryName(name: string): string {
@@ -196,6 +198,17 @@ export class CatalogService {
         p.sku?.toLowerCase().includes(filters.search.toLowerCase())
       );
       console.log('[DEBUG_CATALOG] getProducts fallback products found count:', products.length);
+    }
+
+    // Log the search if a search query was provided
+    if (filters.search) {
+      this.searchLogRepository.create({
+        keyword: filters.search,
+        category: filters.category || 'All',
+        source: 'api',
+        resultsCount: products ? products.length : 0,
+        userId: filters.userId ? new Types.ObjectId(filters.userId) : null,
+      }).catch(err => console.error('Failed to log search:', err));
     }
 
     // Apply advanced filters in-memory for accuracy and test compatibility

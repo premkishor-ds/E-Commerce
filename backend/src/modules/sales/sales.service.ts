@@ -56,6 +56,7 @@ export class SalesService {
         items: [],
       });
     }
+    console.log(`[DEBUG_CART] getCart: userId=${userId} items=${JSON.stringify(cart.items)}`);
     return cart;
   }
 
@@ -67,12 +68,16 @@ export class SalesService {
     const itemIndex = cart.items.findIndex(
       (item) => item.productId.toString() === productId,
     );
+    console.log(`[DEBUG_CART] addToCart: before itemIndex=${itemIndex} quantity=${quantity} items=${JSON.stringify(cart.items)}`);
     if (itemIndex > -1) {
       cart.items[itemIndex].quantity += quantity;
+      cart.markModified('items');
     } else {
       cart.items.push({ productId: new Types.ObjectId(productId), quantity });
     }
-    return cart.save();
+    const saved = await cart.save();
+    console.log(`[DEBUG_CART] addToCart: after saved items=${JSON.stringify(saved.items)}`);
+    return saved;
   }
 
   async removeFromCart(userId: string, productId: string) {
@@ -97,6 +102,7 @@ export class SalesService {
       cart.items.splice(itemIndex, 1);
     } else {
       cart.items[itemIndex].quantity = quantity;
+      cart.markModified('items');
     }
     return cart.save();
   }

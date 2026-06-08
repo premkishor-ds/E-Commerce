@@ -363,6 +363,7 @@ Enhanced Reply:`;
         resolvedEntities['brand'] = prod.brand?.name || prod.brand;
         resolvedEntities['productType'] = prod.productType || prod.category?.name || prod.category;
         resolvedEntities['productId'] = prod._id?.toString() || prod.id;
+        resolvedEntities['removeOne'] = 'true';
         entityScore = 10;
       } else {
         resolvedEntities.noContextProduct = 'true';
@@ -415,7 +416,9 @@ Enhanced Reply:`;
     let userId = req.userId;
     let userRoles = req.userRoles || [];
 
-    const isMockAuthSession = sessionId && (sessionId.startsWith('session-') || sessionId.startsWith('followup-session-'));
+    const isMockAuthSession = sessionId && 
+      (sessionId.startsWith('session-') || sessionId.startsWith('followup-session-')) &&
+      sessionId !== 'session-live-1';
     if (isMockAuthSession) {
       if (!userRoles || userRoles.length === 0) {
         userRoles = ['Customer'];
@@ -537,6 +540,13 @@ Enhanced Reply:`;
         'CHECKOUT_ADDRESS',
         'CHECKOUT_CITY_ZIP',
         'REVIEW_COMMENT',
+        'VENDOR_UPDATE_VARIANTS_VAL',
+        'UPLOAD_FILE_INPUT',
+        'VENDOR_UPDATE_VARIANTS_KEY',
+        'VENDOR_UPDATE_PRICE',
+        'VENDOR_UPDATE_STOCK',
+        'VENDOR_UPDATE_DESC',
+        'VENDOR_UPDATE_SELECT',
       ].includes(activeStep);
       const isStrongTopicSwitch =
         !isFreeFormStep &&
@@ -2996,6 +3006,7 @@ Enhanced Reply:`;
     ctx: any,
     guestId?: string,
   ): Promise<AgentResponse> {
+    console.log('[DEBUG_DISPATCH] intent:', intent, 'entities:', entities, 'message:', message);
     const q = message.toLowerCase().trim();
 
     switch (intent) {
@@ -3812,8 +3823,10 @@ Enhanced Reply:`;
           if (userId)
             await this.memory.updateUserSearchHistory(userId, searchQuery);
 
+          const priceSuffix = activeMaxPrice !== Infinity ? ` under $${activeMaxPrice.toFixed(2)}` : '';
+
           return {
-            reply: `🔍 **Found ${filtered.length} products** for "${searchQuery}":\n\n${list}\n\nType the **product name** to see details, or **"add [name] to cart"** to purchase!`,
+            reply: `🔍 **Found ${filtered.length} products** for "${searchQuery}"${priceSuffix}:\n\n${list}\n\nType the **product name** to see details, or **"add [name] to cart"** to purchase!`,
             intent,
             confidence: 10,
             actions: [{ type: 'NAVIGATE' as any, payload: { path: `/search?q=${encodeURIComponent(searchQuery)}` } }],
@@ -4145,7 +4158,7 @@ Enhanced Reply:`;
         const intelContext = this.chatbotIntelligenceService.getContext(sessionId);
 
         // Check pronoun actions
-        const isRemoveOne = /remove one|decrease|less/i.test(message);
+        const isRemoveOne = /remove one|decrease|less/i.test(message) || entities.removeOne === 'true';
         const isDeleteIt = /delete it|remove it/i.test(message);
 
         if ((isRemoveOne || isDeleteIt) && intelContext.selectedProduct) {

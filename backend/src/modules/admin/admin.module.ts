@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
@@ -8,6 +8,7 @@ import { CatalogModule } from '../catalog/catalog.module';
 import { RepositoriesModule } from '../../repositories/repositories.module';
 import { ChatSession, ChatSessionSchema } from '../agent/agent.schemas';
 
+@Global()
 @Module({
   imports: [
     SalesModule,

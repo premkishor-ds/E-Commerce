@@ -1084,6 +1084,18 @@ export function classifyIntent(message: string): IntentMatch {
     };
   }
 
+  // High-priority: explicit "remove/delete [product]" or general cart item removal
+  if (
+    /^(?:remove|delete|discard|take\s+out)\b/i.test(lower) &&
+    !/\b(address|profile|account|coupon|ticket|card|payment|wishlist)\b/i.test(lower)
+  ) {
+    return {
+      intent: 'REMOVE_CART',
+      score: 10,
+      entities,
+    };
+  }
+
   // High-priority: "show my profile" / "profile info" → VIEW_PROFILE
   if (/\b(show\s+(my\s+)?profile|profile\s+info|my\s+profile\s+info|profile\s+details)\b/i.test(lower)) {
     return {

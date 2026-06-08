@@ -6,6 +6,7 @@ import {
 import { UserRepository, VendorRepository } from '../../repositories/concrete.repositories';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
+import { AuditService } from '../admin/audit.service';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +18,7 @@ export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly vendorRepository: VendorRepository,
+    private readonly auditService: AuditService,
   ) {}
 
   async register(dto: any) {
@@ -66,6 +68,12 @@ export class AuthService {
     // ─────────────────────────────────────────────────────────────────────────
 
     if (user.lockoutUntil && user.lockoutUntil > new Date()) {
+      await this.auditService.logSecurity({
+        userId: user._id,
+        role: user.roles[0],
+        action: 'Account locked attempt',
+        details: `Attempt to login to locked account ${user.email}.`,
+      });
       throw new UnauthorizedException(
         'Account locked temporarily due to too many failed attempts',
       );
@@ -77,6 +85,19 @@ export class AuthService {
       if (user.loginAttempts >= 5) {
         user.lockoutUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 mins lock
         user.loginAttempts = 0;
+        await this.auditService.logSecurity({
+          userId: user._id,
+          role: user.roles[0],
+          action: 'Brute-force lockout',
+          details: `Account ${user.email} locked out for 15 minutes.`,
+        });
+      } else {
+        await this.auditService.logSecurity({
+          userId: user._id,
+          role: user.roles[0],
+          action: 'Failed login attempt',
+          details: `Failed attempt #${user.loginAttempts} for account ${user.email}.`,
+        });
       }
       await user.save();
       throw new UnauthorizedException('Invalid credentials');

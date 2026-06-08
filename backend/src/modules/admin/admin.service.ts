@@ -141,6 +141,17 @@ export class AdminService {
 
   // --- ANALYTICS CALCULATIONS ---
   async getAnalyticsSummary() {
+    const dateKey = new Date().toISOString().split('T')[0];
+    const cached = await this.cacheRepository.findOne({ metricName: 'global_summary', dateKey });
+    
+    // Use 10-minute cache to reduce DB load
+    if (cached && (cached as any).updatedAt) {
+      const ageMs = Date.now() - new Date((cached as any).updatedAt).getTime();
+      if (ageMs < 10 * 60 * 1000) {
+        return cached.details;
+      }
+    }
+
     const [orders, users, products, vendors, chatSessions] = await Promise.all([
       this.orderRepository.find({}),
       this.userRepository.find({}),
@@ -208,7 +219,7 @@ export class AdminService {
     const browserStats = { Chrome: 64, Safari: 18, Firefox: 10, Edge: 8 };
     const deviceStats = { Desktop: 70, Mobile: 25, Tablet: 5 };
 
-    return {
+    const result = {
       revenue: {
         total: totalRevenue,
         monthlyTrend: Object.keys(revenueByMonth).map(month => ({ month, amount: revenueByMonth[month] })),
@@ -233,6 +244,15 @@ export class AdminService {
         devices: deviceStats,
       }
     };
+
+    if (cached) {
+      cached.details = result;
+      await (cached as any).save();
+    } else {
+      await this.cacheRepository.create({ metricName: 'global_summary', dateKey, value: 1, details: result });
+    }
+
+    return result;
   }
 
   // --- LOG QUERIES (DYNAMIC REAL-TIME FROM MONGODB) ---

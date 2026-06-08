@@ -2,7 +2,7 @@ import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SchemasModule } from './schemas/schemas.module';
@@ -20,6 +20,10 @@ import { VoiceModule } from './modules/voice/voice.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ApiLoggerMiddleware } from './modules/admin/api-logger.middleware';
 import { FeedbackModule } from './modules/feedback/feedback.module';
+import { RbacModule } from './modules/rbac/rbac.module';
+import { AuditInterceptor } from './modules/admin/audit.interceptor';
+import { RetryInterceptor } from './modules/admin/retry.interceptor';
+import { CmsModule } from './modules/cms/cms.module';
 
 @Module({
   imports: [
@@ -50,6 +54,8 @@ import { FeedbackModule } from './modules/feedback/feedback.module';
     VoiceModule,
     NotificationModule,
     FeedbackModule,
+    RbacModule,
+    CmsModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -63,6 +69,14 @@ import { FeedbackModule } from './modules/feedback/feedback.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RetryInterceptor,
     },
   ],
 })

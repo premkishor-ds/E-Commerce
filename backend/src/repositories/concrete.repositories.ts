@@ -51,6 +51,40 @@ import {
   FeedbackAttachment,
   FeedbackVote,
   FeedbackActivityLog,
+  RolePermission,
+  UserRole,
+  CmsPage,
+  BlogPost,
+  FaqCategory,
+  FaqItem,
+  MediaFolder,
+  Announcement,
+  FeatureFlag,
+  Experiment,
+  ExperimentResult,
+  Webhook,
+  WebhookLog,
+  Integration,
+  SeoSetting,
+  Sitemap,
+  RedirectRule,
+  TaxRule,
+  CommissionRule,
+  FraudCase,
+  InventoryForecast,
+  Translation,
+  Currency,
+  PrivacyRequest,
+  RetentionPolicy,
+  BackupLog,
+  CronLog,
+  QueueLog,
+  SystemHealthLog,
+  AiUsageLog,
+  AiFeedback,
+  BulkJob,
+  KnowledgeBaseArticle,
+  RoadmapItem,
 } from '../schemas/schemas';
 
 
@@ -59,6 +93,179 @@ import {
 @Injectable()
 export class UserRepository extends BaseRepository<User> {
   constructor(@InjectModel(User.name) model: Model<User>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class UserRoleRepository extends BaseRepository<UserRole> {
+  constructor(@InjectModel(UserRole.name) model: Model<UserRole>) {
+    super(model);
+  }
+}
+
+// --- NEW SAAS ENTERPRISE MODULES (PHASE 21) REPOSITORIES ---
+
+@Injectable()
+export class FaqCategoryRepository extends BaseRepository<FaqCategory> {
+  constructor(@InjectModel(FaqCategory.name) model: Model<FaqCategory>) { super(model); }
+}
+
+@Injectable()
+export class FaqItemRepository extends BaseRepository<FaqItem> {
+  constructor(@InjectModel(FaqItem.name) model: Model<FaqItem>) { super(model); }
+}
+
+@Injectable()
+export class MediaFolderRepository extends BaseRepository<MediaFolder> {
+  constructor(@InjectModel(MediaFolder.name) model: Model<MediaFolder>) { super(model); }
+}
+
+@Injectable()
+export class AnnouncementRepository extends BaseRepository<Announcement> {
+  constructor(@InjectModel(Announcement.name) model: Model<Announcement>) { super(model); }
+}
+
+@Injectable()
+export class FeatureFlagRepository extends BaseRepository<FeatureFlag> {
+  constructor(@InjectModel(FeatureFlag.name) model: Model<FeatureFlag>) { super(model); }
+}
+
+@Injectable()
+export class ExperimentRepository extends BaseRepository<Experiment> {
+  constructor(@InjectModel(Experiment.name) model: Model<Experiment>) { super(model); }
+}
+
+@Injectable()
+export class ExperimentResultRepository extends BaseRepository<ExperimentResult> {
+  constructor(@InjectModel(ExperimentResult.name) model: Model<ExperimentResult>) { super(model); }
+}
+
+@Injectable()
+export class WebhookRepository extends BaseRepository<Webhook> {
+  constructor(@InjectModel(Webhook.name) model: Model<Webhook>) { super(model); }
+}
+
+@Injectable()
+export class WebhookLogRepository extends BaseRepository<WebhookLog> {
+  constructor(@InjectModel(WebhookLog.name) model: Model<WebhookLog>) { super(model); }
+}
+
+@Injectable()
+export class IntegrationRepository extends BaseRepository<Integration> {
+  constructor(@InjectModel(Integration.name) model: Model<Integration>) { super(model); }
+}
+
+@Injectable()
+export class SeoSettingRepository extends BaseRepository<SeoSetting> {
+  constructor(@InjectModel(SeoSetting.name) model: Model<SeoSetting>) { super(model); }
+}
+
+@Injectable()
+export class SitemapRepository extends BaseRepository<Sitemap> {
+  constructor(@InjectModel(Sitemap.name) model: Model<Sitemap>) { super(model); }
+}
+
+@Injectable()
+export class RedirectRuleRepository extends BaseRepository<RedirectRule> {
+  constructor(@InjectModel(RedirectRule.name) model: Model<RedirectRule>) { super(model); }
+}
+
+@Injectable()
+export class TaxRuleRepository extends BaseRepository<TaxRule> {
+  constructor(@InjectModel(TaxRule.name) model: Model<TaxRule>) { super(model); }
+}
+
+@Injectable()
+export class CommissionRuleRepository extends BaseRepository<CommissionRule> {
+  constructor(@InjectModel(CommissionRule.name) model: Model<CommissionRule>) { super(model); }
+}
+
+@Injectable()
+export class FraudCaseRepository extends BaseRepository<FraudCase> {
+  constructor(@InjectModel(FraudCase.name) model: Model<FraudCase>) { super(model); }
+}
+
+@Injectable()
+export class InventoryForecastRepository extends BaseRepository<InventoryForecast> {
+  constructor(@InjectModel(InventoryForecast.name) model: Model<InventoryForecast>) { super(model); }
+}
+
+@Injectable()
+export class TranslationRepository extends BaseRepository<Translation> {
+  constructor(@InjectModel(Translation.name) model: Model<Translation>) { super(model); }
+}
+
+@Injectable()
+export class CurrencyRepository extends BaseRepository<Currency> {
+  constructor(@InjectModel(Currency.name) model: Model<Currency>) { super(model); }
+}
+
+@Injectable()
+export class PrivacyRequestRepository extends BaseRepository<PrivacyRequest> {
+  constructor(@InjectModel(PrivacyRequest.name) model: Model<PrivacyRequest>) { super(model); }
+}
+
+@Injectable()
+export class RetentionPolicyRepository extends BaseRepository<RetentionPolicy> {
+  constructor(@InjectModel(RetentionPolicy.name) model: Model<RetentionPolicy>) { super(model); }
+}
+
+@Injectable()
+export class BackupLogRepository extends BaseRepository<BackupLog> {
+  constructor(@InjectModel(BackupLog.name) model: Model<BackupLog>) { super(model); }
+}
+
+@Injectable()
+export class CronLogRepository extends BaseRepository<CronLog> {
+  constructor(@InjectModel(CronLog.name) model: Model<CronLog>) { super(model); }
+}
+
+@Injectable()
+export class QueueLogRepository extends BaseRepository<QueueLog> {
+  constructor(@InjectModel(QueueLog.name) model: Model<QueueLog>) { super(model); }
+}
+
+@Injectable()
+export class SystemHealthLogRepository extends BaseRepository<SystemHealthLog> {
+  constructor(@InjectModel(SystemHealthLog.name) model: Model<SystemHealthLog>) { super(model); }
+}
+
+@Injectable()
+export class AiUsageLogRepository extends BaseRepository<AiUsageLog> {
+  constructor(@InjectModel(AiUsageLog.name) model: Model<AiUsageLog>) { super(model); }
+}
+
+@Injectable()
+export class AiFeedbackRepository extends BaseRepository<AiFeedback> {
+  constructor(@InjectModel(AiFeedback.name) model: Model<AiFeedback>) { super(model); }
+}
+
+@Injectable()
+export class BulkJobRepository extends BaseRepository<BulkJob> {
+  constructor(@InjectModel(BulkJob.name) model: Model<BulkJob>) { super(model); }
+}
+
+@Injectable()
+export class KnowledgeBaseArticleRepository extends BaseRepository<KnowledgeBaseArticle> {
+  constructor(@InjectModel(KnowledgeBaseArticle.name) model: Model<KnowledgeBaseArticle>) { super(model); }
+}
+
+@Injectable()
+export class RoadmapItemRepository extends BaseRepository<RoadmapItem> {
+  constructor(@InjectModel(RoadmapItem.name) model: Model<RoadmapItem>) { super(model); }
+}
+
+@Injectable()
+export class CmsPageRepository extends BaseRepository<CmsPage> {
+  constructor(@InjectModel(CmsPage.name) model: Model<CmsPage>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class BlogPostRepository extends BaseRepository<BlogPost> {
+  constructor(@InjectModel(BlogPost.name) model: Model<BlogPost>) {
     super(model);
   }
 }

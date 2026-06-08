@@ -14,6 +14,12 @@ export class ApiLoggerMiddleware implements NestMiddleware {
     const method = req.method;
     const endpoint = req.originalUrl || req.url;
 
+    // Exclude high-traffic or health check endpoints from API logging
+    const excludePaths = ['/health', '/metrics', '/favicon.ico', '/api/health'];
+    if (excludePaths.some((path) => endpoint.includes(path))) {
+      return next();
+    }
+
     // Parse request size
     const requestSize = parseInt(req.headers['content-length'] as string, 10) || 0;
 
