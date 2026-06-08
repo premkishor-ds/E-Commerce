@@ -3,7 +3,7 @@ import {
   BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserRepository } from '../../repositories/concrete.repositories';
+import { UserRepository, VendorRepository } from '../../repositories/concrete.repositories';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 
@@ -14,7 +14,10 @@ export class AuthService {
   private readonly jwtRefreshSecret =
     process.env.JWT_REFRESH_SECRET || 'super_refresh_secret_key_456_def';
 
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly vendorRepository: VendorRepository,
+  ) {}
 
   async register(dto: any) {
     const existing = await this.userRepository.findOne({ email: dto.email });
@@ -29,6 +32,16 @@ export class AuthService {
       phone: dto.phone || '',
       permissions: dto.permissions || [],
     });
+
+    if (dto.roles?.includes('Seller') || dto.roles?.includes('Vendor')) {
+      await this.vendorRepository.create({
+        userId: user._id,
+        shopName: dto.shopName || 'My Partner Shop',
+        status: 'Verification In Progress',
+        commissionRate: 10,
+      });
+    }
+
     return this.generateTokens(user);
   }
 

@@ -24,7 +24,7 @@ function badge(color: string, text: string) {
 function statusColor(s: string) {
   const m: Record<string, string> = {
     Active: 'green', Approved: 'green', Delivered: 'green', Completed: 'green',
-    Pending: 'amber', Open: 'amber', 'In Progress': 'amber',
+    Pending: 'amber', Open: 'amber', 'In Progress': 'amber', 'Verification In Progress': 'amber',
     Cancelled: 'red', Suspended: 'red', Rejected: 'red', Flagged: 'red',
     Shipped: 'blue', Paid: 'blue',
     Inactive: 'zinc', Resolved: 'zinc', Closed: 'zinc',
@@ -550,7 +550,7 @@ export default function AdminPage() {
               <FilterBar>
                 <SearchBar value={vendorSearch} onChange={setVendorSearch} placeholder="Search shop name, company…" />
                 <Sel value={vendorStatus} onChange={setVendorStatus} placeholder="All Statuses" options={[
-                  {value:'Pending',label:'Pending'},{value:'Approved',label:'Approved'},{value:'Suspended',label:'Suspended'},
+                  {value:'Verification In Progress',label:'Verification In Progress'},{value:'Active',label:'Active'},{value:'Suspended',label:'Suspended'},
                 ]} />
                 <ApplyBtn onClick={loadVendors} />
               </FilterBar>
@@ -573,7 +573,7 @@ export default function AdminPage() {
                         <td className="px-4 py-3 text-sm text-zinc-500">{v.commissionRate}%</td>
                         <td className="px-4 py-3">{badge(statusColor(v.status), v.status)}</td>
                         <td className="px-4 py-3"><div className="flex gap-1">
-                          {v.status!=='Approved'   && <button onClick={async()=>{await apiAction('PUT',`/admin/vendors/${v._id}/status`,{status:'Approved'});loadVendors();}}
+                          {v.status!=='Active'   && <button onClick={async()=>{await apiAction('PUT',`/admin/vendors/${v._id}/status`,{status:'Active'});loadVendors();}}
                             className="p-1.5 rounded-lg text-zinc-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 cursor-pointer" title="Approve"><CheckCircle className="h-3.5 w-3.5"/></button>}
                           {v.status!=='Suspended'  && <button onClick={async()=>{await apiAction('PUT',`/admin/vendors/${v._id}/status`,{status:'Suspended'});loadVendors();}}
                             className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 cursor-pointer" title="Suspend"><XCircle className="h-3.5 w-3.5"/></button>}

@@ -219,7 +219,7 @@ export class AdminController {
   async updateVendorStatus(@Param('id') id: string, @Body('status') status: string) {
     const vendor = await this.vendorRepository.findById(id);
     if (!vendor) throw new Error('Vendor not found');
-    vendor.status = status;
+    vendor.status = status === 'Approved' ? 'Active' : status;
     return (vendor as any).save();
   }
 

@@ -5,7 +5,7 @@ import { useStore } from '../store/store';
 import {
   LayoutDashboard, Wallet, Percent, Receipt, Lock, Mail, Plus, Trash2,
   LogOut, Sun, Moon, ShieldCheck, Coins, Send, CheckCircle2, FileSpreadsheet,
-  Pencil, X, DollarSign, Tag, Package, ImageIcon, AlignLeft, Box
+  Pencil, X, DollarSign, Tag, Package, ImageIcon, AlignLeft, Box, AlertCircle
 } from 'lucide-react';
 
 export default function VendorPage() {
@@ -14,6 +14,8 @@ export default function VendorPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [vendorStatus, setVendorStatus] = useState('Verification In Progress');
 
   const [activeTab, setActiveTab] = useState('settlements');
   const [companyLegalName, setCompanyLegalName] = useState('NexaHome Brands Inc.');
@@ -81,7 +83,7 @@ export default function VendorPage() {
     if (!user) return;
     const fetchVendorData = async () => {
       try {
-        const [prodRes, settlementsRes, analyticsRes] = await Promise.all([
+        const [prodRes, settlementsRes, analyticsRes, profileRes] = await Promise.all([
           fetch(`http://localhost:5001/api/v1/catalog/products?vendorId=${user.id}`, {
             headers: { 'Authorization': `Bearer ${user.token}` }
           }),
@@ -89,6 +91,9 @@ export default function VendorPage() {
             headers: { 'Authorization': `Bearer ${user.token}` }
           }),
           fetch('http://localhost:5001/api/v1/catalog/vendor/analytics', {
+            headers: { 'Authorization': `Bearer ${user.token}` }
+          }),
+          fetch('http://localhost:5001/api/v1/profile/me', {
             headers: { 'Authorization': `Bearer ${user.token}` }
           })
         ]);
@@ -111,6 +116,11 @@ export default function VendorPage() {
         if (analyticsRes.ok) {
           const a = await analyticsRes.json();
           setCommissionRate(a.commissionRate || 10);
+        }
+        if (profileRes.ok) {
+          const prof = await profileRes.json();
+          setVendorStatus(prof.vendorStatus || 'Verification In Progress');
+          setCompanyLegalName(prof.shopName || 'NexaHome Brands Inc.');
         }
       } catch (err) { console.error(err); }
     };
@@ -142,6 +152,28 @@ export default function VendorPage() {
         body: JSON.stringify({ email, password })
       });
       if (!res.ok) throw new Error('Invalid credentials');
+      const data = await res.json();
+      login(data.user.email, data.user.roles[0], data.accessToken, data.user.id);
+    } catch (err: any) { alert(err.message); }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('http://localhost:5001/api/v1/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          roles: ['Vendor'],
+          shopName: companyLegalName
+        })
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || 'Registration failed');
+      }
       const data = await res.json();
       login(data.user.email, data.user.roles[0], data.accessToken, data.user.id);
     } catch (err: any) { alert(err.message); }
@@ -260,9 +292,18 @@ export default function VendorPage() {
             <Coins className="h-6 w-6" />
           </div>
           <h2 className="mt-4 text-3xl font-extrabold text-zinc-900 dark:text-white">ApexStore Vendor Console</h2>
-          <p className="mt-2 text-sm text-zinc-500">Sign in to manage products, settlements, and payouts.</p>
+          <p className="mt-2 text-sm text-zinc-500">
+            {isRegisterMode ? 'Register a vendor partner account.' : 'Sign in to manage products, settlements, and payouts.'}
+          </p>
         </div>
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={isRegisterMode ? handleRegister : handleLogin} className="space-y-4">
+          {isRegisterMode && (
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400"><Coins className="h-5 w-5" /></span>
+              <input type="text" required placeholder="Company Name" value={companyLegalName} onChange={e => setCompanyLegalName(e.target.value)}
+                className="w-full rounded-xl border border-zinc-200 pl-10 pr-4 py-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 text-zinc-900 dark:text-white" />
+            </div>
+          )}
           <div className="relative">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400"><Mail className="h-5 w-5" /></span>
             <input type="email" required placeholder="Vendor Email Address" value={email} onChange={e => setEmail(e.target.value)}
@@ -274,11 +315,28 @@ export default function VendorPage() {
               className="w-full rounded-xl border border-zinc-200 pl-10 pr-4 py-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 text-zinc-900 dark:text-white" />
           </div>
           <button type="submit" className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-semibold text-white hover:bg-indigo-500 shadow-lg active:scale-95 transition-all text-sm cursor-pointer">
-            Authenticate Vendor
+            {isRegisterMode ? 'Register Vendor' : 'Authenticate Vendor'}
           </button>
         </form>
+        <div className="text-center text-sm text-zinc-500">
+          {isRegisterMode ? (
+            <p>
+              Already have an account?{' '}
+              <button onClick={() => setIsRegisterMode(false)} className="text-indigo-600 font-semibold hover:underline bg-transparent border-0 cursor-pointer">
+                Sign In
+              </button>
+            </p>
+          ) : (
+            <p>
+              Don't have an account?{' '}
+              <button onClick={() => setIsRegisterMode(true)} className="text-indigo-600 font-semibold hover:underline bg-transparent border-0 cursor-pointer">
+                Register as Vendor
+              </button>
+            </p>
+          )}
+        </div>
         <div className="flex justify-center pt-2">
-          <button onClick={toggleTheme} className="p-2 text-zinc-400 hover:text-indigo-500 rounded-lg border dark:border-zinc-800">
+          <button onClick={toggleTheme} className="p-2 text-zinc-400 hover:text-indigo-500 rounded-lg border dark:border-zinc-800 bg-transparent cursor-pointer">
             {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
           </button>
         </div>
@@ -369,7 +427,11 @@ export default function VendorPage() {
           <div className="flex items-center gap-2 font-bold text-xl text-indigo-600 dark:text-indigo-400">
             <Coins className="h-6 w-6" />
             <span>ApexStore Vendor Console</span>
-            <span className="hidden sm:inline-block text-[10px] ml-2 px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200/50">Settlements</span>
+            <span className={`hidden sm:inline-block text-[10px] ml-2 px-2 py-0.5 rounded-full font-semibold border ${
+              vendorStatus === 'Active'
+                ? 'bg-indigo-100 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border-indigo-200/50'
+                : 'bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200/50'
+            }`}>{vendorStatus}</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden md:inline-block text-xs font-semibold text-zinc-500">
@@ -414,6 +476,18 @@ export default function VendorPage() {
         </aside>
 
         <main className="flex-1 p-8 overflow-y-auto space-y-8">
+          {/* Warning Banner if pending */}
+          {vendorStatus !== 'Active' && (
+            <div className="bg-amber-50 border border-amber-200 dark:bg-amber-950/20 dark:border-amber-900/30 rounded-2xl p-4 flex items-start gap-3 text-amber-800 dark:text-amber-300">
+              <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-amber-500" />
+              <div>
+                <h4 className="font-bold text-sm">Account Verification In Progress</h4>
+                <p className="text-xs mt-1 leading-relaxed">
+                  Your vendor account is currently under review by our administrators. You will be able to list new products and manage settlements as soon as your account is approved.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* SETTLEMENTS TAB */}
           {activeTab === 'settlements' && (
@@ -455,12 +529,12 @@ export default function VendorPage() {
                   <form onSubmit={handleWithdrawalRequest} className="space-y-4">
                     <div className="space-y-1">
                       <label className="block text-xs font-semibold text-zinc-500">Withdrawal Amount ($)</label>
-                      <input type="number" required step="0.01" max={pendingAmount}
-                        placeholder={`Max ${pendingAmount.toFixed(2)}`} value={withdrawAmount}
+                      <input type="number" required step="0.01" max={pendingAmount} disabled={vendorStatus !== 'Active'}
+                        placeholder={vendorStatus === 'Active' ? `Max ${pendingAmount.toFixed(2)}` : 'Verification Pending'} value={withdrawAmount}
                         onChange={e => setWithdrawAmount(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-200 bg-white p-3 text-sm focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 text-zinc-900 dark:text-white" />
+                        className="w-full rounded-xl border border-zinc-200 bg-white p-3 text-sm focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 text-zinc-900 dark:text-white disabled:opacity-50" />
                     </div>
-                    <button type="submit" className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-semibold text-white hover:bg-indigo-500 shadow-md active:scale-95 transition-all text-xs cursor-pointer">
+                    <button type="submit" disabled={vendorStatus !== 'Active'} className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-semibold text-white hover:bg-indigo-500 shadow-md active:scale-95 transition-all text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                       <Send className="h-4 w-4" /><span>Execute Bank Settlement</span>
                     </button>
                   </form>
@@ -506,10 +580,16 @@ export default function VendorPage() {
                     <h3 className="font-bold text-lg text-zinc-900 dark:text-white">Wholesale Supply Catalog</h3>
                     <p className="text-xs text-zinc-400 mt-0.5">{vendorProducts.length} product{vendorProducts.length !== 1 ? 's' : ''} listed</p>
                   </div>
-                  <button onClick={() => setShowAddForm(!showAddForm)}
-                    className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-1.5 text-xs font-semibold shadow cursor-pointer">
-                    <Plus className="h-3.5 w-3.5" /><span>New Product</span>
-                  </button>
+                  {vendorStatus === 'Active' ? (
+                    <button onClick={() => setShowAddForm(!showAddForm)}
+                      className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-1.5 text-xs font-semibold shadow cursor-pointer">
+                      <Plus className="h-3.5 w-3.5" /><span>New Product</span>
+                    </button>
+                  ) : (
+                    <span className="text-xs text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                      <AlertCircle className="h-3.5 w-3.5" /> Verification Pending
+                    </span>
+                  )}
                 </div>
 
                 {showAddForm && (

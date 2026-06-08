@@ -93,6 +93,16 @@ export class CatalogService {
   // --- PRODUCTS (VENDOR & ADMIN CRUD) ---
 
   async createProduct(dto: any, vendorId?: string) {
+    if (vendorId) {
+      const vendor = await this.vendorRepository.findOne({
+        userId: new Types.ObjectId(vendorId),
+      });
+      if (!vendor || vendor.status !== 'Active') {
+        throw new BadRequestException(
+          'Your account is under verification. You cannot add products until approved by the admin.',
+        );
+      }
+    }
     const sku =
       dto.sku ||
       'SKU-' + Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -348,7 +358,7 @@ export class CatalogService {
   }
 
   async approveVendor(vendorId: string) {
-    return this.vendorRepository.update(vendorId, { status: 'Approved' });
+    return this.vendorRepository.update(vendorId, { status: 'Active' });
   }
 
 

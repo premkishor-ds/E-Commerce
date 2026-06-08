@@ -98,6 +98,7 @@ export class ProfileService {
         basicProfile.businessPhone = vendorInfo.businessPhone || '';
         basicProfile.bankAccountDetails = vendorInfo.bankAccountDetails || null;
         basicProfile.commissionRate = vendorInfo.commissionRate;
+        basicProfile.vendorStatus = vendorInfo.status || 'Verification In Progress';
       }
     }
 

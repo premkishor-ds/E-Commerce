@@ -16,6 +16,9 @@ class RegisterDto {
 
   @IsOptional()
   roles?: string[];
+
+  @IsOptional()
+  shopName?: string;
 }
 
 class LoginDto {

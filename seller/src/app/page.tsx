@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/store';
 import {
   LayoutDashboard, Wallet, Percent, Receipt, Lock, Mail, Plus, Trash2,
-  LogOut, Sun, Moon, ShieldCheck, Store, Box, Tag, DollarSign, Pencil, X, ImageIcon, AlignLeft, Package
+  LogOut, Sun, Moon, ShieldCheck, Store, Box, Tag, DollarSign, Pencil, X, ImageIcon, AlignLeft, Package,
+  AlertCircle
 } from 'lucide-react';
 
 export default function SellerPage() {
@@ -13,6 +14,8 @@ export default function SellerPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [vendorStatus, setVendorStatus] = useState('Verification In Progress');
 
   const [activeTab, setActiveTab] = useState('listings');
   const [shopName, setShopName] = useState('ApexTech Partner Shop');
@@ -79,9 +82,12 @@ export default function SellerPage() {
     if (!user) return;
     const fetchSellerData = async () => {
       try {
-        const [catalogRes, settlementsRes] = await Promise.all([
+        const [catalogRes, settlementsRes, profileRes] = await Promise.all([
           fetch(`http://localhost:5001/api/v1/catalog/products?vendorId=${user.id}`),
           fetch('http://localhost:5001/api/v1/sales/vendor/settlements', {
+            headers: { 'Authorization': `Bearer ${user.token}` }
+          }),
+          fetch('http://localhost:5001/api/v1/profile/me', {
             headers: { 'Authorization': `Bearer ${user.token}` }
           })
         ]);
@@ -93,6 +99,11 @@ export default function SellerPage() {
           const s = await settlementsRes.json();
           setTotalSettledAmount(s.totalEarnings || 0);
           setPendingSettlement(s.pendingSettlement || 0);
+        }
+        if (profileRes.ok) {
+          const prof = await profileRes.json();
+          setVendorStatus(prof.vendorStatus || 'Verification In Progress');
+          setShopName(prof.shopName || 'ApexTech Partner Shop');
         }
       } catch (err) { console.error(err); }
     };
@@ -124,6 +135,28 @@ export default function SellerPage() {
         body: JSON.stringify({ email, password })
       });
       if (!res.ok) throw new Error('Invalid credentials');
+      const data = await res.json();
+      login(data.user.email, data.user.roles[0], data.accessToken, data.user.id);
+    } catch (err: any) { alert(err.message); }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('http://localhost:5001/api/v1/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          roles: ['Seller'],
+          shopName
+        })
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || 'Registration failed');
+      }
       const data = await res.json();
       login(data.user.email, data.user.roles[0], data.accessToken, data.user.id);
     } catch (err: any) { alert(err.message); }
@@ -216,9 +249,18 @@ export default function SellerPage() {
             <Store className="h-6 w-6" />
           </div>
           <h2 className="mt-4 text-3xl font-extrabold text-zinc-900 dark:text-white">ApexStore Seller Console</h2>
-          <p className="mt-2 text-sm text-zinc-500">Sign in to manage product listings, pricing, and settlements.</p>
+          <p className="mt-2 text-sm text-zinc-500">
+            {isRegisterMode ? 'Register a merchant account to start listing.' : 'Sign in to manage product listings, pricing, and settlements.'}
+          </p>
         </div>
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={isRegisterMode ? handleRegister : handleLogin} className="space-y-4">
+          {isRegisterMode && (
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400"><Store className="h-5 w-5" /></span>
+              <input type="text" required placeholder="Shop Name" value={shopName} onChange={e => setShopName(e.target.value)}
+                className="w-full rounded-xl border border-zinc-200 pl-10 pr-4 py-3 text-sm focus:border-emerald-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 text-zinc-900 dark:text-white" />
+            </div>
+          )}
           <div className="relative">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400"><Mail className="h-5 w-5" /></span>
             <input type="email" required placeholder="Seller Email Address" value={email} onChange={e => setEmail(e.target.value)}
@@ -230,11 +272,28 @@ export default function SellerPage() {
               className="w-full rounded-xl border border-zinc-200 pl-10 pr-4 py-3 text-sm focus:border-emerald-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 text-zinc-900 dark:text-white" />
           </div>
           <button type="submit" className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 font-semibold text-white hover:bg-emerald-500 shadow-lg active:scale-95 transition-all text-sm cursor-pointer">
-            Authenticate Merchant
+            {isRegisterMode ? 'Register Merchant' : 'Authenticate Merchant'}
           </button>
         </form>
+        <div className="text-center text-sm text-zinc-500">
+          {isRegisterMode ? (
+            <p>
+              Already have an account?{' '}
+              <button onClick={() => setIsRegisterMode(false)} className="text-emerald-600 font-semibold hover:underline bg-transparent border-0 cursor-pointer">
+                Sign In
+              </button>
+            </p>
+          ) : (
+            <p>
+              Don't have an account?{' '}
+              <button onClick={() => setIsRegisterMode(true)} className="text-emerald-600 font-semibold hover:underline bg-transparent border-0 cursor-pointer">
+                Register as Seller
+              </button>
+            </p>
+          )}
+        </div>
         <div className="flex justify-center pt-2">
-          <button onClick={toggleTheme} className="p-2 text-zinc-400 hover:text-emerald-500 rounded-lg border dark:border-zinc-800">
+          <button onClick={toggleTheme} className="p-2 text-zinc-400 hover:text-emerald-500 rounded-lg border dark:border-zinc-800 bg-transparent cursor-pointer">
             {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
           </button>
         </div>
@@ -324,7 +383,11 @@ export default function SellerPage() {
           <div className="flex items-center gap-2 font-bold text-xl text-emerald-600 dark:text-emerald-400">
             <Store className="h-6 w-6" />
             <span>ApexStore Seller Console</span>
-            <span className="hidden sm:inline-block text-[10px] ml-2 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-semibold border border-emerald-200/50">Workspace</span>
+            <span className={`hidden sm:inline-block text-[10px] ml-2 px-2 py-0.5 rounded-full font-semibold border ${
+              vendorStatus === 'Active'
+                ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200/50'
+                : 'bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200/50'
+            }`}>{vendorStatus}</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden md:inline-block text-xs font-semibold text-zinc-500">
@@ -372,6 +435,19 @@ export default function SellerPage() {
                 <p className="text-zinc-500 text-sm mt-1">Manage product listings, monitor commission settlements, add and edit products.</p>
               </div>
 
+              {/* Warning Banner if pending */}
+              {vendorStatus !== 'Active' && (
+                <div className="bg-amber-50 border border-amber-200 dark:bg-amber-950/20 dark:border-amber-900/30 rounded-2xl p-4 flex items-start gap-3 text-amber-800 dark:text-amber-300">
+                  <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-amber-500" />
+                  <div>
+                    <h4 className="font-bold text-sm">Account Verification In Progress</h4>
+                    <p className="text-xs mt-1 leading-relaxed">
+                      Your seller account is currently under review by our administrators. You will be able to list new products and manage settlements as soon as your account is approved.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Stats */}
               <section className="grid sm:grid-cols-3 gap-6">
                 {[
@@ -396,10 +472,16 @@ export default function SellerPage() {
                     <h3 className="font-bold text-lg text-zinc-900 dark:text-white">Shop Listings Catalog</h3>
                     <p className="text-xs text-zinc-400 mt-0.5">{catalog.length} product{catalog.length !== 1 ? 's' : ''} in your store</p>
                   </div>
-                  <button onClick={() => setShowAddForm(!showAddForm)}
-                    className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg px-3 py-1.5 text-xs font-semibold shadow cursor-pointer">
-                    <Plus className="h-3.5 w-3.5" /><span>New Listing</span>
-                  </button>
+                  {vendorStatus === 'Active' ? (
+                    <button onClick={() => setShowAddForm(!showAddForm)}
+                      className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg px-3 py-1.5 text-xs font-semibold shadow cursor-pointer">
+                      <Plus className="h-3.5 w-3.5" /><span>New Listing</span>
+                    </button>
+                  ) : (
+                    <span className="text-xs text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                      <AlertCircle className="h-3.5 w-3.5" /> Verification Pending
+                    </span>
+                  )}
                 </div>
 
                 {showAddForm && (
