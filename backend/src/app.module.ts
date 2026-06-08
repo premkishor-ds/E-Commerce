@@ -19,6 +19,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { VoiceModule } from './modules/voice/voice.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ApiLoggerMiddleware } from './modules/admin/api-logger.middleware';
+import { FeedbackModule } from './modules/feedback/feedback.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ApiLoggerMiddleware } from './modules/admin/api-logger.middleware';
     PaymentModule,
     VoiceModule,
     NotificationModule,
+    FeedbackModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000,

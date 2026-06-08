@@ -118,6 +118,44 @@ export default function AdminPage() {
   const [analyticsSubTab, setAnalyticsSubTab] = useState<'overview' | 'sales' | 'chatbot' | 'demographics'>('overview');
   const [apiError, setApiError] = useState<string>('');
 
+  // Feedback Center States
+  const [supportSubTab, setSupportSubTab] = useState<'tickets' | 'feedback'>('tickets');
+  const [feedbackTickets, setFeedbackTickets] = useState<any[]>([]);
+  const [feedbackStats, setFeedbackStats] = useState<any | null>(null);
+  const [selectedFeedback, setSelectedFeedback] = useState<any | null>(null);
+  const [feedbackComments, setFeedbackComments] = useState<any[]>([]);
+  const [feedbackAttachments, setFeedbackAttachments] = useState<any[]>([]);
+  const [feedbackActivities, setFeedbackActivities] = useState<any[]>([]);
+  const [feedbackSearch, setFeedbackSearch] = useState('');
+  const [feedbackTypeFilter, setFeedbackTypeFilter] = useState('');
+  const [feedbackStatusFilter, setFeedbackStatusFilter] = useState('');
+  const [feedbackCategoryFilter, setFeedbackCategoryFilter] = useState('');
+  const [feedbackPage, setFeedbackPage] = useState(1);
+  const [feedbackSortField, setFeedbackSortField] = useState('createdAt');
+  const [feedbackSortOrder, setFeedbackSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [feedbackReplyText, setFeedbackReplyText] = useState('');
+  const [feedbackIsPrivateNote, setFeedbackIsPrivateNote] = useState(false);
+  const [feedbackRoadmapStatusSelect, setFeedbackRoadmapStatusSelect] = useState('');
+  const [feedbackStatusSelect, setFeedbackStatusSelect] = useState('');
+  const [feedbackAssignTeamSelect, setFeedbackAssignTeamSelect] = useState('');
+  const [feedbackAssignAgentSelect, setFeedbackAssignAgentSelect] = useState('');
+  
+  // Floating widget states
+  const [showFloatingWidget, setShowFloatingWidget] = useState(false);
+  const [widgetType, setWidgetType] = useState('Feedback');
+  const [widgetCategory, setWidgetCategory] = useState('General');
+  const [widgetSubject, setWidgetSubject] = useState('');
+  const [widgetDescription, setWidgetDescription] = useState('');
+  const [widgetName, setWidgetName] = useState('');
+  const [widgetEmail, setWidgetEmail] = useState('');
+  const [widgetPhone, setWidgetPhone] = useState('');
+  const [widgetPriority, setWidgetPriority] = useState('Medium');
+  const [widgetSeverity, setWidgetSeverity] = useState('Medium');
+  const [widgetCaptcha, setWidgetCaptcha] = useState('');
+  const [widgetCaptchaVal, setWidgetCaptchaVal] = useState('8F9A');
+  const [widgetAttachments, setWidgetAttachments] = useState<any[]>([]);
+  const [duplicateSuggestions, setDuplicateSuggestions] = useState<any[]>([]);
+
   // Filters & Sorting States
   const [userSearch, setUserSearch] = useState('');
   const [userRole, setUserRole] = useState('');
@@ -183,6 +221,7 @@ export default function AdminPage() {
   // System Settings State
   const [settingTab, setSettingTab] = useState('general');
   const [generalSettings, setGeneralSettings] = useState({ siteName: 'ApexStore', siteUrl: '', supportEmail: '', maintenanceMode: false, pageSize: 20 });
+  const limit = generalSettings.pageSize || 20;
   const [userPage, setUserPage] = useState(1);
   const [orderPage, setOrderPage] = useState(1);
   const [productPage, setProductPage] = useState(1);
@@ -543,6 +582,154 @@ export default function AdminPage() {
     }
   }, [apiFetch]);
 
+  const loadFeedback = useCallback(async () => {
+    setLoading(true);
+    try {
+      const p = new URLSearchParams();
+      if (feedbackSearch) p.set('search', feedbackSearch);
+      if (feedbackTypeFilter) p.set('type', feedbackTypeFilter);
+      if (feedbackStatusFilter) p.set('status', feedbackStatusFilter);
+      if (feedbackCategoryFilter) p.set('category', feedbackCategoryFilter);
+      p.set('page', String(feedbackPage));
+      p.set('limit', String(limit));
+      p.set('sortField', feedbackSortField);
+      p.set('sortOrder', feedbackSortOrder);
+
+      const res = await apiFetch(`/admin/feedback?${p}`);
+      setFeedbackTickets(res.data || []);
+      
+      const statsRes = await apiFetch('/admin/feedback/dashboard');
+      setFeedbackStats(statsRes);
+    } catch { 
+      setFeedbackTickets([]); 
+    } finally {
+      setLoading(false);
+    }
+  }, [apiFetch, feedbackSearch, feedbackTypeFilter, feedbackStatusFilter, feedbackCategoryFilter, feedbackPage, feedbackSortField, feedbackSortOrder, limit]);
+
+  const loadFeedbackDetail = useCallback(async (id: string) => {
+    try {
+      const res = await apiFetch(`/admin/feedback/${id}`);
+      setSelectedFeedback(res.ticket);
+      setFeedbackComments(res.comments || []);
+      setFeedbackAttachments(res.attachments || []);
+      setFeedbackActivities(res.activities || []);
+      
+      setFeedbackStatusSelect(res.ticket.status || '');
+      setFeedbackRoadmapStatusSelect(res.ticket.roadmapStatus || '');
+      setFeedbackAssignTeamSelect(res.ticket.assignedTo || '');
+      setFeedbackAssignAgentSelect(res.ticket.assignedAgentId || '');
+    } catch (err: any) {
+      alert(`Access denied: ${err.message || 'Error loading feedback details.'}`);
+      setSelectedFeedback(null);
+    }
+  }, [apiFetch]);
+
+  // Floating Feedback widget callbacks
+  useEffect(() => {
+    if (!widgetSubject.trim() || widgetSubject.length < 4) {
+      setDuplicateSuggestions([]);
+      return;
+    }
+    const delay = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API}/feedback/duplicates?type=${widgetType}&subject=${encodeURIComponent(widgetSubject)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setDuplicateSuggestions(data || []);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }, 450);
+    return () => clearTimeout(delay);
+  }, [widgetSubject, widgetType]);
+
+  const handleVoteSuggestion = async (id: string) => {
+    if (!token) {
+      alert('Please sign in or use an authorized session to vote.');
+      return;
+    }
+    try {
+      await apiAction('POST', `/feedback/${id}/vote`);
+      alert('Thank you! Your vote has been recorded.');
+      // Refresh duplicate list
+      const res = await fetch(`${API}/feedback/duplicates?type=${widgetType}&subject=${encodeURIComponent(widgetSubject)}`);
+      if (res.ok) {
+        setDuplicateSuggestions(await res.json());
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to vote');
+    }
+  };
+
+  const handleWidgetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (widgetCaptcha.trim().toUpperCase() !== widgetCaptchaVal.toUpperCase()) {
+      alert('Verification CAPTCHA code is incorrect.');
+      return;
+    }
+
+    const metadata = {
+      browser: typeof window !== 'undefined' ? navigator.userAgent : 'Browser',
+      os: typeof window !== 'undefined' ? navigator.platform : 'OS',
+      device: typeof window !== 'undefined' && window.innerWidth < 768 ? 'Mobile' : 'Desktop',
+      screenResolution: typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : '1920x1080',
+      url: typeof window !== 'undefined' ? window.location.href : '',
+    };
+
+    const payload = {
+      type: widgetType,
+      category: widgetCategory,
+      subject: widgetSubject,
+      description: widgetDescription,
+      name: widgetName || 'Anonymous Guest',
+      email: widgetEmail || 'guest@example.com',
+      phone: widgetPhone,
+      priority: widgetPriority,
+      severity: widgetSeverity,
+      ...metadata,
+      attachments: widgetAttachments,
+    };
+
+    try {
+      const path = token ? '/feedback/submit-logged-in' : '/feedback/submit';
+      const res = await fetch(`${API}${path}`, {
+        method: 'POST',
+        headers: token ? authHeaders(token) : { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Submission failed');
+      alert('Feedback ticket created successfully! Our quality control teams will review it.');
+      
+      // Reset state
+      setWidgetSubject('');
+      setWidgetDescription('');
+      setWidgetName('');
+      setWidgetEmail('');
+      setWidgetPhone('');
+      setWidgetCaptcha('');
+      setWidgetAttachments([]);
+      setDuplicateSuggestions([]);
+      setShowFloatingWidget(false);
+
+      if (token && activeTab === 'support' && supportSubTab === 'feedback') {
+        loadFeedback();
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to submit feedback request.');
+    }
+  };
+
+  const handleGenerateCaptcha = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let cap = '';
+    for (let i = 0; i < 4; i++) {
+      cap += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setWidgetCaptchaVal(cap);
+  };
+
   useEffect(() => { if (!token) return; loadStats(); }, [token, loadStats]);
   useEffect(() => { if (!token || activeTab !== 'users') return; loadUsers(); }, [token, activeTab, loadUsers]);
   useEffect(() => { if (!token || activeTab !== 'orders') return; loadOrders(); }, [token, activeTab, loadOrders]);
@@ -552,6 +739,7 @@ export default function AdminPage() {
   useEffect(() => { if (!token || activeTab !== 'settings') return; loadSystemSettings(settingTab); }, [token, activeTab, settingTab, loadSystemSettings]);
   useEffect(() => { if (!token || activeTab !== 'logs') return; loadLogs(); }, [token, activeTab, logSubTab, loadLogs]);
   useEffect(() => { if (!token || activeTab !== 'support') return; loadTickets(); }, [token, activeTab, loadTickets]);
+  useEffect(() => { if (!token || activeTab !== 'support' || supportSubTab !== 'feedback') return; loadFeedback(); }, [token, activeTab, supportSubTab, loadFeedback]);
 
   useEffect(() => {
     if (selectedSeller) {
@@ -757,8 +945,6 @@ export default function AdminPage() {
     }
     return result;
   }, [vendors, vendorType, vendorSearch, vendorStatus, vendorSortField, vendorSortOrder]);
-
-  const limit = generalSettings.pageSize || 20;
 
   const totalUserPages = Math.ceil(filteredUsers.length / limit) || 1;
   const paginatedUsers = useMemo(() => {
@@ -1171,6 +1357,13 @@ export default function AdminPage() {
       });
     }
 
+    if (selectedFeedback) {
+      list.push({
+        label: `Feedback: ${selectedFeedback.subject || selectedFeedback.ticketId}`,
+        onClick: () => {}
+      });
+    }
+
     if (selectedLogDetail) {
       list.push({
         label: `Log Detail: ${selectedLogDetail.action || selectedLogDetail.keyword || 'Overview'}`,
@@ -1179,7 +1372,7 @@ export default function AdminPage() {
     }
 
     return list;
-  }, [activeTab, vendorType, logSubTab, settingTab, selectedUser, selectedSeller, selectedVendor, selectedOrder, selectedProduct, selectedTicket, selectedLogDetail]);
+  }, [activeTab, vendorType, logSubTab, settingTab, selectedUser, selectedSeller, selectedVendor, selectedOrder, selectedProduct, selectedTicket, selectedLogDetail, selectedFeedback, supportSubTab]);
 
   if (!mounted) return null;
 
@@ -1232,7 +1425,6 @@ export default function AdminPage() {
     { key: 'settings',  label: 'Settings',  icon: <Settings className="h-4 w-4" /> },
     { key: 'analytics', label: 'Analytics', icon: <TrendingUp className="h-4 w-4" /> },
     { key: 'logs',      label: 'System Logs',icon: <Database className="h-4 w-4" /> },
-    { key: 'roles',     label: 'Permissions',icon: <ShieldAlert className="h-4 w-4" /> },
   ];
 
   return (
@@ -2130,301 +2322,715 @@ export default function AdminPage() {
           {/* SUPPORT TAB */}
           {activeTab === 'support' && (
             <Section>
-              {selectedTicket ? (
-                <>
-                  <SectionHeader 
-                    title={`Ticket: ${selectedTicket.subject}`} 
-                    desc={`Priority: ${selectedTicket.priority} · Status: ${selectedTicket.status}`}
-                    right={
-                      <button 
-                        onClick={() => setSelectedTicket(null)} 
-                        className="px-3 py-1.5 border dark:border-zinc-800 text-zinc-650 hover:text-indigo-500 rounded-lg text-xs font-semibold flex items-center gap-1.5 dark:text-zinc-300 bg-white dark:bg-zinc-900 cursor-pointer"
-                      >
-                        <X className="h-4 w-4"/> Back to Tickets
-                      </button>
-                    } 
-                  />
-                  <div className="grid md:grid-cols-3 gap-6 text-xs mt-4">
-                    {/* Left & Middle: Chat Messages */}
-                    <div className="md:col-span-2 space-y-4 flex flex-col bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-2xl p-4 shadow-sm min-h-[450px]">
-                      <h4 className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider border-b pb-2 dark:border-zinc-800">Conversation History</h4>
-                      
-                      {/* Messages Box */}
-                      <div className="flex-1 overflow-y-auto space-y-3 p-2 max-h-[300px] min-h-[200px]">
-                        {selectedTicket.messages && selectedTicket.messages.length > 0 ? (
-                          selectedTicket.messages.map((msg: any, idx: number) => {
-                            const isStaff = String(msg.senderId) !== String(selectedTicket.userId);
-                            return (
-                              <div key={idx} className={`flex flex-col ${isStaff ? 'items-end' : 'items-start'}`}>
-                                <div className={`max-w-[75%] rounded-2xl p-3 text-xs ${
-                                  isStaff 
-                                    ? 'bg-indigo-600 text-white rounded-tr-none' 
-                                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-tl-none'
-                                }`}>
-                                  <div className="font-semibold text-[9px] opacity-75 mb-1">
-                                    {isStaff ? 'Support Agent (Staff)' : 'Ticket Creator'}
-                                  </div>
-                                  <p className="leading-relaxed whitespace-pre-wrap">{msg.message}</p>
-                                </div>
-                                <span className="text-[9px] text-zinc-400 mt-1 px-1">
-                                  {msg.sentAt ? new Date(msg.sentAt).toLocaleString() : '—'}
-                                </span>
-                              </div>
-                            );
-                          })
-                        ) : (
-                          <div className="text-zinc-400 text-center py-10 font-medium">No messages found.</div>
-                        )}
-                      </div>
+              {/* Subtabs for Support Center */}
+              <div className="flex border-b dark:border-zinc-800 px-6 bg-zinc-50/30 dark:bg-zinc-900/10">
+                {[
+                  { key: 'tickets', label: 'Support Tickets' },
+                  { key: 'feedback', label: 'Feedback Center' }
+                ].map(t => (
+                  <button key={t.key} onClick={() => { setSupportSubTab(t.key as any); setSelectedTicket(null); setSelectedFeedback(null); }}
+                    className={`px-4 py-3 text-xs font-bold border-b-2 -mb-[2px] transition-all cursor-pointer ${
+                      supportSubTab === t.key
+                        ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                        : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                    }`}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
 
-                      {/* Reply Box */}
-                      <div className="border-t dark:border-zinc-800 pt-3 space-y-2">
-                        <textarea
-                          rows={3}
-                          value={ticketReplyText}
-                          onChange={e => setTicketReplyText(e.target.value)}
-                          placeholder="Type your reply to the customer / merchant..."
-                          className="w-full rounded-xl border dark:border-zinc-800 p-2 text-xs focus:outline-none focus:border-indigo-500 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white resize-none"
-                        />
-                        <div className="flex justify-end">
-                          <button
+              {supportSubTab === 'tickets' ? (
+                selectedTicket ? (
+                  <>
+                    <SectionHeader 
+                      title={`Ticket: ${selectedTicket.subject}`} 
+                      desc={`Priority: ${selectedTicket.priority} · Status: ${selectedTicket.status}`}
+                      right={
+                        <button 
+                          onClick={() => setSelectedTicket(null)} 
+                          className="px-3 py-1.5 border dark:border-zinc-800 text-zinc-650 hover:text-indigo-500 rounded-lg text-xs font-semibold flex items-center gap-1.5 dark:text-zinc-300 bg-white dark:bg-zinc-900 cursor-pointer"
+                        >
+                          <X className="h-4 w-4"/> Back to Tickets
+                        </button>
+                      } 
+                    />
+                    <div className="grid md:grid-cols-3 gap-6 text-xs mt-4 p-6">
+                      {/* Left & Middle: Chat Messages */}
+                      <div className="md:col-span-2 space-y-4 flex flex-col bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-2xl p-4 shadow-sm min-h-[450px]">
+                        <h4 className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider border-b pb-2 dark:border-zinc-800">Conversation History</h4>
+                        
+                        {/* Messages Box */}
+                        <div className="flex-1 overflow-y-auto space-y-3 p-2 max-h-[300px] min-h-[200px]">
+                          {selectedTicket.messages && selectedTicket.messages.length > 0 ? (
+                            selectedTicket.messages.map((msg: any, idx: number) => {
+                              const isStaff = String(msg.senderId) !== String(selectedTicket.userId);
+                              return (
+                                <div key={idx} className={`flex flex-col ${isStaff ? 'items-end' : 'items-start'}`}>
+                                  <div className={`max-w-[75%] rounded-2xl p-3 text-xs ${
+                                    isStaff 
+                                      ? 'bg-indigo-600 text-white rounded-tr-none' 
+                                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 rounded-tl-none'
+                                  }`}>
+                                    <p>{msg.message}</p>
+                                    <span className={`text-[9px] block mt-1 ${isStaff ? 'text-indigo-200' : 'text-zinc-400'}`}>
+                                      {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : ''}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <div className="text-center py-12 text-zinc-400">No message logs.</div>
+                          )}
+                        </div>
+
+                        {/* Reply form */}
+                        <div className="border-t dark:border-zinc-800 pt-3 flex gap-2">
+                          <input 
+                            type="text" 
+                            className="flex-1 rounded-xl border dark:border-zinc-800 p-2.5 text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white outline-none focus:border-indigo-500" 
+                            placeholder="Type your reply to the customer / merchant..." 
+                            value={ticketReplyText} 
+                            onChange={e => setTicketReplyText(e.target.value)} 
+                          />
+                          <button 
                             onClick={async () => {
                               if (!ticketReplyText.trim()) return;
                               try {
-                                const updated = await apiAction('POST', `/support/tickets/${selectedTicket._id}/reply`, { message: ticketReplyText });
-                                alert('Reply sent successfully!');
+                                const res = await apiAction('POST', `/support/tickets/${selectedTicket._id}/reply`, { message: ticketReplyText });
                                 setTicketReplyText('');
-                                // Refresh tickets and update details view
-                                const freshTickets = await apiFetch('/support/tickets');
-                                setTickets(freshTickets);
-                                const found = freshTickets.find((t: any) => t._id === selectedTicket._id);
-                                if (found) setSelectedTicket(found);
+                                setSelectedTicket(res);
+                                loadTickets();
                               } catch (err: any) {
-                                alert(`Failed to send reply: ${err.message}`);
+                                alert(`Failed to reply: ${err.message}`);
                               }
                             }}
-                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg cursor-pointer"
+                            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-xs cursor-pointer shadow"
                           >
-                            Send Reply
+                            Send
                           </button>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Right: Ticket Details & Metadata */}
-                    <div className="space-y-6">
-                      {/* Ticket Creator Metadata Card */}
-                      <div className="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-2xl p-4 shadow-sm space-y-3">
-                        <h4 className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider border-b pb-2 dark:border-zinc-800">Creator Information</h4>
-                        {(() => {
-                          const cUser = users.find(u => String(u._id) === String(selectedTicket.userId));
-                          const cVendor = vendors.find(v => 
-                            String(v.userId?._id) === String(selectedTicket.userId) || 
-                            String(v.userId) === String(selectedTicket.userId) ||
-                            String(v._id) === String(selectedTicket.userId)
-                          );
-
-                          if (cUser) {
-                            return (
-                              <div className="space-y-1.5 text-xs text-zinc-700 dark:text-zinc-300">
-                                <div><strong className="text-zinc-550">Name:</strong> {cUser.firstName} {cUser.lastName}</div>
-                                <div><strong className="text-zinc-550">Role:</strong> {badge('green', 'Customer')}</div>
-                                <div><strong className="text-zinc-550">Email:</strong> {cUser.email}</div>
-                                <div><strong className="text-zinc-550">Wallet:</strong> ${(cUser.walletBalance || 0).toFixed(2)}</div>
-                              </div>
-                            );
-                          } else if (cVendor) {
-                            const isSeller = cVendor.userId?.roles?.includes('Seller');
-                            return (
-                              <div className="space-y-1.5 text-xs text-zinc-700 dark:text-zinc-300">
-                                <div><strong className="text-zinc-550">Shop:</strong> {cVendor.shopName}</div>
-                                <div><strong className="text-zinc-550">Role:</strong> {badge(isSeller ? 'green' : 'blue', isSeller ? 'Seller (B2C)' : 'Vendor (B2B)')}</div>
-                                <div><strong className="text-zinc-550">Legal Entity:</strong> {cVendor.companyLegalName || '—'}</div>
-                                <div><strong className="text-zinc-550">Phone:</strong> {cVendor.businessPhone || '—'}</div>
-                                <div><strong className="text-zinc-550">Email:</strong> {cVendor.userId?.email || '—'}</div>
-                              </div>
-                            );
-                          }
-                          return (
-                            <div className="text-zinc-400 font-medium text-xs">
-                              <div><strong className="text-zinc-500">User ID:</strong> <span className="font-mono text-[10px]">{selectedTicket.userId}</span></div>
+                      {/* Right: Ticket Sidebar Details */}
+                      <div className="space-y-4">
+                        {/* Properties Card */}
+                        <div className="bg-zinc-50/50 dark:bg-zinc-900/40 border dark:border-zinc-800 rounded-2xl p-4 space-y-4 shadow-sm">
+                          <h4 className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider border-b pb-2 dark:border-zinc-800">Properties</h4>
+                          
+                          <div className="space-y-3">
+                            <div>
+                              <span className="block text-[10px] text-zinc-400 font-bold uppercase">Department/Queue</span>
+                              <span className="text-xs font-semibold text-zinc-900 dark:text-white mt-0.5 block">{selectedTicket.category || 'General Support'}</span>
                             </div>
-                          );
-                        })()}
-                      </div>
+                            
+                            <div>
+                              <span className="block text-[10px] text-zinc-400 font-bold uppercase">Priority Level</span>
+                              <span className="mt-1 block">{badge(selectedTicket.priority === 'Urgent' ? 'red' : selectedTicket.priority === 'High' ? 'amber' : 'blue', selectedTicket.priority)}</span>
+                            </div>
 
-                      {/* Ticket Properties and Actions */}
-                      <div className="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-2xl p-4 shadow-sm space-y-4">
-                        <h4 className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider border-b pb-2 dark:border-zinc-800">Ticket Actions</h4>
-                        
-                        {/* Status Change */}
-                        <div className="space-y-1">
-                          <label className="block text-[10px] text-zinc-400 font-bold mb-1">Update Status</label>
-                          <select
-                            value={ticketStatusSelect}
-                            onChange={async (e) => {
-                              const newStatus = e.target.value;
-                              setTicketStatusSelect(newStatus);
-                              try {
-                                await apiAction('PUT', `/support/tickets/${selectedTicket._id}/status`, { status: newStatus });
-                                alert('Status updated successfully!');
-                                const freshTickets = await apiFetch('/support/tickets');
-                                setTickets(freshTickets);
-                                const found = freshTickets.find((t: any) => t._id === selectedTicket._id);
-                                if (found) setSelectedTicket(found);
-                              } catch (err: any) {
-                                alert(`Failed to update status: ${err.message}`);
-                              }
-                            }}
-                            className="w-full px-2 py-1.5 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg text-xs text-zinc-900 dark:text-white"
-                          >
-                            <option value="Open">Open</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Resolved">Resolved</option>
-                            <option value="Closed">Closed</option>
-                          </select>
-                        </div>
+                            <div className="space-y-1">
+                              <label className="text-[10px] text-zinc-400 font-bold uppercase">Update Status</label>
+                              <select 
+                                value={ticketStatusSelect} 
+                                onChange={async (e) => {
+                                  const val = e.target.value;
+                                  setTicketStatusSelect(val);
+                                  try {
+                                    const res = await apiAction('PUT', `/support/tickets/${selectedTicket._id}/status`, { status: val });
+                                    setSelectedTicket(res);
+                                    loadTickets();
+                                  } catch (err: any) {
+                                    alert(`Failed: ${err.message}`);
+                                  }
+                                }}
+                                className="w-full px-2 py-1.5 border dark:border-zinc-850 bg-white dark:bg-zinc-950 rounded-lg text-xs text-zinc-900 dark:text-white cursor-pointer"
+                              >
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Resolved">Resolved</option>
+                                <option value="Closed">Closed</option>
+                              </select>
+                            </div>
 
-                        {/* Assign Agent */}
-                        <div className="space-y-1">
-                          <label className="block text-[10px] text-zinc-400 font-bold mb-1">Assign Agent</label>
-                          <select
-                            value={ticketAgentSelect}
-                            onChange={async (e) => {
-                              const newAgent = e.target.value;
-                              setTicketAgentSelect(newAgent);
-                              try {
-                                await apiAction('PUT', `/support/tickets/${selectedTicket._id}/assign`, { agentId: newAgent });
-                                alert('Agent assigned successfully!');
-                                const freshTickets = await apiFetch('/support/tickets');
-                                setTickets(freshTickets);
-                                const found = freshTickets.find((t: any) => t._id === selectedTicket._id);
-                                if (found) setSelectedTicket(found);
-                              } catch (err: any) {
-                                alert(`Failed to assign agent: ${err.message}`);
-                              }
-                            }}
-                            className="w-full px-2 py-1.5 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg text-xs text-zinc-900 dark:text-white"
-                          >
-                            <option value="">Unassigned</option>
-                            {agentsList.map((agent: any) => (
-                              <option key={agent._id} value={agent.agentId?._id || agent.agentId}>
-                                {agent.agentId?.email || agent.agentId || 'Online Staff'}
-                              </option>
-                            ))}
-                          </select>
+                            <div className="space-y-1">
+                              <label className="text-[10px] text-zinc-400 font-bold uppercase">Assign Staff Agent</label>
+                              <select 
+                                value={ticketAgentSelect} 
+                                onChange={async (e) => {
+                                  const val = e.target.value;
+                                  setTicketAgentSelect(val);
+                                  try {
+                                    await apiAction('PUT', `/support/tickets/${selectedTicket._id}/assign`, { agentId: val || null });
+                                    const freshTickets = await apiFetch('/support/tickets');
+                                    setTickets(freshTickets);
+                                    const found = freshTickets.find((t: any) => t._id === selectedTicket._id);
+                                    if (found) setSelectedTicket(found);
+                                  } catch (err: any) {
+                                    alert(`Failed to assign agent: ${err.message}`);
+                                  }
+                                }}
+                                className="w-full px-2 py-1.5 border dark:border-zinc-800 bg-white dark:bg-zinc-955 rounded-lg text-xs text-zinc-905 dark:text-white"
+                              >
+                                <option value="">Unassigned</option>
+                                {agentsList.map((agent: any) => (
+                                  <option key={agent._id} value={agent.agentId?._id || agent.agentId}>
+                                    {agent.agentId?.email || agent.agentId || 'Online Staff'}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <SectionHeader 
-                    title="Support Center" 
-                    desc="Manage Customer, Seller, and Vendor support requests and agent workloads."
-                    right={
-                      <button onClick={loadTickets} className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 cursor-pointer">
-                        <RefreshCw className="h-4 w-4"/>
-                      </button>
-                    }
-                  />
-
-                  <FilterBar>
-                    <SearchBar value={ticketSearch} onChange={setTicketSearch} placeholder="Search tickets by subject..." />
-                    <Sel 
-                      value={ticketStatusFilter} 
-                      onChange={setTicketStatusFilter} 
-                      placeholder="All Statuses" 
-                      options={[
-                        { value: 'Open', label: 'Open' },
-                        { value: 'In Progress', label: 'In Progress' },
-                        { value: 'Resolved', label: 'Resolved' },
-                        { value: 'Closed', label: 'Closed' },
-                      ]} 
+                  </>
+                ) : (
+                  <>
+                    <SectionHeader 
+                      title="Support Center" 
+                      desc="Manage Customer, Seller, and Vendor support requests and agent workloads."
+                      right={
+                        <button onClick={loadTickets} className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 cursor-pointer">
+                          <RefreshCw className="h-4 w-4"/>
+                        </button>
+                      }
                     />
-                    <ApplyBtn onClick={loadTickets} />
-                  </FilterBar>
 
-                  {loading ? <Loading /> : (
-                    <>
-                      <Table>
-                        <Thead>
-                          <tr>
-                            <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Subject</th>
-                            <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">User Creator</th>
-                            <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Priority</th>
-                            <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Status</th>
-                            <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Created At</th>
-                          </tr>
-                        </Thead>
-                        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                          {tickets
-                            .filter(t => {
+                    <FilterBar>
+                      <SearchBar value={ticketSearch} onChange={setTicketSearch} placeholder="Search tickets by subject..." />
+                      <Sel 
+                        value={ticketStatusFilter} 
+                        onChange={setTicketStatusFilter} 
+                        placeholder="All Statuses" 
+                        options={[
+                          { value: 'Open', label: 'Open' },
+                          { value: 'In Progress', label: 'In Progress' },
+                          { value: 'Resolved', label: 'Resolved' },
+                          { value: 'Closed', label: 'Closed' },
+                        ]} 
+                      />
+                      <ApplyBtn onClick={loadTickets} />
+                    </FilterBar>
+
+                    {loading ? <Loading /> : (
+                      <>
+                        <Table>
+                          <Thead>
+                            <tr>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Subject</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">User Creator</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Priority</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Status</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Created At</th>
+                            </tr>
+                          </Thead>
+                          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                            {tickets
+                              .filter(t => {
+                                const matchSearch = t.subject?.toLowerCase().includes(ticketSearch.toLowerCase());
+                                const matchStatus = !ticketStatusFilter || t.status === ticketStatusFilter;
+                                return matchSearch && matchStatus;
+                              })
+                              .slice((ticketPage - 1) * limit, ticketPage * limit)
+                              .map((t: any) => {
+                                const cUser = users.find(u => String(u._id) === String(t.userId));
+                                const cVendor = vendors.find(v => 
+                                  String(v.userId?._id) === String(t.userId) || 
+                                  String(v.userId) === String(t.userId) ||
+                                  String(v._id) === String(t.userId)
+                                );
+
+                                let priorityColor = 'zinc';
+                                if (t.priority === 'Urgent') priorityColor = 'red';
+                                else if (t.priority === 'High') priorityColor = 'amber';
+                                else if (t.priority === 'Medium') priorityColor = 'blue';
+
+                                let statusColor = 'zinc';
+                                if (t.status === 'Resolved') statusColor = 'green';
+                                else if (t.status === 'In Progress') statusColor = 'blue';
+                                else if (t.status === 'Open') statusColor = 'amber';
+
+                                return (
+                                  <tr key={t._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-xs">
+                                    <td 
+                                      className="px-4 py-3 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                                      onClick={() => setSelectedTicket(t)}
+                                    >
+                                      {t.subject}
+                                    </td>
+                                    <td className="px-4 py-3 text-zinc-500">
+                                      {cUser ? (
+                                        <span>{cUser.firstName} {cUser.lastName} (Customer)</span>
+                                      ) : cVendor ? (
+                                        <span>{cVendor.shopName} (Merchant)</span>
+                                      ) : (
+                                        <span className="font-mono">{t.userId?.toString().slice(-8).toUpperCase()}</span>
+                                      )}
+                                    </td>
+                                    <td className="px-4 py-3">{badge(priorityColor, t.priority)}</td>
+                                    <td className="px-4 py-3">{badge(statusColor, t.status)}</td>
+                                    <td className="px-4 py-3 text-zinc-400">
+                                      {t.createdAt ? new Date(t.createdAt).toLocaleString() : '—'}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                          </tbody>
+                        </Table>
+                        <Pagination 
+                          currentPage={ticketPage} 
+                          totalPages={Math.ceil(
+                            tickets.filter(t => {
                               const matchSearch = t.subject?.toLowerCase().includes(ticketSearch.toLowerCase());
                               const matchStatus = !ticketStatusFilter || t.status === ticketStatusFilter;
                               return matchSearch && matchStatus;
-                            })
-                            .slice((ticketPage - 1) * limit, ticketPage * limit)
-                            .map((t: any) => {
-                              const cUser = users.find(u => String(u._id) === String(t.userId));
-                              const cVendor = vendors.find(v => 
-                                String(v.userId?._id) === String(t.userId) || 
-                                String(v.userId) === String(t.userId) ||
-                                String(v._id) === String(t.userId)
-                              );
+                            }).length / limit
+                          ) || 1} 
+                          onPageChange={setTicketPage} 
+                        />
+                      </>
+                    )}
+                  </>
+                )
+              ) : (
+                // ================= FEEDBACK CENTER SUB-TAB =================
+                selectedFeedback ? (
+                  <>
+                    <SectionHeader 
+                      title={`Feedback: [${selectedFeedback.ticketId}] ${selectedFeedback.subject}`}
+                      desc={`Category: ${selectedFeedback.category} · Priority: ${selectedFeedback.priority}`}
+                      right={
+                        <button 
+                          onClick={() => setSelectedFeedback(null)} 
+                          className="px-3 py-1.5 border dark:border-zinc-800 text-zinc-650 hover:text-indigo-500 rounded-lg text-xs font-semibold flex items-center gap-1.5 dark:text-zinc-300 bg-white dark:bg-zinc-900 cursor-pointer"
+                        >
+                          <X className="h-4 w-4"/> Back to Listing
+                        </button>
+                      } 
+                    />
 
-                              let priorityColor = 'zinc';
-                              if (t.priority === 'Urgent') priorityColor = 'red';
-                              else if (t.priority === 'High') priorityColor = 'amber';
-                              else if (t.priority === 'Medium') priorityColor = 'blue';
+                    {selectedFeedback.isConfidential && (
+                      <div className="bg-rose-50 border border-rose-200 text-rose-800 dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-450 px-6 py-2 text-xs font-bold flex items-center gap-2">
+                        <Lock className="h-4 w-4 animate-pulse" /> Confidential Security Report. Restricted Access Authorized.
+                      </div>
+                    )}
 
-                              let statusColor = 'zinc';
-                              if (t.status === 'Resolved') statusColor = 'green';
-                              else if (t.status === 'In Progress') statusColor = 'blue';
-                              else if (t.status === 'Open') statusColor = 'amber';
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+                      {/* Left and Middle: Details & Communication */}
+                      <div className="lg:col-span-2 space-y-6">
+                        {/* Reporter & Context Info */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                          {/* Reporter Info */}
+                          <div className="bg-zinc-50/50 dark:bg-zinc-900/40 p-4 border dark:border-zinc-800 rounded-xl space-y-2 shadow-sm">
+                            <h4 className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider">Reporter Info</h4>
+                            <div className="space-y-1">
+                              <div><strong>Name:</strong> {selectedFeedback.name}</div>
+                              <div><strong>Email:</strong> {selectedFeedback.email}</div>
+                              <div><strong>Role:</strong> {selectedFeedback.userRole}</div>
+                              {selectedFeedback.userId && <div><strong>User ID:</strong> <span className="font-mono text-[10px]">{selectedFeedback.userId}</span></div>}
+                            </div>
+                          </div>
 
+                          {/* Technical Context */}
+                          <div className="bg-zinc-50/50 dark:bg-zinc-900/40 p-4 border dark:border-zinc-800 rounded-xl space-y-2 shadow-sm">
+                            <h4 className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider">Technical Environment</h4>
+                            <div className="space-y-1">
+                              <div><strong>OS / Browser:</strong> {selectedFeedback.os} / {selectedFeedback.browser}</div>
+                              <div><strong>Device / Size:</strong> {selectedFeedback.device} ({selectedFeedback.screenResolution})</div>
+                              <div><strong>IP Address:</strong> <span className="font-mono">{selectedFeedback.ipAddress}</span></div>
+                            </div>
+                          </div>
+
+                          {/* Meta & Issue details */}
+                          <div className="bg-zinc-50/50 dark:bg-zinc-900/40 p-4 border dark:border-zinc-800 rounded-xl space-y-2 shadow-sm">
+                            <h4 className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider">Issue Meta</h4>
+                            <div className="space-y-1">
+                              <div><strong>Type:</strong> {badge('blue', selectedFeedback.type)}</div>
+                              <div><strong>Severity:</strong> {badge(selectedFeedback.severity === 'Critical' ? 'red' : 'zinc', selectedFeedback.severity)}</div>
+                              <div><strong>Created:</strong> {new Date(selectedFeedback.createdAt).toLocaleString()}</div>
+                              {selectedFeedback.url && <div className="truncate"><strong>URL:</strong> <a href={selectedFeedback.url} target="_blank" rel="noreferrer" className="text-indigo-500 hover:underline">{selectedFeedback.url}</a></div>}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Description Box */}
+                        <div className="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-2xl p-5 shadow-sm space-y-3">
+                          <h4 className="font-bold text-xs text-zinc-900 dark:text-white uppercase tracking-wider">Description</h4>
+                          <p className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-wrap">{selectedFeedback.description}</p>
+                        </div>
+
+                        {/* Attachments Section */}
+                        {feedbackAttachments.length > 0 && (
+                          <div className="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-2xl p-5 shadow-sm space-y-3">
+                            <h4 className="font-bold text-xs text-zinc-900 dark:text-white uppercase tracking-wider">Attachments ({feedbackAttachments.length})</h4>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                              {feedbackAttachments.map((att: any) => {
+                                const isImg = att.fileType.startsWith('image/');
+                                return (
+                                  <div key={att._id} className="border dark:border-zinc-800 rounded-xl p-2.5 bg-zinc-50/50 dark:bg-zinc-950 flex flex-col justify-between items-center text-center">
+                                    {isImg ? (
+                                      <div className="h-16 w-full rounded bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden">
+                                        <img src={att.fileUrl || '/api/placeholder'} alt="Attachment preview" className="object-cover h-full w-full" />
+                                      </div>
+                                    ) : (
+                                      <div className="h-16 w-full rounded bg-zinc-100 dark:bg-zinc-850 flex items-center justify-center text-zinc-400 font-bold text-[10px]">
+                                        {att.fileType.split('/')[1]?.toUpperCase() || 'FILE'}
+                                      </div>
+                                    )}
+                                    <span className="text-[10px] text-zinc-800 dark:text-zinc-200 truncate w-full mt-2 font-medium">{att.fileName}</span>
+                                    <a href={att.fileUrl} target="_blank" rel="noreferrer" className="mt-1 text-[9px] text-indigo-500 font-bold hover:underline">Download</a>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Customer Closure Survey Metric (Show if Resolved/Closed) */}
+                        {selectedFeedback.rating > 0 && (
+                          <div className="bg-emerald-50 border border-emerald-250 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-900/30 dark:text-emerald-450 p-5 rounded-2xl shadow-sm space-y-2">
+                            <h4 className="font-bold text-xs uppercase tracking-wider flex items-center gap-1.5"><CheckCircle className="h-4 w-4" /> Customer Satisfaction Survey Rating</h4>
+                            <div className="flex items-center gap-1">
+                              {[1, 2, 3, 4, 5].map(star => (
+                                <span key={star} className={`text-lg ${star <= selectedFeedback.rating ? 'text-amber-500' : 'text-zinc-300'}`}>★</span>
+                              ))}
+                              <span className="text-xs font-bold ml-2">({selectedFeedback.rating} / 5 Stars)</span>
+                            </div>
+                            {selectedFeedback.surveyComment && (
+                              <p className="text-xs italic mt-1 bg-white/50 dark:bg-zinc-950/40 p-2 rounded-xl border border-emerald-100 dark:border-emerald-955">
+                                "{selectedFeedback.surveyComment}"
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Conversation & Activities box */}
+                        <div className="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-2xl p-5 shadow-sm space-y-4">
+                          <h4 className="font-bold text-xs text-zinc-900 dark:text-white uppercase tracking-wider">Communication Logs & Audit Trail</h4>
+                          
+                          <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                            {/* Merge comments & activities chronologically */}
+                            {[
+                              ...feedbackComments.map(c => ({ ...c, type: 'comment' })),
+                              ...feedbackActivities.map(a => ({ ...a, type: 'activity' })),
+                            ]
+                              .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                              .map((item: any, idx: number) => {
+                                if (item.type === 'activity') {
+                                  return (
+                                    <div key={idx} className="flex gap-2 items-center text-[10px] text-zinc-400 font-mono py-1.5 border-b border-dashed dark:border-zinc-800/85">
+                                      <Activity className="h-3 w-3 text-indigo-500 shrink-0" />
+                                      <span><strong>{item.userName} ({item.userRole})</strong> triggered <strong>{item.action}</strong> {item.newValue ? `-> ${item.newValue}` : ''}</span>
+                                    </div>
+                                  );
+                                } else {
+                                  const isStaff = item.userRole === 'Admin' || item.userRole === 'Super Admin' || item.userRole === 'Support Agent';
+                                  return (
+                                    <div key={idx} className={`flex ${isStaff ? 'justify-end' : 'justify-start'}`}>
+                                      <div className={`max-w-[80%] rounded-2xl p-3 text-xs shadow-sm ${
+                                        item.isPrivate
+                                          ? 'bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 text-amber-800 dark:text-amber-400'
+                                          : isStaff 
+                                            ? 'bg-indigo-600 text-white rounded-tr-none'
+                                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-150 rounded-tl-none'
+                                      }`}>
+                                        <div className="flex justify-between items-center gap-4 text-[9px] font-bold uppercase tracking-wider mb-1 opacity-70">
+                                          <span>{item.userName} ({item.userRole})</span>
+                                          {item.isPrivate && <span className="bg-amber-600 text-white text-[8px] px-1 rounded uppercase tracking-wider font-extrabold">Internal Note</span>}
+                                        </div>
+                                        <p>{item.text}</p>
+                                        <span className="text-[8px] block text-right mt-1 opacity-60">{new Date(item.createdAt).toLocaleTimeString()}</span>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                              })}
+                          </div>
+
+                          {/* Submit Comment */}
+                          <div className="border-t dark:border-zinc-800 pt-3 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <label className="flex items-center gap-1.5 text-xs text-zinc-650 dark:text-zinc-350 cursor-pointer select-none font-bold">
+                                <input 
+                                  type="checkbox" 
+                                  checked={feedbackIsPrivateNote} 
+                                  onChange={e => setFeedbackIsPrivateNote(e.target.checked)} 
+                                  className="rounded border-zinc-300 text-amber-600 focus:ring-amber-500 h-4 w-4" 
+                                />
+                                <span className={feedbackIsPrivateNote ? 'text-amber-600 font-extrabold' : ''}>Internal Private Note (Developer / QA Notes)</span>
+                              </label>
+                            </div>
+                            <div className="flex gap-2">
+                              <input 
+                                type="text"
+                                className="flex-1 rounded-xl border dark:border-zinc-800 p-2.5 text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white outline-none focus:border-indigo-500"
+                                placeholder={feedbackIsPrivateNote ? "Add developer/QA notes (restricted to staff)..." : "Type a response update to the user..."}
+                                value={feedbackReplyText}
+                                onChange={e => setFeedbackReplyText(e.target.value)}
+                              />
+                              <button 
+                                onClick={async () => {
+                                  if (!feedbackReplyText.trim()) return;
+                                  try {
+                                    await apiAction('POST', `/admin/feedback/${selectedFeedback._id}/comments`, {
+                                      text: feedbackReplyText,
+                                      isPrivate: feedbackIsPrivateNote,
+                                    });
+                                    setFeedbackReplyText('');
+                                    loadFeedbackDetail(selectedFeedback._id);
+                                    loadFeedback();
+                                  } catch (err: any) {
+                                    alert(`Failed: ${err.message}`);
+                                  }
+                                }}
+                                className={`px-5 py-2.5 font-bold rounded-xl text-xs cursor-pointer shadow text-white ${feedbackIsPrivateNote ? 'bg-amber-600 hover:bg-amber-500' : 'bg-indigo-600 hover:bg-indigo-500'}`}
+                              >
+                                Post Note
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right: Operations & Workflows Panel */}
+                      <div className="space-y-4">
+                        {/* Properties Settings Card */}
+                        <div className="bg-zinc-50/50 dark:bg-zinc-900/40 border dark:border-zinc-800 rounded-2xl p-4 space-y-4 shadow-sm">
+                          <h4 className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider border-b pb-2 dark:border-zinc-800">Workflow Operations</h4>
+                          
+                          <div className="space-y-4">
+                            {/* Roadmap status if Feature Request */}
+                            {selectedFeedback.type === 'Feature Request' && (
+                              <div className="space-y-1">
+                                <label className="text-[10px] text-zinc-450 font-bold uppercase block">Roadmap Status (Feature Voting)</label>
+                                <select 
+                                  value={feedbackRoadmapStatusSelect}
+                                  onChange={async (e) => {
+                                    const val = e.target.value;
+                                    setFeedbackRoadmapStatusSelect(val);
+                                    try {
+                                      await apiAction('PUT', `/admin/feedback/${selectedFeedback._id}/roadmap`, { roadmapStatus: val });
+                                      loadFeedbackDetail(selectedFeedback._id);
+                                      loadFeedback();
+                                    } catch (err: any) { alert(`Failed: ${err.message}`); }
+                                  }}
+                                  className="w-full px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg text-xs text-zinc-900 dark:text-white cursor-pointer"
+                                >
+                                  <option value="none">Not on Roadmap</option>
+                                  <option value="Planned">Planned</option>
+                                  <option value="Under Development">Under Development</option>
+                                  <option value="Released">Released</option>
+                                  <option value="Rejected">Rejected</option>
+                                </select>
+                                <div className="text-[10px] text-indigo-600 font-bold mt-1">Total Votes: {selectedFeedback.votesCount || 0}</div>
+                              </div>
+                            )}
+
+                            {/* Ticket Status */}
+                            <div className="space-y-1">
+                              <label className="text-[10px] text-zinc-450 font-bold uppercase block">Ticket Status</label>
+                              <select 
+                                value={feedbackStatusSelect}
+                                onChange={async (e) => {
+                                  const val = e.target.value;
+                                  setFeedbackStatusSelect(val);
+                                  try {
+                                    await apiAction('PUT', `/admin/feedback/${selectedFeedback._id}/status`, { status: val });
+                                    loadFeedbackDetail(selectedFeedback._id);
+                                    loadFeedback();
+                                  } catch (err: any) { alert(`Failed: ${err.message}`); }
+                                }}
+                                className="w-full px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg text-xs text-zinc-900 dark:text-white cursor-pointer"
+                              >
+                                <option value="New">New</option>
+                                <option value="Open">Open</option>
+                                <option value="In Review">In Review</option>
+                                <option value="Assigned">Assigned</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Awaiting Response">Awaiting Response</option>
+                                <option value="Testing">Testing</option>
+                                <option value="Resolved">Resolved</option>
+                                <option value="Closed">Closed</option>
+                                <option value="Rejected">Rejected</option>
+                              </select>
+                            </div>
+
+                            {/* Assignment Team / Agent */}
+                            <div className="space-y-2">
+                              <label className="text-[10px] text-zinc-450 font-bold uppercase block">Assign Department</label>
+                              <select 
+                                value={feedbackAssignTeamSelect}
+                                onChange={async (e) => {
+                                  const team = e.target.value;
+                                  setFeedbackAssignTeamSelect(team);
+                                  try {
+                                    await apiAction('PUT', `/admin/feedback/${selectedFeedback._id}/assign`, {
+                                      team,
+                                      agentId: feedbackAssignAgentSelect || null
+                                    });
+                                    loadFeedbackDetail(selectedFeedback._id);
+                                    loadFeedback();
+                                  } catch (err: any) { alert(`Failed: ${err.message}`); }
+                                }}
+                                className="w-full px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-955 rounded-lg text-xs text-zinc-900 dark:text-white cursor-pointer"
+                              >
+                                <option value="Support Team">Support Team</option>
+                                <option value="QA Team">QA Team</option>
+                                <option value="Development Team">Development Team</option>
+                                <option value="Product Team">Product Team</option>
+                              </select>
+                            </div>
+
+                            <div className="space-y-2">
+                              <label className="text-[10px] text-zinc-455 font-bold uppercase block">Assign Specific Agent</label>
+                              <select 
+                                value={feedbackAssignAgentSelect}
+                                onChange={async (e) => {
+                                  const agentId = e.target.value;
+                                  setFeedbackAssignAgentSelect(agentId);
+                                  try {
+                                    await apiAction('PUT', `/admin/feedback/${selectedFeedback._id}/assign`, {
+                                      team: feedbackAssignTeamSelect,
+                                      agentId: agentId || null
+                                    });
+                                    loadFeedbackDetail(selectedFeedback._id);
+                                    loadFeedback();
+                                  } catch (err: any) { alert(`Failed: ${err.message}`); }
+                                }}
+                                className="w-full px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg text-xs text-zinc-900 dark:text-white cursor-pointer"
+                              >
+                                <option value="">Select Agent...</option>
+                                {agentsList.map((agent: any) => (
+                                  <option key={agent._id} value={agent.agentId?._id || agent.agentId}>
+                                    {agent.agentId?.email || agent.agentId || 'Online Staff'}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  // Feedback dashboard & List view
+                  <>
+                    <SectionHeader 
+                      title="Feedback Management Center" 
+                      desc="Monitor user satisfaction, bug reports, feature voting, and custom technical logs."
+                      right={
+                        <button onClick={loadFeedback} className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 cursor-pointer">
+                          <RefreshCw className="h-4 w-4"/>
+                        </button>
+                      } 
+                    />
+
+                    {/* Stats Dashboard */}
+                    {feedbackStats && (
+                      <div className="p-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 border-b dark:border-zinc-800 bg-zinc-50/20">
+                        <div className="space-y-1"><span className="text-[9px] uppercase tracking-wider text-zinc-400 font-bold">Total Feedback</span><div className="text-lg font-black">{feedbackStats.total}</div></div>
+                        <div className="space-y-1"><span className="text-[9px] uppercase tracking-wider text-zinc-400 font-bold">Open Tickets</span><div className="text-lg font-black text-indigo-600">{feedbackStats.open}</div></div>
+                        <div className="space-y-1"><span className="text-[9px] uppercase tracking-wider text-zinc-400 font-bold">Resolved</span><div className="text-lg font-black text-emerald-600">{feedbackStats.resolved}</div></div>
+                        <div className="space-y-1"><span className="text-[9px] uppercase tracking-wider text-rose-500 font-bold">Bugs Reported</span><div className="text-lg font-black text-rose-500">{feedbackStats.bugs}</div></div>
+                        <div className="space-y-1"><span className="text-[9px] uppercase tracking-wider text-indigo-400 font-bold">Features</span><div className="text-lg font-black text-indigo-400">{feedbackStats.features}</div></div>
+                        <div className="space-y-1"><span className="text-[9px] uppercase tracking-wider text-amber-500 font-bold">Complaints</span><div className="text-lg font-black text-amber-500">{feedbackStats.complaints}</div></div>
+                        <div className="space-y-1"><span className="text-[9px] uppercase tracking-wider text-emerald-650 font-bold">Satisfaction Score</span><div className="text-lg font-black text-emerald-650">{feedbackStats.userSatisfactionScore}%</div></div>
+                      </div>
+                    )}
+
+                    {/* Filter Bar */}
+                    <FilterBar>
+                      <SearchBar value={feedbackSearch} onChange={setFeedbackSearch} placeholder="Search Ticket ID, subject, email..." />
+                      
+                      <select value={feedbackTypeFilter} onChange={e => setFeedbackTypeFilter(e.target.value)}
+                        className="px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 min-w-[140px]">
+                        <option value="">All Types</option>
+                        <option value="Feedback">Feedback</option>
+                        <option value="Suggestion">Suggestion</option>
+                        <option value="Bug Report">Bug Report</option>
+                        <option value="Feature Request">Feature Request</option>
+                        <option value="Complaint">Complaint</option>
+                        <option value="Security Report">Security Report</option>
+                      </select>
+
+                      <select value={feedbackStatusFilter} onChange={e => setFeedbackStatusFilter(e.target.value)}
+                        className="px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 min-w-[140px]">
+                        <option value="">All Statuses</option>
+                        <option value="New">New</option>
+                        <option value="Open">Open</option>
+                        <option value="In Review">In Review</option>
+                        <option value="Assigned">Assigned</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                        <option value="Closed">Closed</option>
+                        <option value="Rejected">Rejected</option>
+                      </select>
+
+                      <select value={feedbackCategoryFilter} onChange={e => setFeedbackCategoryFilter(e.target.value)}
+                        className="px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 min-w-[140px]">
+                        <option value="">All Categories</option>
+                        <option value="General">General</option>
+                        <option value="Bug Reports">Bug Reports</option>
+                        <option value="Feature Requests">Feature Requests</option>
+                        <option value="Complaint Reports">Complaint Reports</option>
+                        <option value="Security Reports">Security Reports</option>
+                      </select>
+
+                      <ApplyBtn onClick={loadFeedback} />
+                    </FilterBar>
+
+                    {loading ? <Loading /> : (
+                      <>
+                        <Table>
+                          <Thead>
+                            <tr>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Ticket ID</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Subject</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Type</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Reporter</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Priority</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Status</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Votes</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Roadmap</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Created Date</th>
+                            </tr>
+                          </Thead>
+                          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                            {feedbackTickets.map((t: any) => {
                               return (
-                                <tr key={t._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
-                                  <td 
-                                    className="px-4 py-3 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
-                                    onClick={() => setSelectedTicket(t)}
-                                  >
+                                <tr key={t._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-xs cursor-pointer" onClick={() => loadFeedbackDetail(t._id)}>
+                                  <td className="px-4 py-3 font-mono font-bold text-zinc-650">{t.ticketId}</td>
+                                  <td className="px-4 py-3 font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1.5">
+                                    {t.isConfidential && <Lock className="h-3.5 w-3.5 text-rose-500 shrink-0" />}
                                     {t.subject}
                                   </td>
-                                  <td className="px-4 py-3 text-xs text-zinc-650 dark:text-zinc-400">
-                                    {cUser ? (
-                                      <span>{cUser.firstName} {cUser.lastName} (Customer)</span>
-                                    ) : cVendor ? (
-                                      <span>{cVendor.shopName} (Merchant)</span>
-                                    ) : (
-                                      <span className="font-mono">{t.userId?.toString().slice(-8).toUpperCase()}</span>
-                                    )}
-                                  </td>
-                                  <td className="px-4 py-3">{badge(priorityColor, t.priority)}</td>
-                                  <td className="px-4 py-3">{badge(statusColor, t.status)}</td>
-                                  <td className="px-4 py-3 text-xs text-zinc-400">
-                                    {t.createdAt ? new Date(t.createdAt).toLocaleString() : '—'}
-                                  </td>
+                                  <td className="px-4 py-3">{badge('indigo', t.type)}</td>
+                                  <td className="px-4 py-3 text-zinc-500">{t.name} ({t.userRole})</td>
+                                  <td className="px-4 py-3">{badge(t.priority === 'Critical' || t.priority === 'Emergency' ? 'red' : t.priority === 'High' ? 'amber' : 'blue', t.priority)}</td>
+                                  <td className="px-4 py-3">{badge(t.status === 'Resolved' || t.status === 'Closed' ? 'green' : t.status === 'Rejected' ? 'zinc' : 'blue', t.status)}</td>
+                                  <td className="px-4 py-3 font-bold font-mono">{t.votesCount || 0}</td>
+                                  <td className="px-4 py-3">{t.roadmapStatus !== 'none' ? badge('indigo', t.roadmapStatus) : '—'}</td>
+                                  <td className="px-4 py-3 text-zinc-400">{new Date(t.createdAt).toLocaleDateString()}</td>
                                 </tr>
                               );
                             })}
-                        </tbody>
-                      </Table>
-                      <Pagination 
-                        currentPage={ticketPage} 
-                        totalPages={Math.ceil(
-                          tickets.filter(t => {
-                            const matchSearch = t.subject?.toLowerCase().includes(ticketSearch.toLowerCase());
-                            const matchStatus = !ticketStatusFilter || t.status === ticketStatusFilter;
-                            return matchSearch && matchStatus;
-                          }).length / limit
-                        ) || 1} 
-                        onPageChange={setTicketPage} 
-                      />
-                    </>
-                  )}
-                </>
+                            {feedbackTickets.length === 0 && (
+                              <tr>
+                                <td colSpan={9} className="text-center py-8 text-zinc-400">No feedback submissions found.</td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </Table>
+                        <Pagination 
+                          currentPage={feedbackPage} 
+                          totalPages={feedbackStats?.totalPages || 1} 
+                          onPageChange={setFeedbackPage} 
+                        />
+                      </>
+                    )}
+                  </>
+                )
               )}
             </Section>
           )}
@@ -3139,7 +3745,7 @@ export default function AdminPage() {
                       {logSubTab === 'analytics' && logAnalytics && (
                         <div className="space-y-6">
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <StatCard label="Logs Created Today" value={logAnalytics.totalLogsToday} icon={<Database className="h-4 w-4"/>} color="indigo" />
+                            <StatCard label="Total Logs Recorded" value={logAnalytics.totalLogsToday} icon={<Database className="h-4 w-4"/>} color="indigo" />
                             <StatCard label="API Requests (Total)" value={logAnalytics.totalApiCalls} icon={<Activity className="h-4 w-4"/>} color="blue" />
                             <StatCard label="Security Alerts Triggered" value={logAnalytics.securityAlerts} icon={<ShieldAlert className="h-4 w-4"/>} color="rose" />
                             <StatCard label="Failed Login Records" value={logAnalytics.failedLogins} icon={<Lock className="h-4 w-4"/>} color="amber" />
@@ -3741,6 +4347,244 @@ export default function AdminPage() {
 
         </main>
       </div>
+
+      {/* Floating Action Button */}
+      <button
+        onClick={() => {
+          handleGenerateCaptcha();
+          setShowFloatingWidget(true);
+        }}
+        className="fixed bottom-6 right-6 z-50 p-4 bg-indigo-600 hover:bg-indigo-500 hover:scale-105 active:scale-95 text-white rounded-full shadow-2xl transition-all flex items-center gap-2 cursor-pointer font-bold text-xs"
+      >
+        <Star className="h-5 w-5 animate-pulse" />
+        <span>Give Feedback</span>
+      </button>
+
+      {/* Glassmorphic overlay widget */}
+      {showFloatingWidget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="w-full max-w-xl bg-white/90 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl p-6 relative backdrop-filter max-h-[90vh] overflow-y-auto space-y-4">
+            <button
+              onClick={() => setShowFloatingWidget(false)}
+              className="absolute top-4 right-4 p-1 rounded-full text-zinc-400 hover:bg-zinc-105 dark:hover:bg-zinc-850"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div className="text-center">
+              <h2 className="text-lg font-black text-zinc-900 dark:text-white">Feedback Center Widget</h2>
+              <p className="text-xs text-zinc-500">Report bugs, request features, or submit feature votes directly to our product engineering teams.</p>
+            </div>
+
+            <form onSubmit={handleWidgetSubmit} className="space-y-4 text-xs">
+              {/* Type & Category selection */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] text-zinc-450 font-bold uppercase mb-1">Feedback Type</label>
+                  <select
+                    value={widgetType}
+                    onChange={(e) => setWidgetType(e.target.value)}
+                    className="w-full px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg text-zinc-800 dark:text-white"
+                  >
+                    <option value="Feedback">Feedback</option>
+                    <option value="Suggestion">Suggestion</option>
+                    <option value="Bug Report">Bug Report</option>
+                    <option value="Feature Request">Feature Request</option>
+                    <option value="Complaint">Complaint</option>
+                    <option value="Security Report">Security Report</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] text-zinc-450 font-bold uppercase mb-1">Queue Category</label>
+                  <select
+                    value={widgetCategory}
+                    onChange={(e) => setWidgetCategory(e.target.value)}
+                    className="w-full px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-955 rounded-lg text-zinc-805 dark:text-white"
+                  >
+                    <option value="General">General</option>
+                    <option value="Bug Reports">Bug Reports</option>
+                    <option value="Feature Requests">Feature Requests</option>
+                    <option value="Complaint Reports">Complaint Reports</option>
+                    <option value="Security Reports">Security Reports</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Subject */}
+              <div>
+                <label className="block text-[10px] text-zinc-450 font-bold uppercase mb-1">Subject / Summary</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Summarize the request or issue..."
+                  value={widgetSubject}
+                  onChange={(e) => setWidgetSubject(e.target.value)}
+                  className="w-full px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg text-zinc-800 dark:text-white outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              {/* Duplicate suggestions */}
+              {duplicateSuggestions.length > 0 && (
+                <div className="bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-150/40 p-3.5 rounded-xl space-y-2">
+                  <span className="block text-[10px] text-indigo-700 dark:text-indigo-400 font-extrabold uppercase tracking-wider">Similar Existing Submissions</span>
+                  <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
+                    {duplicateSuggestions.map((item: any) => (
+                      <div key={item._id} className="flex justify-between items-center bg-white dark:bg-zinc-900 border dark:border-zinc-850 p-2 rounded-lg gap-3">
+                        <div className="min-w-0">
+                          <div className="font-bold text-zinc-800 dark:text-zinc-200 truncate">{item.subject}</div>
+                          <div className="text-[9px] text-zinc-450 mt-0.5">Roadmap: {item.roadmapStatus} · Votes: {item.votesCount}</div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleVoteSuggestion(item._id)}
+                          className="px-2.5 py-1 bg-indigo-600 text-white rounded text-[9px] font-bold shrink-0 hover:bg-indigo-500"
+                        >
+                          Vote (+1)
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Description */}
+              <div>
+                <label className="block text-[10px] text-zinc-450 font-bold uppercase mb-1">Details & Description</label>
+                <textarea
+                  required
+                  rows={3}
+                  placeholder="Provide precise details, steps to reproduce, or product goals..."
+                  value={widgetDescription}
+                  onChange={(e) => setWidgetDescription(e.target.value)}
+                  className="w-full px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg text-zinc-800 dark:text-white outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              {/* Guest Profile Details (Only when not logged in / token is empty) */}
+              {!token && (
+                <div className="border-t border-dashed dark:border-zinc-800 pt-3.5 space-y-3">
+                  <span className="block text-[10px] text-zinc-455 font-bold uppercase tracking-wider">Guest Contact Details</span>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Your Name"
+                        value={widgetName}
+                        onChange={(e) => setWidgetName(e.target.value)}
+                        className="w-full px-2.5 py-1.5 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg text-zinc-800 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="email"
+                        required
+                        placeholder="Your Email"
+                        value={widgetEmail}
+                        onChange={(e) => setWidgetEmail(e.target.value)}
+                        className="w-full px-2.5 py-1.5 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg text-zinc-800 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Phone (Optional)"
+                        value={widgetPhone}
+                        onChange={(e) => setWidgetPhone(e.target.value)}
+                        className="w-full px-2.5 py-1.5 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg text-zinc-800 dark:text-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Priority / Severity / CAPTCHA */}
+              <div className="grid grid-cols-3 gap-3 border-t border-dashed dark:border-zinc-800 pt-3">
+                <div>
+                  <label className="block text-[10px] text-zinc-450 font-bold uppercase mb-1">Priority</label>
+                  <select
+                    value={widgetPriority}
+                    onChange={(e) => setWidgetPriority(e.target.value)}
+                    className="w-full px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg text-zinc-850 dark:text-white"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] text-zinc-450 font-bold uppercase mb-1">Severity</label>
+                  <select
+                    value={widgetSeverity}
+                    onChange={(e) => setWidgetSeverity(e.target.value)}
+                    className="w-full px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg text-zinc-850 dark:text-white"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] text-zinc-455 font-bold uppercase mb-1">CAPTCHA: <span className="font-mono font-black text-indigo-600 dark:text-indigo-400 bg-zinc-100 dark:bg-zinc-950 px-1 rounded">{widgetCaptchaVal}</span></label>
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter code"
+                      value={widgetCaptcha}
+                      onChange={(e) => setWidgetCaptcha(e.target.value)}
+                      className="w-full px-2.5 py-1.5 border dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-lg font-mono tracking-widest text-zinc-800 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleGenerateCaptcha}
+                      className="px-2 py-1.5 border dark:border-zinc-800 hover:bg-zinc-50 rounded-lg text-zinc-500"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Attachments list / simulator */}
+              <div className="space-y-2">
+                <span className="block text-[10px] text-zinc-450 font-bold uppercase">Simulated Attachments</span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const id = Date.now().toString();
+                      setWidgetAttachments([
+                        ...widgetAttachments,
+                        {
+                          fileName: `screenshot_${id.slice(-4)}.png`,
+                          fileType: 'image/png',
+                          fileUrl: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=400&q=80',
+                        },
+                      ]);
+                    }}
+                    className="px-3 py-1.5 border dark:border-zinc-800 hover:border-indigo-400 rounded-lg text-zinc-650 hover:text-indigo-650"
+                  >
+                    + Add Mock Screenshot
+                  </button>
+                  {widgetAttachments.length > 0 && (
+                    <span className="text-zinc-500 self-center font-bold">({widgetAttachments.length} Files Attached)</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <button
+                type="submit"
+                className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold rounded-xl shadow-lg active:scale-95 transition-all text-xs"
+              >
+                Submit Feedback Request
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

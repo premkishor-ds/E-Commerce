@@ -410,9 +410,9 @@ export class AdminService {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const totalLogsToday = await this.auditRepository.count({ createdAt: { $gte: today } }) +
-                           await this.activityRepository.count({ createdAt: { $gte: today } }) +
-                           await this.apiLogRepository.count({ createdAt: { $gte: today } });
+    const totalLogsToday = await this.auditRepository.count({}) +
+                           await this.activityRepository.count({}) +
+                           await this.apiLogRepository.count({});
 
     const totalAdminActions = await this.activityRepository.count({ userRole: { $in: ['Admin', 'Super Admin'] } });
     const totalCustomerActions = await this.activityRepository.count({ userRole: 'Customer' });

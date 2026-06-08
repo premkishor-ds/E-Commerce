@@ -46,6 +46,11 @@ import {
   ExportLog,
   GuestLog,
   ChangeHistory,
+  FeedbackTicket,
+  FeedbackComment,
+  FeedbackAttachment,
+  FeedbackVote,
+  FeedbackActivityLog,
 } from '../schemas/schemas';
 
 
@@ -358,6 +363,41 @@ export class GuestLogRepository extends BaseRepository<GuestLog> {
 @Injectable()
 export class ChangeHistoryRepository extends BaseRepository<ChangeHistory> {
   constructor(@InjectModel(ChangeHistory.name) model: Model<ChangeHistory>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class FeedbackTicketRepository extends BaseRepository<FeedbackTicket> {
+  constructor(@InjectModel(FeedbackTicket.name) model: Model<FeedbackTicket>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class FeedbackCommentRepository extends BaseRepository<FeedbackComment> {
+  constructor(@InjectModel(FeedbackComment.name) model: Model<FeedbackComment>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class FeedbackAttachmentRepository extends BaseRepository<FeedbackAttachment> {
+  constructor(@InjectModel(FeedbackAttachment.name) model: Model<FeedbackAttachment>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class FeedbackVoteRepository extends BaseRepository<FeedbackVote> {
+  constructor(@InjectModel(FeedbackVote.name) model: Model<FeedbackVote>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class FeedbackActivityLogRepository extends BaseRepository<FeedbackActivityLog> {
+  constructor(@InjectModel(FeedbackActivityLog.name) model: Model<FeedbackActivityLog>) {
     super(model);
   }
 }

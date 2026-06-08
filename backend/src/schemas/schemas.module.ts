@@ -87,6 +87,16 @@ import {
   GuestLogSchema,
   ChangeHistory,
   ChangeHistorySchema,
+  FeedbackTicket,
+  FeedbackTicketSchema,
+  FeedbackComment,
+  FeedbackCommentSchema,
+  FeedbackAttachment,
+  FeedbackAttachmentSchema,
+  FeedbackVote,
+  FeedbackVoteSchema,
+  FeedbackActivityLog,
+  FeedbackActivityLogSchema,
 } from './schemas';
 
 @Module({
@@ -135,6 +145,11 @@ import {
       { name: ExportLog.name, schema: ExportLogSchema },
       { name: GuestLog.name, schema: GuestLogSchema },
       { name: ChangeHistory.name, schema: ChangeHistorySchema },
+      { name: FeedbackTicket.name, schema: FeedbackTicketSchema },
+      { name: FeedbackComment.name, schema: FeedbackCommentSchema },
+      { name: FeedbackAttachment.name, schema: FeedbackAttachmentSchema },
+      { name: FeedbackVote.name, schema: FeedbackVoteSchema },
+      { name: FeedbackActivityLog.name, schema: FeedbackActivityLogSchema },
     ]),
   ],
   exports: [MongooseModule],

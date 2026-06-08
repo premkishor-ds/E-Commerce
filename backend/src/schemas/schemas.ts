@@ -1355,5 +1355,178 @@ export class ChangeHistory extends Document {
 export const ChangeHistorySchema = SchemaFactory.createForClass(ChangeHistory);
 
 
+// --- FEEDBACK TICKET ---
+@Schema({ timestamps: true })
+export class FeedbackTicket extends Document {
+  @Prop({ required: true, unique: true, index: true })
+  ticketId: string; // e.g. FDB-12345
+
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true, index: true })
+  email: string;
+
+  @Prop({ default: '' })
+  phone: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null, index: true })
+  userId: Types.ObjectId | null;
+
+  @Prop({ required: true, default: 'Guest', index: true })
+  userRole: string; // Guest, Customer, Seller, Vendor, Admin, Support Agent
+
+  @Prop({ required: true, index: true })
+  type: string; // Feedback, Suggestion, Bug Report, Feature Request, Complaint, Security Report
+
+  @Prop({ required: true, index: true })
+  category: string; // General Feedback, Bug Reports, Feature Requests, Complaint Reports, Security Reports, etc.
+
+  @Prop({ required: true })
+  subject: string;
+
+  @Prop({ required: true })
+  description: string;
+
+  @Prop({ required: true, default: 'Medium', index: true })
+  priority: string; // Low, Medium, High, Critical, Emergency
+
+  @Prop({ required: true, default: 'Medium' })
+  severity: string; // Low, Medium, High, Critical, Emergency
+
+  @Prop({ required: true, default: 'New', index: true })
+  status: string; // New, Open, In Review, Assigned, In Progress, Awaiting Response, Testing, Resolved, Closed, Rejected
+
+  @Prop({ default: 'Support Team', index: true })
+  assignedTo: string; // Support Team, QA Team, Development Team, Product Team
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null, index: true })
+  assignedAgentId: Types.ObjectId | null;
+
+  @Prop({ default: '' })
+  url: string;
+
+  @Prop({ default: '' })
+  referrerUrl: string;
+
+  @Prop({ default: '' })
+  browser: string;
+
+  @Prop({ default: '' })
+  device: string;
+
+  @Prop({ default: '' })
+  os: string;
+
+  @Prop({ default: '' })
+  screenResolution: string;
+
+  @Prop({ default: '' })
+  sessionID: string;
+
+  @Prop({ default: '' })
+  ipAddress: string;
+
+  @Prop({ default: false, index: true })
+  isConfidential: boolean; // True for Security Reports
+
+  @Prop({ default: 'none', index: true })
+  roadmapStatus: string; // none, Planned, Under Development, Released, Rejected
+
+  @Prop({ default: 0 })
+  votesCount: number;
+
+  @Prop({ default: 0 })
+  rating: number; // 1-5 Stars
+
+  @Prop({ default: '' })
+  surveyComment: string;
+}
+export const FeedbackTicketSchema = SchemaFactory.createForClass(FeedbackTicket);
+
+// --- FEEDBACK COMMENT ---
+@Schema({ timestamps: true })
+export class FeedbackComment extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'FeedbackTicket', required: true, index: true })
+  feedbackId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  userId: Types.ObjectId | null;
+
+  @Prop({ required: true })
+  userName: string;
+
+  @Prop({ required: true })
+  userRole: string;
+
+  @Prop({ required: true })
+  text: string;
+
+  @Prop({ default: false, index: true })
+  isPrivate: boolean; // Internal notes visible to admins only
+}
+export const FeedbackCommentSchema = SchemaFactory.createForClass(FeedbackComment);
+
+// --- FEEDBACK ATTACHMENT ---
+@Schema({ timestamps: true })
+export class FeedbackAttachment extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'FeedbackTicket', required: true, index: true })
+  feedbackId: Types.ObjectId;
+
+  @Prop({ required: true })
+  fileName: string;
+
+  @Prop({ required: true })
+  fileType: string;
+
+  @Prop({ required: true })
+  fileSize: number;
+
+  @Prop({ required: true })
+  fileUrl: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  uploadedBy: Types.ObjectId | null;
+}
+export const FeedbackAttachmentSchema = SchemaFactory.createForClass(FeedbackAttachment);
+
+// --- FEEDBACK VOTE ---
+@Schema({ timestamps: true })
+export class FeedbackVote extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'FeedbackTicket', required: true, index: true })
+  feedbackId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
+  userId: Types.ObjectId;
+}
+export const FeedbackVoteSchema = SchemaFactory.createForClass(FeedbackVote);
+
+// --- FEEDBACK ACTIVITY LOG ---
+@Schema({ timestamps: true })
+export class FeedbackActivityLog extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'FeedbackTicket', required: true, index: true })
+  feedbackId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  userId: Types.ObjectId | null;
+
+  @Prop({ required: true })
+  userName: string;
+
+  @Prop({ required: true })
+  userRole: string;
+
+  @Prop({ required: true })
+  action: string;
+
+  @Prop({ default: '' })
+  oldValue: string;
+
+  @Prop({ default: '' })
+  newValue: string;
+}
+export const FeedbackActivityLogSchema = SchemaFactory.createForClass(FeedbackActivityLog);
+
+
 
 

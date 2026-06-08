@@ -44,6 +44,11 @@ import {
   ExportLogRepository,
   GuestLogRepository,
   ChangeHistoryRepository,
+  FeedbackTicketRepository,
+  FeedbackCommentRepository,
+  FeedbackAttachmentRepository,
+  FeedbackVoteRepository,
+  FeedbackActivityLogRepository,
 } from './concrete.repositories';
 
 const REPOSITORIES = [
@@ -90,6 +95,11 @@ const REPOSITORIES = [
   ExportLogRepository,
   GuestLogRepository,
   ChangeHistoryRepository,
+  FeedbackTicketRepository,
+  FeedbackCommentRepository,
+  FeedbackAttachmentRepository,
+  FeedbackVoteRepository,
+  FeedbackActivityLogRepository,
 ];
 
 
