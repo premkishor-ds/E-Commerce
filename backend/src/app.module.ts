@@ -12,8 +12,7 @@ import { CatalogModule } from './modules/catalog/catalog.module';
 import { SalesModule } from './modules/sales/sales.module';
 import { SupportModule } from './modules/support/support.module';
 import { SeoModule } from './modules/seo/seo.module';
-// AdminJS module disabled — @adminjs/nestjs package.json is broken (ERR_PACKAGE_PATH_NOT_EXPORTED)
-// import { AppAdminModule } from './modules/admin/admin.module';
+import { AppAdminModule } from './modules/admin/admin.module';
 import { AgentModule } from './modules/agent/agent.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { PaymentModule } from './modules/payment/payment.module';
@@ -42,7 +41,7 @@ import { NotificationModule } from './modules/notification/notification.module';
     SalesModule,
     SupportModule,
     SeoModule,
-    // AppAdminModule, // Disabled — @adminjs/nestjs package has broken exports
+    AppAdminModule,
     AgentModule,
     ProfileModule,
     PaymentModule,
