@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
     // constraint error that is a framework bug, not user code. Ignore it in production builds.
     ignoreBuildErrors: true,
   },
+  experimental: {
+    webpackMemoryOptimizations: true,
+  },
 };
 
 export default nextConfig;
