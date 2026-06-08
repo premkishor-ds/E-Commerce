@@ -570,10 +570,10 @@ export class Vendor extends Document {
   @Prop({ required: true, default: 10 })
   commissionRate: number; // e.g., 10%
 
-  @Prop({ default: '' })
+  @Prop({ required: true })
   companyLegalName: string;
 
-  @Prop({ default: '' })
+  @Prop({ required: true })
   businessPhone: string;
 
   @Prop({ type: Object, default: null })
@@ -953,5 +953,167 @@ export class FileMetadata extends Document {
   storageUrl: string;
 }
 export const FileMetadataSchema = SchemaFactory.createForClass(FileMetadata);
+
+// --- ADMIN SESSION ---
+@Schema({ timestamps: true })
+export class AdminSession extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
+  userId: Types.ObjectId;
+
+  @Prop({ required: true })
+  token: string;
+
+  @Prop({ default: '' })
+  ipAddress: string;
+
+  @Prop({ default: '' })
+  browser: string;
+
+  @Prop({ default: '' })
+  os: string;
+
+  @Prop({ default: true })
+  isActive: boolean;
+
+  @Prop({ default: false })
+  isSuspicious: boolean;
+
+  @Prop({ type: Date, default: Date.now })
+  lastActiveAt: Date;
+}
+export const AdminSessionSchema = SchemaFactory.createForClass(AdminSession);
+
+// --- SYSTEM SETTING ---
+@Schema({ timestamps: true })
+export class SystemSetting extends Document {
+  @Prop({ required: true, unique: true, index: true })
+  category: string; // general, theme, localization, email, sms, notification, storage, api
+
+  @Prop({ type: Object, required: true })
+  settings: Record<string, any>;
+}
+export const SystemSettingSchema = SchemaFactory.createForClass(SystemSetting);
+
+// --- AUDIT LOG ---
+@Schema({ timestamps: true })
+export class AuditLog extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
+  userId: Types.ObjectId;
+
+  @Prop({ required: true })
+  userRole: string;
+
+  @Prop({ required: true })
+  action: string;
+
+  @Prop({ required: true })
+  resource: string;
+
+  @Prop({ default: '' })
+  details: string;
+
+  @Prop({ default: '' })
+  ipAddress: string;
+
+  @Prop({ default: '' })
+  browser: string;
+
+  @Prop({ default: '' })
+  device: string;
+}
+export const AuditLogSchema = SchemaFactory.createForClass(AuditLog);
+
+// --- SEARCH LOG ---
+@Schema({ timestamps: true })
+export class SearchLog extends Document {
+  @Prop({ default: '' })
+  keyword: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  userId: Types.ObjectId | null;
+
+  @Prop({ default: 'Guest' })
+  userRole: string;
+
+  @Prop({ default: 'All' })
+  category: string;
+
+  @Prop({ default: 'web' })
+  source: string;
+
+  @Prop({ default: 0 })
+  resultsCount: number;
+}
+export const SearchLogSchema = SchemaFactory.createForClass(SearchLog);
+
+// --- ACTIVITY LOG ---
+@Schema({ timestamps: true })
+export class ActivityLog extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
+  userId: Types.ObjectId;
+
+  @Prop({ required: true })
+  userRole: string;
+
+  @Prop({ required: true })
+  action: string;
+
+  @Prop({ default: '' })
+  details: string;
+
+  @Prop({ required: true, index: true })
+  category: string; // Login, Logout, Profile, Order, Product, Customer, Seller, Vendor, Settings
+}
+export const ActivityLogSchema = SchemaFactory.createForClass(ActivityLog);
+
+// --- CHATBOT LOG ---
+@Schema({ timestamps: true })
+export class ChatbotLog extends Document {
+  @Prop({ required: true, index: true })
+  sessionId: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  userId: Types.ObjectId | null;
+
+  @Prop({ required: true })
+  query: string;
+
+  @Prop({ required: true })
+  primaryGoal: string;
+
+  @Prop({ default: '' })
+  secondaryGoal: string;
+
+  @Prop({ required: true })
+  confidence: number;
+
+  @Prop({ type: Object, default: {} })
+  entities: Record<string, any>;
+
+  @Prop({ default: false })
+  needsClarification: boolean;
+
+  @Prop({ default: false })
+  isFallback: boolean;
+}
+export const ChatbotLogSchema = SchemaFactory.createForClass(ChatbotLog);
+
+// --- ANALYTICS CACHE ---
+@Schema({ timestamps: true })
+export class AnalyticsCache extends Document {
+  @Prop({ required: true, index: true })
+  metricName: string;
+
+  @Prop({ required: true, index: true })
+  dateKey: string; // e.g. YYYY-MM-DD
+
+  @Prop({ required: true })
+  value: number;
+
+  @Prop({ type: Object, default: {} })
+  details: Record<string, any>;
+}
+export const AnalyticsCacheSchema = SchemaFactory.createForClass(AnalyticsCache);
+
 
 

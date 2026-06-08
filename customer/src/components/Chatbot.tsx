@@ -68,10 +68,10 @@ function getOrCreateGuestId(): string {
 function getOrCreateSessionId(): string {
   if (typeof window === 'undefined') return '';
   const key = 'apexstore_session_id';
-  let sessionId = sessionStorage.getItem(key);
+  let sessionId = localStorage.getItem(key);
   if (!sessionId) {
     sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
-    sessionStorage.setItem(key, sessionId);
+    localStorage.setItem(key, sessionId);
   }
   return sessionId;
 }

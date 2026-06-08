@@ -30,6 +30,13 @@ import {
   LedgerEntryRepository,
   WarehouseRepository,
   FileMetadataRepository,
+  AdminSessionRepository,
+  SystemSettingRepository,
+  AuditLogRepository,
+  SearchLogRepository,
+  ActivityLogRepository,
+  ChatbotLogRepository,
+  AnalyticsCacheRepository,
 } from './concrete.repositories';
 
 const REPOSITORIES = [
@@ -62,6 +69,13 @@ const REPOSITORIES = [
   LedgerEntryRepository,
   WarehouseRepository,
   FileMetadataRepository,
+  AdminSessionRepository,
+  SystemSettingRepository,
+  AuditLogRepository,
+  SearchLogRepository,
+  ActivityLogRepository,
+  ChatbotLogRepository,
+  AnalyticsCacheRepository,
 ];
 
 

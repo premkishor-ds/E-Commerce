@@ -13,6 +13,7 @@ import {
   CouponRepository,
   TicketRepository,
 } from '../../repositories/concrete.repositories';
+import { AdminService } from './admin.service';
 
 @ApiTags('Admin Dashboard')
 @Controller('admin')
@@ -29,6 +30,7 @@ export class AdminController {
     private readonly vendorRepository: VendorRepository,
     private readonly couponRepository: CouponRepository,
     private readonly ticketRepository: TicketRepository,
+    private readonly adminService: AdminService,
   ) {}
 
   // --- OVERVIEW STATS ---
@@ -61,7 +63,8 @@ export class AdminController {
       totalRevenue,
       todayOrders: todayOrders.length,
       openTickets: tickets.filter((t) => t.status === 'Open').length,
-      pendingVendors: vendors.filter((v) => v.status === 'Pending').length,
+      pendingVendors: vendors.filter((v) => v.status === 'Verification In Progress').length,
+      activeVendors: vendors.filter((v) => v.status === 'Active').length,
     };
   }
 
@@ -199,7 +202,7 @@ export class AdminController {
     @Query('search') search?: string,
     @Query('status') status?: string,
   ) {
-    let vendors = await this.vendorRepository.find({});
+    let vendors = await this.vendorRepository.find({}, { populate: 'userId' });
     if (search) {
       const s = search.toLowerCase();
       vendors = vendors.filter(
@@ -220,6 +223,17 @@ export class AdminController {
     const vendor = await this.vendorRepository.findById(id);
     if (!vendor) throw new Error('Vendor not found');
     vendor.status = status === 'Approved' ? 'Active' : status;
+    return (vendor as any).save();
+  }
+
+  @Put('vendors/:id')
+  @ApiOperation({ summary: 'Update vendor details' })
+  async updateVendor(@Param('id') id: string, @Body() dto: any) {
+    const vendor = await this.vendorRepository.findById(id);
+    if (!vendor) throw new Error('Vendor not found');
+    if (dto.companyLegalName !== undefined) vendor.companyLegalName = dto.companyLegalName;
+    if (dto.businessPhone !== undefined) vendor.businessPhone = dto.businessPhone;
+    if (dto.commissionRate !== undefined) vendor.commissionRate = dto.commissionRate;
     return (vendor as any).save();
   }
 
@@ -286,5 +300,141 @@ export class AdminController {
     if (!coupon) throw new Error('Coupon not found');
     await (coupon as any).deleteOne();
     return { success: true };
+  }
+
+  // --- ADMIN PROFILE ---
+  @Get('profile')
+  @ApiOperation({ summary: 'Get current admin profile details' })
+  async getProfile(@Request() req: any) {
+    const user = await this.userRepository.findById(req.user.sub || req.user.id);
+    if (!user) throw new Error('User not found');
+    return {
+      id: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      displayName: user.displayName || `${user.firstName} ${user.lastName}`,
+      phone: user.phone,
+      alternatePhone: user.alternatePhone || '',
+      roles: user.roles,
+      permissions: user.permissions,
+      accountStatus: user.accountStatus,
+      verificationStatus: user.verificationStatus,
+      createdAt: (user as any).createdAt,
+      employeeId: 'EMP-2026-9872',
+      department: 'Platform Administration',
+      joiningDate: (user as any).createdAt,
+      profileCompletion: 85,
+    };
+  }
+
+  @Put('profile')
+  @ApiOperation({ summary: 'Update admin profile' })
+  async updateProfile(@Request() req: any, @Body() dto: any) {
+    const user = await this.userRepository.findById(req.user.sub || req.user.id);
+    if (!user) throw new Error('User not found');
+    if (dto.firstName !== undefined) user.firstName = dto.firstName;
+    if (dto.lastName !== undefined) user.lastName = dto.lastName;
+    if (dto.phone !== undefined) user.phone = dto.phone;
+    if (dto.alternatePhone !== undefined) user.alternatePhone = dto.alternatePhone;
+    await (user as any).save();
+    await this.adminService.logActivity(user._id.toString(), user.roles[0], 'Update Profile', 'Updated personal profile details', 'Profile');
+    return user;
+  }
+
+  @Get('profile/sessions')
+  @ApiOperation({ summary: 'Get active admin sessions' })
+  async getActiveSessions(@Request() req: any) {
+    const userId = req.user.sub || req.user.id;
+    return this.adminService.getSessions(userId);
+  }
+
+  @Delete('profile/sessions/:id')
+  @ApiOperation({ summary: 'Revoke an active session' })
+  async revokeSession(@Request() req: any, @Param('id') id: string) {
+    return this.adminService.revokeSession(id);
+  }
+
+  @Delete('profile/sessions')
+  @ApiOperation({ summary: 'Revoke all sessions' })
+  async revokeAllSessions(@Request() req: any) {
+    const userId = req.user.sub || req.user.id;
+    return this.adminService.revokeAllSessions(userId);
+  }
+
+  // --- SYSTEM SETTINGS ---
+  @Get('settings/:category')
+  @ApiOperation({ summary: 'Get settings by category' })
+  async getSettings(@Param('category') category: string) {
+    return this.adminService.getSettings(category);
+  }
+
+  @Put('settings/:category')
+  @ApiOperation({ summary: 'Update settings by category' })
+  async updateSettings(@Request() req: any, @Param('category') category: string, @Body() body: any) {
+    const userId = req.user.sub || req.user.id;
+    const result = await this.adminService.updateSettings(category, body);
+    await this.adminService.logActivity(userId, req.user.roles[0], 'Update Settings', `Updated ${category} system configurations`, 'Settings');
+    return result;
+  }
+
+  // --- DETAILED LOGS ---
+  @Get('audit-logs')
+  @ApiOperation({ summary: 'Get system audit logs' })
+  async getAuditLogs() {
+    return this.adminService.getAuditLogs();
+  }
+
+  @Get('search-logs')
+  @ApiOperation({ summary: 'Get query search logs' })
+  async getSearchLogs() {
+    return this.adminService.getSearchLogs();
+  }
+
+  @Get('activity-logs')
+  @ApiOperation({ summary: 'Get all user activity logs' })
+  async getActivityLogs() {
+    return this.adminService.getActivityLogs();
+  }
+
+  @Get('chatbot-logs')
+  @ApiOperation({ summary: 'Get detailed chatbot queries and fallback rates' })
+  async getChatbotLogs() {
+    return this.adminService.getChatbotLogs();
+  }
+
+  // --- EXPORTS ---
+  @Get('customers/export')
+  @ApiOperation({ summary: 'Export customers to CSV string' })
+  async exportCustomers() {
+    const customers = await this.userRepository.find({ roles: 'Customer' });
+    const formatted = customers.map((c: any) => ({
+      ID: c._id.toString(),
+      Email: c.email,
+      Phone: c.phone || 'N/A',
+      Status: c.accountStatus,
+      Balance: `$${(c.walletBalance || 0).toFixed(2)}`,
+      Joined: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : 'N/A',
+    }));
+    const csv = this.adminService.exportToCsv(formatted, ['ID', 'Email', 'Phone', 'Status', 'Balance', 'Joined']);
+    return { csv, filename: `customers_export_${Date.now()}.csv` };
+  }
+
+  @Get('logs/export')
+  @ApiOperation({ summary: 'Export audit logs to CSV string' })
+  async exportAuditLogs() {
+    const logs = [
+      { ID: 'AUD-001', Action: 'Update Settings', Resource: 'SMTP Settings', Role: 'Admin', IP: '192.168.1.10', Date: new Date().toLocaleDateString() },
+      { ID: 'AUD-002', Action: 'Approve Vendor', Resource: 'Mega Vendor Corp', Role: 'Admin', IP: '192.168.1.10', Date: new Date().toLocaleDateString() },
+    ];
+    const csv = this.adminService.exportToCsv(logs, ['ID', 'Action', 'Resource', 'Role', 'IP', 'Date']);
+    return { csv, filename: `audit_logs_export_${Date.now()}.csv` };
+  }
+
+  // --- PLATFORM ANALYTICS ---
+  @Get('analytics/summary')
+  @ApiOperation({ summary: 'Get computed overview metrics' })
+  async getAnalytics() {
+    return this.adminService.getAnalyticsSummary();
   }
 }

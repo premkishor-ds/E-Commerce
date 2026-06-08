@@ -32,6 +32,13 @@ import {
   LedgerEntry,
   Warehouse,
   FileMetadata,
+  AdminSession,
+  SystemSetting,
+  AuditLog,
+  SearchLog,
+  ActivityLog,
+  ChatbotLog,
+  AnalyticsCache,
 } from '../schemas/schemas';
 
 
@@ -245,6 +252,55 @@ export class WarehouseRepository extends BaseRepository<Warehouse> {
 @Injectable()
 export class FileMetadataRepository extends BaseRepository<FileMetadata> {
   constructor(@InjectModel(FileMetadata.name) model: Model<FileMetadata>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class AdminSessionRepository extends BaseRepository<AdminSession> {
+  constructor(@InjectModel(AdminSession.name) model: Model<AdminSession>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class SystemSettingRepository extends BaseRepository<SystemSetting> {
+  constructor(@InjectModel(SystemSetting.name) model: Model<SystemSetting>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class AuditLogRepository extends BaseRepository<AuditLog> {
+  constructor(@InjectModel(AuditLog.name) model: Model<AuditLog>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class SearchLogRepository extends BaseRepository<SearchLog> {
+  constructor(@InjectModel(SearchLog.name) model: Model<SearchLog>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class ActivityLogRepository extends BaseRepository<ActivityLog> {
+  constructor(@InjectModel(ActivityLog.name) model: Model<ActivityLog>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class ChatbotLogRepository extends BaseRepository<ChatbotLog> {
+  constructor(@InjectModel(ChatbotLog.name) model: Model<ChatbotLog>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class AnalyticsCacheRepository extends BaseRepository<AnalyticsCache> {
+  constructor(@InjectModel(AnalyticsCache.name) model: Model<AnalyticsCache>) {
     super(model);
   }
 }
