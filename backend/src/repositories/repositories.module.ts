@@ -81,6 +81,8 @@ import {
   BulkJobRepository,
   KnowledgeBaseArticleRepository,
   RoadmapItemRepository,
+  SellerRepository,
+  SellerSettlementRepository,
 } from './concrete.repositories';
 
 const REPOSITORIES = [
@@ -164,6 +166,8 @@ const REPOSITORIES = [
   BulkJobRepository,
   KnowledgeBaseArticleRepository,
   RoadmapItemRepository,
+  SellerRepository,
+  SellerSettlementRepository,
 ];
 
 

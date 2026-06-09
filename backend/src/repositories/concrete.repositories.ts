@@ -85,7 +85,23 @@ import {
   BulkJob,
   KnowledgeBaseArticle,
   RoadmapItem,
+  Seller,
+  SellerSettlement,
 } from '../schemas/schemas';
+
+@Injectable()
+export class SellerRepository extends BaseRepository<Seller> {
+  constructor(@InjectModel(Seller.name) model: Model<Seller>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class SellerSettlementRepository extends BaseRepository<SellerSettlement> {
+  constructor(@InjectModel(SellerSettlement.name) model: Model<SellerSettlement>) {
+    super(model);
+  }
+}
 
 
 

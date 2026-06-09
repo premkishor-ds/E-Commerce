@@ -5,7 +5,8 @@ import { useStore } from '../store/store';
 import {
   LayoutDashboard, Wallet, Percent, Receipt, Lock, Mail, Plus, Trash2,
   LogOut, Sun, Moon, ShieldCheck, Coins, Send, CheckCircle2, FileSpreadsheet,
-  Pencil, X, DollarSign, Tag, Package, ImageIcon, AlignLeft, Box, AlertCircle
+  Pencil, X, DollarSign, Tag, Package, ImageIcon, AlignLeft, Box, AlertCircle,
+  FileText, ClipboardList, BarChart3, Bell, HelpCircle, ArrowUpRight, Store
 } from 'lucide-react';
 
 export default function VendorPage() {
@@ -17,7 +18,7 @@ export default function VendorPage() {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [vendorStatus, setVendorStatus] = useState('Verification In Progress');
 
-  const [activeTab, setActiveTab] = useState('settlements');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [companyLegalName, setCompanyLegalName] = useState('NexaHome Brands Inc.');
   const [businessPhone, setBusinessPhone] = useState('+12025550156');
   const [bankName, setBankName] = useState('Bank of America');
@@ -30,6 +31,21 @@ export default function VendorPage() {
   const [commissionRate, setCommissionRate] = useState(0);
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [payoutsHistory, setPayoutsHistory] = useState<Array<{ id: string; amount: number; date: string; status: string }>>([]);
+
+  // Expanded Tab States
+  const [purchaseOrders, setPurchaseOrders] = useState<any[]>([]);
+  const [contracts, setContracts] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [analyticsData, setAnalyticsData] = useState<any>({
+    monthlySupply: 4200,
+    activeContracts: 3,
+    supplyHistory: [120, 240, 310, 480, 520, 680]
+  });
+
+  // Support inputs
+  const [ticketSubject, setTicketSubject] = useState('');
+  const [ticketMessage, setTicketMessage] = useState('');
 
   const [vendorProducts, setVendorProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -83,7 +99,7 @@ export default function VendorPage() {
     if (!user) return;
     const fetchVendorData = async () => {
       try {
-        const [prodRes, settlementsRes, analyticsRes, profileRes] = await Promise.all([
+        const [prodRes, settlementsRes, analyticsRes, profileRes, poRes, ticketsRes, notifyRes] = await Promise.all([
           fetch(`http://localhost:5001/api/v1/catalog/products?vendorId=${user.id}`, {
             headers: { 'Authorization': `Bearer ${user.token}` }
           }),
@@ -94,6 +110,15 @@ export default function VendorPage() {
             headers: { 'Authorization': `Bearer ${user.token}` }
           }),
           fetch('http://localhost:5001/api/v1/profile/me', {
+            headers: { 'Authorization': `Bearer ${user.token}` }
+          }),
+          fetch('http://localhost:5001/api/v1/sales/orders', {
+            headers: { 'Authorization': `Bearer ${user.token}` }
+          }),
+          fetch('http://localhost:5001/api/v1/support/tickets', {
+            headers: { 'Authorization': `Bearer ${user.token}` }
+          }),
+          fetch('http://localhost:5001/api/v1/notifications', {
             headers: { 'Authorization': `Bearer ${user.token}` }
           })
         ]);
@@ -119,9 +144,36 @@ export default function VendorPage() {
         }
         if (profileRes.ok) {
           const prof = await profileRes.json();
-          setVendorStatus(prof.vendorStatus || 'Verification In Progress');
+          setVendorStatus(prof.vendorStatus || 'Active');
           setCompanyLegalName(prof.shopName || 'NexaHome Brands Inc.');
         }
+        if (poRes.ok) {
+          setPurchaseOrders(await poRes.json());
+        } else {
+          setPurchaseOrders([
+            { id: 'PO-7721', sellerStore: 'ApexTech Partner Shop', item: 'NexaHome Bamboo Sheets', quantity: 120, total: 3600.00, status: 'Approved', date: '2026-06-08' },
+            { id: 'PO-8812', sellerStore: 'GizmoStore Retail', item: 'NexaHome Kitchen Set', quantity: 50, total: 1850.00, status: 'Pending', date: '2026-06-09' }
+          ]);
+        }
+        if (ticketsRes.ok) {
+          setTickets(await ticketsRes.json());
+        } else {
+          setTickets([
+            { id: 'TKT-202', subject: 'Wholesale listing bulk CSV import guide', status: 'Resolved', priority: 'Medium' }
+          ]);
+        }
+        if (notifyRes.ok) {
+          setNotifications(await notifyRes.json());
+        } else {
+          setNotifications([
+            { id: '1', title: 'New PO Request Received', message: 'GizmoStore Retail requested a wholesale PO-8812 for NexaHome Kitchen Set.', isRead: false },
+            { id: '2', title: 'Settlement Account Linked', message: 'Your direct deposit routing numbers were verified successfully.', isRead: true }
+          ]);
+        }
+        setContracts([
+          { id: 'CTR-4412', partner: 'ApexTech Global LLC', startDate: '2026-01-10', endDate: '2027-01-10', status: 'Active', terms: '10% Commission Cap, Net-30 Settlements' },
+          { id: 'CTR-1102', partner: 'GizmoStore Group', startDate: '2026-03-01', endDate: '2027-03-01', status: 'Active', terms: 'Wholesale Distribution Contract' }
+        ]);
       } catch (err) { console.error(err); }
     };
     fetchVendorData();
@@ -456,15 +508,23 @@ export default function VendorPage() {
             </div>
             <nav className="space-y-1">
               {[
-                { key: 'settlements', label: 'Settlements Overview' },
-                { key: 'products', label: 'Product Listings' },
-                { key: 'profile', label: 'Vendor Profile' }
+                { key: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" /> },
+                { key: 'products', label: 'Products', icon: <Box className="h-4 w-4" /> },
+                { key: 'inventory', label: 'Inventory Supply', icon: <Package className="h-4 w-4" /> },
+                { key: 'orders', label: 'Purchase Orders', icon: <ClipboardList className="h-4 w-4" /> },
+                { key: 'settlements', label: 'Settlements', icon: <Wallet className="h-4 w-4" /> },
+                { key: 'contracts', label: 'Contracts', icon: <FileText className="h-4 w-4" /> },
+                { key: 'reports', label: 'Reports', icon: <BarChart3 className="h-4 w-4" /> },
+                { key: 'notifications', label: 'Notifications', icon: <Bell className="h-4 w-4" /> },
+                { key: 'support', label: 'Support', icon: <HelpCircle className="h-4 w-4" /> },
+                { key: 'profile', label: 'Profile', icon: <Store className="h-4 w-4" /> }
               ].map(tab => (
                 <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                  className={`w-full text-left rounded-xl px-4 py-2.5 text-xs font-semibold ${activeTab === tab.key
+                  className={`w-full text-left rounded-xl px-4 py-2 flex items-center gap-2.5 text-xs font-semibold transition-all ${activeTab === tab.key
                     ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-300 border border-indigo-100/50 dark:border-indigo-900/30'
                     : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}>
-                  {tab.label}
+                  {tab.icon}
+                  <span>{tab.label}</span>
                 </button>
               ))}
             </nav>
@@ -661,6 +721,401 @@ export default function VendorPage() {
             </>
           )}
 
+          {/* DASHBOARD TAB */}
+          {activeTab === 'dashboard' && (
+            <>
+              <div>
+                <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white">Supply Dashboard</h1>
+                <p className="text-zinc-500 text-sm mt-1">Overview of supplied inventory, active wholesale contracts, and pending bank transfers.</p>
+              </div>
+
+              <section className="grid sm:grid-cols-4 gap-6">
+                {[
+                  { label: 'Total Earnings', value: `$${settledAmount.toFixed(2)}`, icon: <Wallet className="h-10 w-10 text-indigo-500 bg-indigo-50 dark:bg-indigo-950/20 p-2 rounded-xl" /> },
+                  { label: 'Pending Payouts', value: `$${pendingAmount.toFixed(2)}`, icon: <Receipt className="h-10 w-10 text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 p-2 rounded-xl" /> },
+                  { label: 'Active Contracts', value: contracts.length, icon: <FileText className="h-10 w-10 text-amber-500 bg-amber-50 dark:bg-amber-950/20 p-2 rounded-xl" /> },
+                  { label: 'Pending POs', value: purchaseOrders.filter(po => po.status === 'Pending').length, icon: <ClipboardList className="h-10 w-10 text-rose-500 bg-rose-50 dark:bg-rose-950/20 p-2 rounded-xl" /> }
+                ].map(s => (
+                  <div key={s.label} className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm flex items-center justify-between dark:border-zinc-800">
+                    <div>
+                      <div className="text-xs text-zinc-400 font-bold uppercase tracking-wider">{s.label}</div>
+                      <div className="text-2xl font-black mt-1 text-zinc-900 dark:text-white">{s.value}</div>
+                    </div>
+                    {s.icon}
+                  </div>
+                ))}
+              </section>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 dark:border-zinc-800 shadow-sm space-y-4">
+                  <h3 className="font-bold text-sm text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">Supplied Products Catalog</h3>
+                  <div className="space-y-3">
+                    {vendorProducts.slice(0, 3).map(p => (
+                      <div key={p.id} className="flex justify-between items-center border-b pb-2 dark:border-zinc-800">
+                        <div>
+                          <div className="font-bold text-xs text-zinc-900 dark:text-white">{p.title}</div>
+                          <div className="text-[10px] text-zinc-400">SKU: {p.sku} · Stock: {p.stock}</div>
+                        </div>
+                        <div className="text-xs font-bold text-indigo-600">${p.price.toFixed(2)}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 dark:border-zinc-800 shadow-sm space-y-4">
+                  <h3 className="font-bold text-sm text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">Recent Purchase Orders</h3>
+                  <div className="space-y-3">
+                    {purchaseOrders.map(po => (
+                      <div key={po.id} className="flex justify-between items-center border-b pb-2 dark:border-zinc-800">
+                        <div>
+                          <div className="font-bold text-xs text-zinc-900 dark:text-white">{po.sellerStore}</div>
+                          <div className="text-[10px] text-zinc-400">{po.item} · Qty: {po.quantity}</div>
+                        </div>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${po.status === 'Approved' ? 'bg-emerald-100 text-emerald-850' : 'bg-amber-100 text-amber-850'}`}>{po.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* PRODUCTS TAB */}
+          {activeTab === 'products' && (
+            <>
+              <div>
+                <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white">Product Listings</h1>
+                <p className="text-zinc-500 text-sm mt-1">Add, edit, and manage your wholesale supply catalog.</p>
+              </div>
+
+              <section className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm space-y-6 dark:border-zinc-800">
+                <div className="flex items-center justify-between border-b pb-4 dark:border-zinc-800">
+                  <div>
+                    <h3 className="font-bold text-lg text-zinc-900 dark:text-white">Wholesale Supply Catalog</h3>
+                    <p className="text-xs text-zinc-400 mt-0.5">{vendorProducts.length} product{vendorProducts.length !== 1 ? 's' : ''} listed</p>
+                  </div>
+                  {vendorStatus === 'Active' ? (
+                    <button onClick={() => setShowAddForm(!showAddForm)}
+                      className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-1.5 text-xs font-semibold shadow cursor-pointer">
+                      <Plus className="h-3.5 w-3.5" /><span>New Product</span>
+                    </button>
+                  ) : (
+                    <span className="text-xs text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                      <AlertCircle className="h-3.5 w-3.5" /> Verification Pending
+                    </span>
+                  )}
+                </div>
+
+                {showAddForm && (
+                  <form onSubmit={handleAddProduct} className="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/80 p-4 rounded-xl space-y-4">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
+                      <Box className="h-4 w-4" /><span>New Wholesale Product</span>
+                    </h4>
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <input type="text" required placeholder="Product Title" value={newTitle} onChange={e => setNewTitle(e.target.value)}
+                        className="rounded-lg border border-zinc-200 bg-white p-2.5 text-xs focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-white" />
+                      <select value={newCategory} onChange={e => setNewCategory(e.target.value)}
+                        className="rounded-lg border border-zinc-200 bg-white p-2.5 text-xs focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-white">
+                        {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+                      </select>
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-2 text-zinc-400"><DollarSign className="h-3.5 w-3.5" /></span>
+                        <input type="number" required step="0.01" placeholder="Price" value={newPrice} onChange={e => setNewPrice(e.target.value)}
+                          className="w-full rounded-lg border border-zinc-200 bg-white pl-7 pr-2.5 py-2.5 text-xs focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-white" />
+                      </div>
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-2 text-zinc-400"><Tag className="h-3.5 w-3.5" /></span>
+                        <input type="text" required placeholder="SKU Code" value={newSku} onChange={e => setNewSku(e.target.value)}
+                          className="w-full rounded-lg border border-zinc-200 bg-white pl-7 pr-2.5 py-2.5 text-xs focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-white" />
+                      </div>
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-2 text-zinc-400"><Package className="h-3.5 w-3.5" /></span>
+                        <input type="number" placeholder="Stock" value={newStock} onChange={e => setNewStock(e.target.value)}
+                          className="w-full rounded-lg border border-zinc-200 bg-white pl-7 pr-2.5 py-2.5 text-xs focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-white" />
+                      </div>
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-2 text-zinc-400"><ImageIcon className="h-3.5 w-3.5" /></span>
+                        <input type="text" placeholder="Image URL (optional)" value={newImage} onChange={e => setNewImage(e.target.value)}
+                          className="w-full rounded-lg border border-zinc-200 bg-white pl-7 pr-2.5 py-2.5 text-xs focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-white" />
+                      </div>
+                    </div>
+                    <textarea rows={2} placeholder="Description (optional)" value={newDesc} onChange={e => setNewDesc(e.target.value)}
+                      className="w-full rounded-lg border border-zinc-200 bg-white p-2.5 text-xs focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-white resize-none" />
+                    <div className="flex gap-2">
+                      <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-1.5 text-xs font-semibold shadow cursor-pointer">Save Product</button>
+                      <button type="button" onClick={() => setShowAddForm(false)} className="border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer">Cancel</button>
+                    </div>
+                  </form>
+                )}
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {vendorProducts.length === 0 && (
+                    <p className="col-span-2 text-center text-sm text-zinc-400 py-8">No products yet. Add your first wholesale listing.</p>
+                  )}
+                  {vendorProducts.map(p => (
+                    <div key={p.id} className="flex gap-4 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 items-center bg-zinc-50/30 dark:bg-zinc-900/30 group">
+                      <img src={p.images[0]} alt={p.title} className="h-16 w-16 object-cover rounded-lg border dark:border-zinc-800 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-sm text-zinc-900 dark:text-white truncate">{p.title}</h4>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Wholesale: <strong className="text-zinc-900 dark:text-zinc-200">${p.price.toFixed(2)}</strong> · Stock: <strong className="text-zinc-900 dark:text-zinc-200">{p.stock}</strong></p>
+                        <p className="text-[10px] text-zinc-400 mt-0.5">Brand: {p.brand} · SKU: {p.sku}</p>
+                      </div>
+                      <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => openEditModal(p)} className="p-2 text-zinc-400 hover:text-indigo-500 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-950/20 cursor-pointer" aria-label="Edit">
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => handleDeleteProduct(p.id)} className="p-2 text-zinc-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 cursor-pointer" aria-label="Delete">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </>
+          )}
+
+          {/* INVENTORY TAB */}
+          {activeTab === 'inventory' && (
+            <section className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm space-y-6 dark:border-zinc-800">
+              <div>
+                <h3 className="font-bold text-xl text-zinc-900 dark:text-white">Wholesale Supply Inventory</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">Manage stock supplied to retail partner sellers.</p>
+              </div>
+              <div className="space-y-4">
+                {vendorProducts.map(p => (
+                  <div key={p.id} className="flex justify-between items-center border-b pb-3 dark:border-zinc-800">
+                    <div>
+                      <div className="font-bold text-sm text-zinc-900 dark:text-white">{p.title}</div>
+                      <div className="text-xs text-zinc-400">SKU: {p.sku}</div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${p.stock < 20 ? 'bg-red-105 text-red-800' : 'bg-indigo-100 text-indigo-800'}`}>
+                        {p.stock} Available
+                      </span>
+                      <button onClick={() => alert('Stock replenishment request sent!')}
+                        className="bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                        Add +100 Units
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* PURCHASE ORDERS TAB */}
+          {activeTab === 'orders' && (
+            <section className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm space-y-6 dark:border-zinc-800">
+              <div>
+                <h3 className="font-bold text-xl text-zinc-900 dark:text-white">Purchase Orders (POs)</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">Approve and track merchant PO wholesale supply requests.</p>
+              </div>
+              <div className="space-y-4">
+                {purchaseOrders.map(po => (
+                  <div key={po.id} className="flex justify-between items-center border-b pb-3 dark:border-zinc-800">
+                    <div>
+                      <div className="font-bold text-sm text-zinc-900 dark:text-white">{po.sellerStore}</div>
+                      <div className="text-xs text-zinc-400">PO: {po.id} · Item: {po.item} · Qty: {po.quantity}</div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <div className="text-sm font-bold text-zinc-900 dark:text-white">${po.total.toFixed(2)}</div>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-105 text-amber-800">{po.status}</span>
+                      </div>
+                      <button onClick={() => alert('PO request approved & dispatched!')}
+                        className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-1.5 text-xs font-semibold">
+                        Approve
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* SETTLEMENTS TAB */}
+          {activeTab === 'settlements' && (
+            <>
+              <div>
+                <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white">Vendor Balance Sheets</h1>
+                <p className="text-zinc-500 text-sm mt-1">Request transfers of pending payout funds and track invoice logs.</p>
+              </div>
+
+              <section className="grid sm:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm flex items-center justify-between dark:border-zinc-800">
+                  <div>
+                    <div className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Settled Balance</div>
+                    <div className="text-2xl font-black mt-1 text-zinc-900 dark:text-white">${settledAmount.toFixed(2)}</div>
+                  </div>
+                  <Wallet className="h-10 w-10 text-indigo-500 bg-indigo-50 dark:bg-indigo-950/20 p-2 rounded-xl border border-indigo-100/50" />
+                </div>
+                <div className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm flex items-center justify-between dark:border-zinc-800">
+                  <div>
+                    <div className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Pending Payouts</div>
+                    <div className="text-2xl font-black mt-1 text-zinc-900 dark:text-white">${pendingAmount.toFixed(2)}</div>
+                  </div>
+                  <Receipt className="h-10 w-10 text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 p-2 rounded-xl border border-emerald-100/50" />
+                </div>
+                <div className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm flex items-center justify-between dark:border-zinc-800">
+                  <div>
+                    <div className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Commission Charge</div>
+                    <div className="text-2xl font-black mt-1 text-zinc-900 dark:text-white">{commissionRate}%</div>
+                  </div>
+                  <Percent className="h-10 w-10 text-amber-500 bg-amber-50 dark:bg-amber-950/20 p-2 rounded-xl border border-amber-100/50" />
+                </div>
+              </section>
+
+              <section className="grid md:grid-cols-2 gap-8">
+                <div className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm space-y-4 dark:border-zinc-800">
+                  <h3 className="font-bold text-lg text-zinc-900 dark:text-white flex items-center gap-2 border-b pb-2 dark:border-zinc-800">
+                    <Coins className="h-5 w-5 text-indigo-500" /><span>Request Settlement Payout</span>
+                  </h3>
+                  <form onSubmit={handleWithdrawalRequest} className="space-y-4">
+                    <div className="space-y-1">
+                      <label className="block text-xs font-semibold text-zinc-500">Withdrawal Amount ($)</label>
+                      <input type="number" required step="0.01" max={pendingAmount} disabled={vendorStatus !== 'Active'}
+                        placeholder={vendorStatus === 'Active' ? `Max ${pendingAmount.toFixed(2)}` : 'Verification Pending'} value={withdrawAmount}
+                        onChange={e => setWithdrawAmount(e.target.value)}
+                        className="w-full rounded-xl border border-zinc-200 bg-white p-3 text-sm focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 text-zinc-900 dark:text-white disabled:opacity-50" />
+                    </div>
+                    <button type="submit" disabled={vendorStatus !== 'Active'} className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-semibold text-white hover:bg-indigo-500 shadow-md active:scale-95 transition-all text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                      <Send className="h-4 w-4" /><span>Execute Bank Settlement</span>
+                    </button>
+                  </form>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm space-y-4 dark:border-zinc-800">
+                  <h3 className="font-bold text-lg text-zinc-900 dark:text-white flex items-center gap-2 border-b pb-2 dark:border-zinc-800">
+                    <FileSpreadsheet className="h-5 w-5 text-emerald-500" /><span>Transfer Ledgers</span>
+                  </h3>
+                  <div className="space-y-3 overflow-y-auto max-h-[160px]">
+                    {payoutsHistory.length === 0 && <p className="text-xs text-zinc-400 text-center py-4">No payout history yet.</p>}
+                    {payoutsHistory.map(log => (
+                      <div key={log.id} className="flex justify-between items-center p-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/20 dark:bg-zinc-950/20">
+                        <div>
+                          <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{log.id}</span>
+                          <span className="ml-2 text-xs text-zinc-400">{log.date}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">${log.amount.toFixed(2)}</span>
+                          <span className="flex items-center gap-0.5 text-[9px] bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-bold px-2 py-0.5 rounded border border-emerald-100/50">
+                            <CheckCircle2 className="h-2.5 w-2.5" />{log.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+
+          {/* CONTRACTS TAB */}
+          {activeTab === 'contracts' && (
+            <section className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm space-y-6 dark:border-zinc-800">
+              <div>
+                <h3 className="font-bold text-xl text-zinc-900 dark:text-white">Active Contracts & SLA</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">Review current legal distribution contracts and wholesale terms.</p>
+              </div>
+              <div className="space-y-4">
+                {contracts.map(c => (
+                  <div key={c.id} className="border border-zinc-100 dark:border-zinc-800 rounded-xl p-4 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-sm text-zinc-900 dark:text-white">{c.partner}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-850">{c.status}</span>
+                    </div>
+                    <p className="text-xs text-zinc-500 mt-1">{c.terms}</p>
+                    <div className="text-[10px] text-zinc-400 pt-1">
+                      Active: {c.startDate} to {c.endDate}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* REPORTS TAB */}
+          {activeTab === 'reports' && (
+            <section className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm space-y-6 dark:border-zinc-800">
+              <div>
+                <h3 className="font-bold text-xl text-zinc-900 dark:text-white">Wholesale Supply Analytics</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">Supply capacity logs and historical data.</p>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-end gap-2 h-32 pt-6">
+                  {analyticsData.supplyHistory.map((val: number, idx: number) => (
+                    <div key={idx} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                      <div className="bg-indigo-600 rounded-t w-full" style={{ height: `${(val / 800) * 100}%` }}></div>
+                      <span className="text-[10px] text-zinc-400">M{idx+1}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-center pt-4 border-t dark:border-zinc-800">
+                  <div>
+                    <div className="text-xs text-zinc-400 font-semibold">Monthly Units Dispatched</div>
+                    <div className="text-lg font-bold text-zinc-900 dark:text-white">{analyticsData.monthlySupply} Units</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-zinc-400 font-semibold">Active Distribution Channels</div>
+                    <div className="text-lg font-bold text-zinc-900 dark:text-white">{analyticsData.activeContracts} Sellers</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* NOTIFICATIONS TAB */}
+          {activeTab === 'notifications' && (
+            <section className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm space-y-6 dark:border-zinc-800">
+              <div>
+                <h3 className="font-bold text-xl text-zinc-900 dark:text-white">Partner Notifications</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">Latest system logs, incoming POs, and contract modifications.</p>
+              </div>
+              <div className="space-y-3">
+                {notifications.map(n => (
+                  <div key={n.id} className={`p-4 rounded-xl border flex gap-3 ${n.isRead ? 'border-zinc-100 bg-zinc-50/50 dark:border-zinc-800/85 dark:bg-zinc-900/40' : 'border-indigo-200 bg-indigo-50/20 dark:border-indigo-900/30'}`}>
+                    <Bell className={`h-5 w-5 shrink-0 ${n.isRead ? 'text-zinc-400' : 'text-indigo-500'}`} />
+                    <div>
+                      <h4 className="font-bold text-xs text-zinc-900 dark:text-white">{n.title}</h4>
+                      <p className="text-[11px] text-zinc-600 dark:text-zinc-400 mt-0.5">{n.message}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {activeTab === 'support' && (
+            <section className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm space-y-6 dark:border-zinc-800">
+              <div>
+                <h3 className="font-bold text-xl text-zinc-900 dark:text-white">Partner Support Center</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">Submit wholesale queries and track ticket logs.</p>
+              </div>
+              <form onSubmit={e => { e.preventDefault(); if(!ticketSubject) return; setTickets([...tickets, { id: 'TKT-NEW', subject: ticketSubject, status: 'Open', priority: 'Medium' }]); setTicketSubject(''); setTicketMessage(''); alert('Support ticket created!'); }}
+                className="space-y-3 bg-zinc-50 dark:bg-zinc-950 p-4 rounded-xl">
+                <h4 className="font-bold text-xs text-zinc-850 dark:text-zinc-200 uppercase tracking-wider font-sans">Submit Support Request</h4>
+                <input type="text" placeholder="Subject" value={ticketSubject} onChange={e => setTicketSubject(e.target.value)} required
+                  className="w-full rounded-lg border border-zinc-200 bg-white p-2.5 text-xs focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-white" />
+                <textarea placeholder="Tell us how we can help" value={ticketMessage} onChange={e => setTicketMessage(e.target.value)} rows={3}
+                  className="w-full rounded-lg border border-zinc-200 bg-white p-2.5 text-xs focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-white resize-none" />
+                <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-1.5 text-xs font-semibold">Submit Ticket</button>
+              </form>
+              <div className="space-y-3">
+                <h4 className="font-bold text-xs uppercase tracking-wider text-zinc-400">Open Tickets</h4>
+                {tickets.map(t => (
+                  <div key={t.id} className="flex justify-between items-center border-b pb-3 dark:border-zinc-800">
+                    <div>
+                      <div className="font-bold text-sm text-zinc-900 dark:text-white">{t.subject}</div>
+                      <div className="text-xs text-zinc-400">ID: {t.id} · Priority: {t.priority}</div>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">{t.status}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* PROFILE TAB */}
           {activeTab === 'profile' && (
             <section className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm space-y-6 dark:border-zinc-800">
@@ -719,7 +1174,7 @@ export default function VendorPage() {
                   </button>
                 </div>
               </div>
-              <button onClick={() => { alert('Vendor settings saved!'); setActiveTab('settlements'); }}
+              <button onClick={() => { alert('Vendor settings saved!'); setActiveTab('dashboard'); }}
                 className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-4 py-2.5 text-xs font-semibold shadow cursor-pointer">
                 Save Settings
               </button>

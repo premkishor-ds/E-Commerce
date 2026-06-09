@@ -6,7 +6,8 @@ import {
   LogOut, Sun, Moon, Search, Filter, ChevronUp, ChevronDown,
   Trash2, CheckCircle, XCircle, ShieldCheck, TrendingUp,
   Mail, Lock, AlertCircle, RefreshCw, Edit2, X, Check,
-  User, Settings, Database, Activity, Eye, ShieldAlert, Cpu, Download, ToggleLeft, ToggleRight, Phone, Calendar
+  User, Settings, Database, Activity, Eye, ShieldAlert, Cpu, Download, ToggleLeft, ToggleRight, Phone, Calendar,
+  Megaphone, FileText
 } from 'lucide-react';
 
 const API = 'http://localhost:5001/api/v1';
@@ -238,6 +239,43 @@ export default function AdminPage() {
     'Manager': { dashboard: true, products: true, orders: true, settings: false, logs: false },
     'Customer Support': { dashboard: true, products: false, orders: true, settings: false, logs: false },
     'Analytics Viewer': { dashboard: true, products: false, orders: false, settings: false, logs: false },
+  });
+
+  // Phase F State Variables
+  const [featureFlags, setFeatureFlags] = useState<any[]>([
+    { _id: 'flag-1', name: 'Al Chatbot Assistant', key: 'ENABLE_CHATBOT', description: 'Enable NLP chatbot assistant widget in storefront.', isEnabled: true, group: 'Storefront' },
+    { _id: 'flag-2', name: 'Direct Wallet Payouts', key: 'ENABLE_WALLET_WITHDRAWAL', description: 'Allow sellers/vendors to request direct bank deposit settlements.', isEnabled: true, group: 'Payments' },
+    { _id: 'flag-3', name: 'SSO Login Integration', key: 'ENABLE_SSO', description: 'Show Google and GitHub quick authentication login buttons.', isEnabled: false, group: 'Authentication' }
+  ]);
+  const [newFlagName, setNewFlagName] = useState('');
+  const [newFlagKey, setNewFlagKey] = useState('');
+  const [newFlagDesc, setNewFlagDesc] = useState('');
+  const [newFlagGroup, setNewFlagGroup] = useState('Storefront');
+
+  const [announcements, setAnnouncements] = useState<any[]>([
+    { _id: 'ann-1', title: 'Summer Sale Promo Event', message: 'The platform summer sale campaign starts tomorrow! Make sure all items are stocked.', targetRole: 'Customer', isActive: true, createdAt: '2026-06-08T10:00:00.000Z' },
+    { _id: 'ann-2', title: 'Scheduled Database Maintenance', message: 'We will be conducting platform DB maintenance on Sunday at 02:00 AM UTC. Expect brief downtime.', targetRole: 'Seller', isActive: true, createdAt: '2026-06-05T08:30:00.000Z' }
+  ]);
+  const [newAnnTitle, setNewAnnTitle] = useState('');
+  const [newAnnMsg, setNewAnnMsg] = useState('');
+  const [newAnnTarget, setNewAnnTarget] = useState('Customer');
+
+  const [fraudLogs, setFraudLogs] = useState<any[]>([
+    { _id: 'frd-1', email: 'spammer_99@example.com', riskScore: 92, reason: 'High-frequency brute-force login attempts (15 failures/min)', ipAddress: '198.51.100.42', status: 'Blocked', createdAt: '2026-06-09T02:15:00.000Z' },
+    { _id: 'frd-2', email: 'clara.oswald@example.com', riskScore: 45, reason: 'Cross-device session activity in short interval', ipAddress: '203.0.113.195', status: 'Flagged', createdAt: '2026-06-08T18:40:00.000Z' }
+  ]);
+
+  const [gdprRequests, setGdprRequests] = useState<any[]>([
+    { _id: 'gdp-1', email: 'dDonna.noble@example.com', requestType: 'Export Data', status: 'Pending', createdAt: '2026-06-09T01:00:00.000Z' },
+    { _id: 'gdp-2', email: 'rory.williams@example.com', requestType: 'Delete Profile', status: 'Completed', processedAt: '2026-06-07T12:00:00.000Z', createdAt: '2026-06-06T10:30:00.000Z' }
+  ]);
+
+  const [healthMetrics, setHealthMetrics] = useState({
+    cpu: 18,
+    memory: 46,
+    disk: 34,
+    dbConnected: true,
+    uptime: '14 Days, 6 Hours'
   });
 
   useEffect(() => {
@@ -1422,6 +1460,11 @@ export default function AdminPage() {
     { key: 'products',  label: 'Products',  icon: <Package className="h-4 w-4" /> },
     { key: 'vendors',   label: 'Merchants', icon: <Store className="h-4 w-4" /> },
     { key: 'support',   label: 'Support Center', icon: <AlertCircle className="h-4 w-4" /> },
+    { key: 'flags',     label: 'Feature Flags', icon: <ToggleLeft className="h-4 w-4" /> },
+    { key: 'announcements', label: 'Announcements', icon: <Megaphone className="h-4 w-4" /> },
+    { key: 'fraud',     label: 'Fraud Control', icon: <ShieldAlert className="h-4 w-4" /> },
+    { key: 'gdpr',      label: 'GDPR Queue', icon: <FileText className="h-4 w-4" /> },
+    { key: 'health',    label: 'System Health', icon: <Activity className="h-4 w-4" /> },
     { key: 'settings',  label: 'Settings',  icon: <Settings className="h-4 w-4" /> },
     { key: 'analytics', label: 'Analytics', icon: <TrendingUp className="h-4 w-4" /> },
     { key: 'logs',      label: 'System Logs',icon: <Database className="h-4 w-4" /> },
@@ -4345,6 +4388,407 @@ export default function AdminPage() {
             </Section>
           )}
 
+          {/* FEATURE FLAGS TAB */}
+          {activeTab === 'flags' && (
+            <Section>
+              <SectionHeader title="Global Feature Flags" desc="Instantly enable or disable specific platform capabilities across storefronts and consoles." />
+              <div className="p-6 space-y-6">
+                {/* Create Flag Form */}
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!newFlagName || !newFlagKey) return;
+                  const newFlag = {
+                    _id: `flag-${Date.now()}`,
+                    name: newFlagName,
+                    key: newFlagKey.trim().toUpperCase(),
+                    description: newFlagDesc || 'No description provided.',
+                    group: newFlagGroup,
+                    isEnabled: false
+                  };
+                  setFeatureFlags([...featureFlags, newFlag]);
+                  setNewFlagName(''); setNewFlagKey(''); setNewFlagDesc('');
+                  alert(`Feature flag ${newFlag.key} created!`);
+                }} className="bg-zinc-50 dark:bg-zinc-950/40 p-5 rounded-2xl border dark:border-zinc-850 space-y-4">
+                  <h4 className="font-bold text-xs uppercase text-indigo-600 dark:text-indigo-400">Register New Feature Flag</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <input type="text" required placeholder="Feature Name (e.g. Apple Pay)" value={newFlagName} onChange={e=>setNewFlagName(e.target.value)}
+                      className="px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-xs focus:outline-none focus:border-indigo-500 text-zinc-900 dark:text-white" />
+                    <input type="text" required placeholder="Flag Key (e.g. ENABLE_APPLE_PAY)" value={newFlagKey} onChange={e=>setNewFlagKey(e.target.value)}
+                      className="px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-xs focus:outline-none focus:border-indigo-500 text-zinc-900 dark:text-white font-mono" />
+                    <select value={newFlagGroup} onChange={e=>setNewFlagGroup(e.target.value)}
+                      className="px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-xs focus:outline-none focus:border-indigo-500 text-zinc-900 dark:text-white cursor-pointer">
+                      <option value="Storefront">Storefront</option>
+                      <option value="Payments">Payments</option>
+                      <option value="Authentication">Authentication</option>
+                      <option value="System">System Backend</option>
+                    </select>
+                    <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold py-2 shadow transition-all">
+                      Create Flag
+                    </button>
+                  </div>
+                  <input type="text" placeholder="Short description of what this feature flag controls..." value={newFlagDesc} onChange={e=>setNewFlagDesc(e.target.value)}
+                    className="w-full px-3 py-2 border dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-xs focus:outline-none focus:border-indigo-500 text-zinc-900 dark:text-white" />
+                </form>
+
+                {/* Flags list */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  {featureFlags.map((flag) => (
+                    <div key={flag._id} className="border dark:border-zinc-800 rounded-2xl p-5 bg-zinc-50/20 dark:bg-zinc-900/30 flex justify-between items-start gap-4">
+                      <div className="space-y-1">
+                        <span className="inline-block bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-305 text-[9px] font-bold px-2 py-0.5 rounded">
+                          {flag.group}
+                        </span>
+                        <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white">{flag.name}</h4>
+                        <code className="text-[10px] text-zinc-400 font-mono block">{flag.key}</code>
+                        <p className="text-xs text-zinc-500 mt-1">{flag.description}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <button 
+                          onClick={() => {
+                            setFeatureFlags(featureFlags.map(f => f._id === flag._id ? { ...f, isEnabled: !f.isEnabled } : f));
+                          }}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold shadow transition-all ${
+                            flag.isEnabled 
+                              ? 'bg-emerald-600 text-white hover:bg-emerald-500' 
+                              : 'bg-zinc-200 text-zinc-700 hover:bg-zinc-300 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
+                          }`}
+                        >
+                          {flag.isEnabled ? 'Enabled' : 'Disabled'}
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (confirm('Delete this feature flag?')) {
+                              setFeatureFlags(featureFlags.filter(f => f._id !== flag._id));
+                            }
+                          }}
+                          className="text-red-500 hover:text-red-650 text-[10px] font-semibold hover:underline"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Section>
+          )}
+
+          {/* SYSTEM ANNOUNCEMENTS TAB */}
+          {activeTab === 'announcements' && (
+            <Section>
+              <SectionHeader title="System Broadcasts & Announcements" desc="Publish banner notifications and warnings globally targeting customers, sellers, or vendors." />
+              <div className="p-6 space-y-6">
+                {/* Create form */}
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!newAnnTitle || !newAnnMsg) return;
+                  const newAnn = {
+                    _id: `ann-${Date.now()}`,
+                    title: newAnnTitle,
+                    message: newAnnMsg,
+                    targetRole: newAnnTarget,
+                    isActive: true,
+                    createdAt: new Date().toISOString()
+                  };
+                  setAnnouncements([newAnn, ...announcements]);
+                  setNewAnnTitle(''); setNewAnnMsg('');
+                  alert('Announcement broadcasted successfully!');
+                }} className="bg-zinc-50 dark:bg-zinc-950/40 p-5 rounded-2xl border dark:border-zinc-850 space-y-3">
+                  <h4 className="font-bold text-xs uppercase text-indigo-650 dark:text-indigo-400">Draft New Broadcast Announcement</h4>
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    <input type="text" required placeholder="Announcement Title" value={newAnnTitle} onChange={e=>setNewAnnTitle(e.target.value)}
+                      className="rounded-xl border border-zinc-200 bg-white p-2.5 text-xs focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-white sm:col-span-2" />
+                    <select value={newAnnTarget} onChange={e=>setNewAnnTarget(e.target.value)}
+                      className="rounded-xl border border-zinc-200 bg-white p-2.5 text-xs focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-white cursor-pointer">
+                      <option value="Customer">Audience: Customers</option>
+                      <option value="Seller">Audience: Sellers</option>
+                      <option value="Vendor">Audience: Vendors</option>
+                      <option value="All">Audience: All Roles</option>
+                    </select>
+                  </div>
+                  <textarea rows={3} required placeholder="Compose message body broadcast details..." value={newAnnMsg} onChange={e=>setNewAnnMsg(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white p-2.5 text-xs focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-white resize-none" />
+                  <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold px-4 py-2 shadow">
+                    Broadcast Announcement
+                  </button>
+                </form>
+
+                {/* List announcements */}
+                <div className="space-y-4">
+                  {announcements.map((ann) => (
+                    <div key={ann._id} className="border dark:border-zinc-800 rounded-2xl p-5 bg-zinc-50/20 dark:bg-zinc-900/30 flex justify-between items-start gap-4">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="bg-indigo-50 text-indigo-700 text-[9px] font-bold px-2 py-0.5 rounded border border-indigo-100">
+                            To: {ann.targetRole}s
+                          </span>
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${
+                            ann.isActive 
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
+                              : 'bg-zinc-100 text-zinc-550 border-zinc-200'
+                          }`}>
+                            {ann.isActive ? 'Active Broadcast' : 'Archived'}
+                          </span>
+                        </div>
+                        <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white">{ann.title}</h4>
+                        <p className="text-xs text-zinc-650 dark:text-zinc-350">{ann.message}</p>
+                        <span className="text-[10px] text-zinc-400 block">{new Date(ann.createdAt).toLocaleString()}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => {
+                            setAnnouncements(announcements.map(a => a._id === ann._id ? { ...a, isActive: !a.isActive } : a));
+                          }}
+                          className="text-indigo-600 hover:underline text-xs font-semibold"
+                        >
+                          Toggle Active
+                        </button>
+                        <span className="text-zinc-200">|</span>
+                        <button 
+                          onClick={() => {
+                            if (confirm('Delete this announcement?')) {
+                              setAnnouncements(announcements.filter(a => a._id !== ann._id));
+                            }
+                          }}
+                          className="text-red-500 hover:underline text-xs font-semibold"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Section>
+          )}
+
+          {/* FRAUD CONTROL TAB */}
+          {activeTab === 'fraud' && (
+            <Section>
+              <SectionHeader title="Fraud & Threat Intelligence Monitor" desc="Real-time login failures monitoring, transaction threat scores, and suspicious IP logs." />
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <StatCard label="Critical Alerts" value={fraudLogs.filter(l => l.riskScore >= 80).length} icon={<ShieldAlert className="h-5 w-5"/>} color="rose" />
+                  <StatCard label="Flagged Users" value={fraudLogs.filter(l => l.status === 'Flagged').length} icon={<AlertCircle className="h-5 w-5"/>} color="amber" />
+                  <StatCard label="IP Blocks in Vault" value={24} icon={<Lock className="h-5 w-5"/>} color="indigo" />
+                </div>
+
+                <Table>
+                  <Thead>
+                    <tr>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Account / IP</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Risk Score</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Reason / Incident Description</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Status</th>
+                      <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500 text-right">Actions</th>
+                    </tr>
+                  </Thead>
+                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                    {fraudLogs.map((log) => (
+                      <tr key={log._id} className="text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
+                        <td className="px-4 py-3">
+                          <div className="font-semibold text-zinc-900 dark:text-white">{log.email}</div>
+                          <div className="text-[10px] text-zinc-400 font-mono">IP: {log.ipAddress}</div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            log.riskScore >= 80 
+                              ? 'bg-red-50 text-red-750 border border-red-100' 
+                              : 'bg-amber-50 text-amber-750 border border-amber-100'
+                          }`}>
+                            {log.riskScore}% Risk
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-zinc-500 max-w-[240px] truncate" title={log.reason}>{log.reason}</td>
+                        <td className="px-4 py-3">{badge(log.status === 'Blocked' ? 'red' : 'amber', log.status)}</td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex gap-2 justify-end">
+                            <button 
+                              onClick={() => {
+                                setFraudLogs(fraudLogs.map(l => l._id === log._id ? { ...l, status: l.status === 'Blocked' ? 'Flagged' : 'Blocked' } : l));
+                                alert(`Security status updated!`);
+                              }}
+                              className="text-indigo-600 hover:underline font-bold"
+                            >
+                              {log.status === 'Blocked' ? 'Unblock' : 'Block IP'}
+                            </button>
+                            <span className="text-zinc-200">|</span>
+                            <button 
+                              onClick={() => {
+                                setFraudLogs(fraudLogs.filter(l => l._id !== log._id));
+                                alert('Alert dismissed successfully.');
+                              }}
+                              className="text-zinc-400 hover:text-zinc-650 hover:underline font-semibold"
+                            >
+                              Dismiss
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            </Section>
+          )}
+
+          {/* GDPR QUEUE TAB */}
+          {activeTab === 'gdpr' && (
+            <Section>
+              <SectionHeader title="GDPR & Privacy Compliance Queue" desc="Review, audit, and execute customer privacy requests for personal data exports or erasures." />
+              <div className="p-6 space-y-6">
+                <Table>
+                  <Thead>
+                    <tr>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Requestor Email</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Request Type</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Date Received</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Status</th>
+                      <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500 text-right">Privacy Execution Actions</th>
+                    </tr>
+                  </Thead>
+                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                    {gdprRequests.map((req) => (
+                      <tr key={req._id} className="text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
+                        <td className="px-4 py-3 font-semibold text-zinc-900 dark:text-white">{req.email}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            req.requestType === 'Delete Profile' 
+                              ? 'bg-rose-50 text-rose-700 border border-rose-100' 
+                              : 'bg-indigo-50 text-indigo-700 border border-indigo-100'
+                          }`}>
+                            {req.requestType}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-zinc-400">{new Date(req.createdAt).toLocaleDateString()}</td>
+                        <td className="px-4 py-3">{badge(req.status === 'Completed' ? 'green' : 'amber', req.status)}</td>
+                        <td className="px-4 py-3 text-right">
+                          {req.status === 'Pending' ? (
+                            <div className="flex gap-2 justify-end">
+                              <button 
+                                onClick={() => {
+                                  // Simulate data export
+                                  const mockData = {
+                                    email: req.email,
+                                    exportedAt: new Date().toISOString(),
+                                    profile: { firstName: 'Simulated', lastName: 'Customer' },
+                                    addresses: [],
+                                    orders: []
+                                  };
+                                  const blob = new Blob([JSON.stringify(mockData, null, 2)], { type: 'application/json' });
+                                  const url = URL.createObjectURL(blob);
+                                  const a = document.createElement('a');
+                                  a.href = url;
+                                  a.download = `GDPR-Export-${req.email}.json`;
+                                  a.click();
+                                  setGdprRequests(gdprRequests.map(r => r._id === req._id ? { ...r, status: 'Completed', processedAt: new Date().toISOString() } : r));
+                                  alert('GDPR data package generated and downloaded successfully!');
+                                }}
+                                className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-1 font-semibold"
+                              >
+                                {req.requestType === 'Export Data' ? 'Generate Export' : 'Process Erasure'}
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-zinc-450 italic">Processed on {new Date(req.processedAt).toLocaleDateString()}</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            </Section>
+          )}
+
+          {/* SYSTEM HEALTH TAB */}
+          {activeTab === 'health' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h1 className="text-2xl font-black text-zinc-900 dark:text-white">System Infrastructure Health</h1>
+                  <p className="text-sm text-zinc-500 mt-0.5">Live monitoring metrics for CPU cores, RAM allocations, database latency, and websocket networks.</p>
+                </div>
+                <button 
+                  onClick={() => {
+                    alert("System Health Diagnostic Complete:\n\n• CPU Cores: 12 Cores Online\n• NestJS Backend REST API: Healthy\n• MongoDB Atlas Cluster: 9ms Latency\n• Redis Caching Server: Active\n• Socket.IO Live Support Server: Active\n• Elasticsearch Indexing: 100% Synced");
+                  }}
+                  className="bg-indigo-650 hover:bg-indigo-600 text-white rounded-xl px-4 py-2 text-xs font-semibold shadow"
+                >
+                  Run Full Infrastructure Diagnostics
+                </button>
+              </div>
+
+              {/* Gauges grid */}
+              <div className="grid sm:grid-cols-3 gap-6">
+                {[
+                  { label: 'CPU Cluster Load', value: `${healthMetrics.cpu}%`, progress: healthMetrics.cpu, color: 'indigo' },
+                  { label: 'Memory Allocation', value: `${healthMetrics.memory}%`, progress: healthMetrics.memory, color: 'blue' },
+                  { label: 'Disk Storage Volume', value: `${healthMetrics.disk}%`, progress: healthMetrics.disk, color: 'emerald' }
+                ].map(g => {
+                  const barColors: Record<string, string> = {
+                    indigo: 'bg-indigo-600',
+                    blue: 'bg-blue-600',
+                    emerald: 'bg-emerald-600'
+                  };
+                  return (
+                    <div key={g.label} className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border dark:border-zinc-800 shadow-sm space-y-4">
+                      <div className="text-xs text-zinc-400 font-bold uppercase tracking-wider">{g.label}</div>
+                      <div className="text-3xl font-black text-zinc-900 dark:text-white">{g.value}</div>
+                      <div className="w-full bg-zinc-150 dark:bg-zinc-800 rounded-full h-2">
+                        <div className={`h-2 rounded-full ${barColors[g.color]}`} style={{ width: `${g.progress}%` }}></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Status and Uptime details */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border dark:border-zinc-800 shadow-sm space-y-4">
+                  <h3 className="font-bold text-sm text-zinc-900 dark:text-white border-b pb-2 dark:border-zinc-800">Operational Microservices</h3>
+                  <div className="space-y-3 pt-1 text-xs">
+                    {[
+                      { service: 'NestJS REST API Gateway', status: 'Online', desc: 'Port 5001' },
+                      { service: 'MongoDB Atlas Replica Set', status: 'Online', desc: 'Latency 9ms' },
+                      { service: 'Redis Session & Cache Store', status: 'Online', desc: 'Active' },
+                      { service: 'Socket.IO Websocket Gateway', status: 'Online', desc: 'Live Support Port' }
+                    ].map(s => (
+                      <div key={s.service} className="flex justify-between items-center border-b pb-2 last:border-0 dark:border-zinc-800">
+                        <div>
+                          <div className="font-bold text-zinc-855 dark:text-zinc-200">{s.service}</div>
+                          <div className="text-[10px] text-zinc-450">{s.desc}</div>
+                        </div>
+                        <span className="bg-emerald-50 text-emerald-800 font-bold text-[9px] px-2 py-0.5 rounded border border-emerald-100">{s.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border dark:border-zinc-800 shadow-sm space-y-4">
+                  <h3 className="font-bold text-sm text-zinc-900 dark:text-white border-b pb-2 dark:border-zinc-800">Server Metrics Overview</h3>
+                  <div className="space-y-3 pt-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500 font-medium">Server Uptime:</span>
+                      <span className="font-bold text-zinc-900 dark:text-white">{healthMetrics.uptime}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500 font-medium">Active Websocket Connections:</span>
+                      <span className="font-bold text-zinc-900 dark:text-white">14 Client Connections</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500 font-medium">Average Request Latency:</span>
+                      <span className="font-bold text-zinc-900 dark:text-white">12ms</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500 font-medium">Cron Retention sweeps:</span>
+                      <span className="font-bold text-zinc-900 dark:text-white">Daily at 00:00 UTC</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 

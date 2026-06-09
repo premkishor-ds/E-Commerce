@@ -1578,296 +1578,1202 @@ export class FeedbackActivityLog extends Document {
 }
 export const FeedbackActivityLogSchema = SchemaFactory.createForClass(FeedbackActivityLog);
 
-// --- ROLE ---
+// ─────────────────────────────────────────────────────────────────────────────
+// ENTERPRISE SCHEMAS — Phase A
+// ─────────────────────────────────────────────────────────────────────────────
+
+// --- SELLER (Separate from Vendor) ---
 @Schema({ timestamps: true })
-export class Role extends Document {
-  @Prop({ required: true, unique: true, index: true })
-  name: string;
+export class Seller extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, unique: true, index: true })
+  userId: Types.ObjectId;
+
+  @Prop({ required: true })
+  storeName: string;
 
   @Prop({ default: '' })
-  description: string;
-}
-export const RoleSchema = SchemaFactory.createForClass(Role);
-
-// --- PERMISSION ---
-@Schema({ timestamps: true })
-export class Permission extends Document {
-  @Prop({ required: true, unique: true, index: true })
-  name: string;
+  storeDescription: string;
 
   @Prop({ default: '' })
-  description: string;
+  logo: string;
+
+  @Prop({ default: '' })
+  banner: string;
+
+  @Prop({ default: 'Pending', index: true })
+  status: string; // Pending, Approved, Suspended, Rejected
+
+  @Prop({ default: 10 })
+  commissionRate: number;
+
+  @Prop({ default: '' })
+  businessEmail: string;
+
+  @Prop({ default: '' })
+  businessPhone: string;
+
+  @Prop({ default: '' })
+  gstNumber: string;
+
+  @Prop({ default: '' })
+  panNumber: string;
+
+  @Prop({ type: Object, default: null })
+  bankDetails: {
+    bankName: string;
+    accountNumber: string;
+    ifscCode: string;
+    accountHolder: string;
+  } | null;
+
+  @Prop({ default: 0 })
+  totalRevenue: number;
+
+  @Prop({ default: 0 })
+  totalOrders: number;
+
+  @Prop({ default: 0 })
+  pendingPayout: number;
+
+  @Prop({ default: 0 })
+  rating: number;
+
+  @Prop({ default: true })
+  isActive: boolean;
 }
-export const PermissionSchema = SchemaFactory.createForClass(Permission);
+export const SellerSchema = SchemaFactory.createForClass(Seller);
 
-// --- NEW SAAS ENTERPRISE MODULES (PHASE 21) ---
+// --- SELLER SETTLEMENT ---
+@Schema({ timestamps: true })
+export class SellerSettlement extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'Seller', required: true, index: true })
+  sellerId: Types.ObjectId;
 
+  @Prop({ required: true })
+  amount: number;
+
+  @Prop({ default: 0 })
+  commission: number;
+
+  @Prop({ default: 0 })
+  netAmount: number;
+
+  @Prop({ required: true, default: 'Pending', index: true })
+  status: string; // Pending, Processing, Completed, Failed
+
+  @Prop({ default: '' })
+  transactionRef: string;
+
+  @Prop({ type: Date, default: null })
+  processedAt: Date | null;
+
+  @Prop({ type: [Types.ObjectId], ref: 'Order', default: [] })
+  orderIds: Types.ObjectId[];
+
+  @Prop({ default: '' })
+  notes: string;
+}
+export const SellerSettlementSchema = SchemaFactory.createForClass(SellerSettlement);
+
+// --- FAQ CATEGORY ---
 @Schema({ timestamps: true })
 export class FaqCategory extends Document {
-  @Prop({ required: true, unique: true }) name: string;
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true, unique: true, index: true })
+  slug: string;
+
+  @Prop({ default: '' })
+  description: string;
+
+  @Prop({ default: '' })
+  icon: string;
+
+  @Prop({ default: 0 })
+  sortOrder: number;
+
+  @Prop({ default: true })
+  isActive: boolean;
 }
 export const FaqCategorySchema = SchemaFactory.createForClass(FaqCategory);
 
+// --- FAQ ITEM ---
 @Schema({ timestamps: true })
 export class FaqItem extends Document {
-  @Prop({ type: Types.ObjectId, ref: 'FaqCategory', required: true }) categoryId: Types.ObjectId;
-  @Prop({ required: true }) question: string;
-  @Prop({ required: true }) answer: string;
-  @Prop({ default: 0 }) helpfulCount: number;
+  @Prop({ type: Types.ObjectId, ref: 'FaqCategory', required: true, index: true })
+  categoryId: Types.ObjectId;
+
+  @Prop({ required: true })
+  question: string;
+
+  @Prop({ required: true })
+  answer: string;
+
+  @Prop({ default: 0 })
+  sortOrder: number;
+
+  @Prop({ default: 0 })
+  viewCount: number;
+
+  @Prop({ default: 0 })
+  helpfulCount: number;
+
+  @Prop({ default: 0 })
+  notHelpfulCount: number;
+
+  @Prop({ default: true })
+  isActive: boolean;
 }
 export const FaqItemSchema = SchemaFactory.createForClass(FaqItem);
 
+// --- MEDIA FOLDER ---
 @Schema({ timestamps: true })
 export class MediaFolder extends Document {
-  @Prop({ required: true }) name: string;
-  @Prop({ type: Types.ObjectId, ref: 'MediaFolder', default: null }) parentId: Types.ObjectId | null;
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'MediaFolder', default: null })
+  parentId: Types.ObjectId | null;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  createdBy: Types.ObjectId;
+
+  @Prop({ default: 0 })
+  fileCount: number;
 }
 export const MediaFolderSchema = SchemaFactory.createForClass(MediaFolder);
 
+// --- MEDIA FILE ---
+@Schema({ timestamps: true })
+export class MediaFile extends Document {
+  @Prop({ required: true })
+  originalName: string;
+
+  @Prop({ required: true })
+  fileName: string;
+
+  @Prop({ required: true })
+  mimeType: string;
+
+  @Prop({ required: true })
+  sizeBytes: number;
+
+  @Prop({ required: true })
+  url: string;
+
+  @Prop({ default: '' })
+  thumbnailUrl: string;
+
+  @Prop({ required: true, default: 'image', index: true })
+  fileType: string; // image, video, pdf, document, other
+
+  @Prop({ type: Types.ObjectId, ref: 'MediaFolder', default: null, index: true })
+  folderId: Types.ObjectId | null;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  uploadedBy: Types.ObjectId;
+
+  @Prop({ default: '' })
+  altText: string;
+
+  @Prop({ default: '' })
+  caption: string;
+
+  @Prop({ default: 0 })
+  width: number;
+
+  @Prop({ default: 0 })
+  height: number;
+
+  @Prop({ default: '' })
+  storageProvider: string; // local, s3, cloudinary
+}
+export const MediaFileSchema = SchemaFactory.createForClass(MediaFile);
+
+// --- ANNOUNCEMENT ---
 @Schema({ timestamps: true })
 export class Announcement extends Document {
-  @Prop({ required: true }) title: string;
-  @Prop({ required: true }) content: string;
-  @Prop({ type: [String], default: ['All'] }) targetRoles: string[];
-  @Prop({ default: true }) isActive: boolean;
+  @Prop({ required: true })
+  title: string;
+
+  @Prop({ required: true })
+  message: string;
+
+  @Prop({ required: true, default: 'Info', index: true })
+  type: string; // Info, Warning, Maintenance, Promotion, Security, Feature
+
+  @Prop({ type: [String], default: ['All'], index: true })
+  targetAudience: string[]; // All, Customers, Sellers, Vendors, Admins
+
+  @Prop({ required: true, default: 'Active', index: true })
+  status: string; // Draft, Active, Expired
+
+  @Prop({ default: false })
+  isDismissible: boolean;
+
+  @Prop({ default: '' })
+  ctaLabel: string;
+
+  @Prop({ default: '' })
+  ctaUrl: string;
+
+  @Prop({ default: '' })
+  bannerColor: string;
+
+  @Prop({ type: Date, default: null })
+  startsAt: Date | null;
+
+  @Prop({ type: Date, default: null })
+  expiresAt: Date | null;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  createdBy: Types.ObjectId;
+
+  @Prop({ default: 0 })
+  viewCount: number;
+
+  @Prop({ default: 0 })
+  dismissCount: number;
 }
 export const AnnouncementSchema = SchemaFactory.createForClass(Announcement);
 
+// --- FEATURE FLAG ---
 @Schema({ timestamps: true })
 export class FeatureFlag extends Document {
-  @Prop({ required: true, unique: true }) name: string;
-  @Prop({ default: false }) isEnabled: boolean;
-  @Prop({ default: 100 }) percentageRollout: number;
+  @Prop({ required: true, unique: true, index: true })
+  key: string; // e.g. ENABLE_AI_CHATBOT, NEW_CHECKOUT_FLOW
+
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ default: '' })
+  description: string;
+
+  @Prop({ default: false })
+  isEnabled: boolean;
+
+  @Prop({ default: 'all', index: true })
+  environment: string; // all, development, staging, production
+
+  @Prop({ default: 100 })
+  rolloutPercentage: number; // 0-100
+
+  @Prop({ type: [String], default: [] })
+  allowedRoles: string[];
+
+  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
+  allowedUsers: Types.ObjectId[];
+
+  @Prop({ type: Object, default: {} })
+  metadata: Record<string, any>;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  updatedBy: Types.ObjectId;
 }
 export const FeatureFlagSchema = SchemaFactory.createForClass(FeatureFlag);
 
+// --- EXPERIMENT (A/B TESTING) ---
 @Schema({ timestamps: true })
 export class Experiment extends Document {
-  @Prop({ required: true }) name: string;
-  @Prop({ required: true }) description: string;
-  @Prop({ default: 'Draft' }) status: string;
+  @Prop({ required: true, unique: true, index: true })
+  key: string;
+
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ default: '' })
+  description: string;
+
+  @Prop({ required: true, default: 'Draft', index: true })
+  status: string; // Draft, Running, Paused, Completed
+
+  @Prop({ type: [Object], default: [] })
+  variants: Array<{
+    key: string;
+    name: string;
+    weight: number; // percentage
+    description: string;
+  }>;
+
+  @Prop({ required: true })
+  targetMetric: string; // conversion_rate, revenue, add_to_cart, etc.
+
+  @Prop({ type: Date, default: null })
+  startedAt: Date | null;
+
+  @Prop({ type: Date, default: null })
+  endedAt: Date | null;
+
+  @Prop({ default: '' })
+  winnerVariant: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  createdBy: Types.ObjectId;
 }
 export const ExperimentSchema = SchemaFactory.createForClass(Experiment);
 
+// --- EXPERIMENT RESULT ---
 @Schema({ timestamps: true })
 export class ExperimentResult extends Document {
-  @Prop({ type: Types.ObjectId, ref: 'Experiment', required: true }) experimentId: Types.ObjectId;
-  @Prop({ required: true }) variant: string;
-  @Prop({ default: 0 }) impressions: number;
-  @Prop({ default: 0 }) conversions: number;
+  @Prop({ type: Types.ObjectId, ref: 'Experiment', required: true, index: true })
+  experimentId: Types.ObjectId;
+
+  @Prop({ required: true })
+  variantKey: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null, index: true })
+  userId: Types.ObjectId | null;
+
+  @Prop({ default: '' })
+  sessionId: string;
+
+  @Prop({ required: true })
+  event: string; // view, click, convert, purchase
+
+  @Prop({ default: 0 })
+  value: number;
+
+  @Prop({ default: '' })
+  ipAddress: string;
 }
 export const ExperimentResultSchema = SchemaFactory.createForClass(ExperimentResult);
 
+// --- WEBHOOK ---
 @Schema({ timestamps: true })
 export class Webhook extends Document {
-  @Prop({ required: true }) name: string;
-  @Prop({ required: true }) url: string;
-  @Prop({ required: true }) secret: string;
-  @Prop({ type: [String], default: [] }) events: string[];
-  @Prop({ default: true }) isActive: boolean;
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true })
+  url: string;
+
+  @Prop({ type: [String], required: true })
+  events: string[]; // order.created, payment.success, refund.issued, product.updated
+
+  @Prop({ default: '' })
+  secret: string;
+
+  @Prop({ required: true, default: 'Active', index: true })
+  status: string; // Active, Inactive, Failed
+
+  @Prop({ default: 3 })
+  retryCount: number;
+
+  @Prop({ default: 0 })
+  successCount: number;
+
+  @Prop({ default: 0 })
+  failureCount: number;
+
+  @Prop({ type: Date, default: null })
+  lastTriggeredAt: Date | null;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  createdBy: Types.ObjectId;
 }
 export const WebhookSchema = SchemaFactory.createForClass(Webhook);
 
+// --- WEBHOOK LOG ---
 @Schema({ timestamps: true })
 export class WebhookLog extends Document {
-  @Prop({ type: Types.ObjectId, ref: 'Webhook', required: true }) webhookId: Types.ObjectId;
-  @Prop({ required: true }) event: string;
-  @Prop({ required: true }) payload: string;
-  @Prop({ required: true }) status: number;
-  @Prop({ default: '' }) response: string;
+  @Prop({ type: Types.ObjectId, ref: 'Webhook', required: true, index: true })
+  webhookId: Types.ObjectId;
+
+  @Prop({ required: true })
+  event: string;
+
+  @Prop({ required: true })
+  url: string;
+
+  @Prop({ type: Object, default: {} })
+  payload: Record<string, any>;
+
+  @Prop({ required: true, default: 'Pending', index: true })
+  status: string; // Pending, Success, Failed, Retrying
+
+  @Prop({ default: 0 })
+  responseStatus: number;
+
+  @Prop({ default: '' })
+  responseBody: string;
+
+  @Prop({ default: 0 })
+  attemptCount: number;
+
+  @Prop({ default: 0 })
+  latencyMs: number;
+
+  @Prop({ type: Date, default: null })
+  nextRetryAt: Date | null;
 }
 export const WebhookLogSchema = SchemaFactory.createForClass(WebhookLog);
 
+// --- INTEGRATION ---
 @Schema({ timestamps: true })
 export class Integration extends Document {
-  @Prop({ required: true, unique: true }) name: string;
-  @Prop({ required: true }) provider: string;
-  @Prop({ default: false }) isEnabled: boolean;
-  @Prop({ type: Object, default: {} }) config: Record<string, any>;
+  @Prop({ required: true, unique: true, index: true })
+  key: string; // stripe, razorpay, paypal, shiprocket, openai, google_analytics
+
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ default: '' })
+  description: string;
+
+  @Prop({ default: '' })
+  category: string; // Payment, Shipping, Analytics, AI, Marketing
+
+  @Prop({ default: '' })
+  logo: string;
+
+  @Prop({ default: false })
+  isEnabled: boolean;
+
+  @Prop({ type: Object, default: {} })
+  config: Record<string, any>; // Encrypted API keys, secrets
+
+  @Prop({ default: 'Unknown', index: true })
+  healthStatus: string; // Healthy, Degraded, Down, Unknown
+
+  @Prop({ type: Date, default: null })
+  lastCheckedAt: Date | null;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  updatedBy: Types.ObjectId;
 }
 export const IntegrationSchema = SchemaFactory.createForClass(Integration);
 
+// --- SEO SETTING ---
 @Schema({ timestamps: true })
 export class SeoSetting extends Document {
-  @Prop({ required: true, unique: true }) path: string;
-  @Prop({ required: true }) metaTitle: string;
-  @Prop({ required: true }) metaDescription: string;
-  @Prop({ default: '' }) openGraphImage: string;
+  @Prop({ required: true, unique: true, index: true })
+  page: string; // home, shop, product, category, blog, checkout, etc.
+
+  @Prop({ default: '' })
+  metaTitle: string;
+
+  @Prop({ default: '' })
+  metaDescription: string;
+
+  @Prop({ default: '' })
+  canonicalUrl: string;
+
+  @Prop({ default: '' })
+  ogTitle: string;
+
+  @Prop({ default: '' })
+  ogDescription: string;
+
+  @Prop({ default: '' })
+  ogImage: string;
+
+  @Prop({ default: '' })
+  twitterTitle: string;
+
+  @Prop({ default: '' })
+  twitterDescription: string;
+
+  @Prop({ default: '' })
+  twitterImage: string;
+
+  @Prop({ default: 'index, follow' })
+  robotsDirective: string;
+
+  @Prop({ type: [String], default: [] })
+  keywords: string[];
 }
 export const SeoSettingSchema = SchemaFactory.createForClass(SeoSetting);
 
+// --- SITEMAP ---
 @Schema({ timestamps: true })
 export class Sitemap extends Document {
-  @Prop({ required: true }) url: string;
-  @Prop({ required: true }) lastModified: Date;
-  @Prop({ default: 'weekly' }) changeFreq: string;
+  @Prop({ required: true, unique: true, index: true })
+  type: string; // products, categories, blogs, cms
+
+  @Prop({ required: true })
+  url: string; // Path to the generated sitemap
+
+  @Prop({ default: 0 })
+  urlCount: number;
+
+  @Prop({ type: Date, default: null })
+  lastGeneratedAt: Date | null;
+
+  @Prop({ default: 'Pending' })
+  status: string; // Pending, Generated, Failed
 }
 export const SitemapSchema = SchemaFactory.createForClass(Sitemap);
 
+// --- REDIRECT RULE ---
 @Schema({ timestamps: true })
 export class RedirectRule extends Document {
-  @Prop({ required: true }) fromPath: string;
-  @Prop({ required: true }) toPath: string;
-  @Prop({ default: 301 }) statusCode: number;
+  @Prop({ required: true, unique: true, index: true })
+  sourceUrl: string;
+
+  @Prop({ required: true })
+  destinationUrl: string;
+
+  @Prop({ required: true, default: 301 })
+  redirectType: number; // 301, 302
+
+  @Prop({ default: true })
+  isActive: boolean;
+
+  @Prop({ default: 0 })
+  hitCount: number;
+
+  @Prop({ type: Date, default: null })
+  lastHitAt: Date | null;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  createdBy: Types.ObjectId;
 }
 export const RedirectRuleSchema = SchemaFactory.createForClass(RedirectRule);
 
+// --- TAX RULE ---
 @Schema({ timestamps: true })
 export class TaxRule extends Document {
-  @Prop({ required: true }) name: string;
-  @Prop({ required: true }) country: string;
-  @Prop({ default: '' }) state: string;
-  @Prop({ required: true }) ratePercentage: number;
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true, default: 'GST', index: true })
+  taxType: string; // GST, VAT, State Tax, Country Tax, Custom
+
+  @Prop({ required: true })
+  rate: number; // percentage
+
+  @Prop({ default: '' })
+  country: string;
+
+  @Prop({ default: '' })
+  state: string;
+
+  @Prop({ type: [Types.ObjectId], ref: 'Category', default: [] })
+  applicableCategories: Types.ObjectId[];
+
+  @Prop({ default: true })
+  isActive: boolean;
+
+  @Prop({ default: false })
+  isDefault: boolean;
+
+  @Prop({ default: '' })
+  taxCode: string;
+
+  @Prop({ default: '' })
+  description: string;
 }
 export const TaxRuleSchema = SchemaFactory.createForClass(TaxRule);
 
+// --- COMMISSION RULE ---
 @Schema({ timestamps: true })
 export class CommissionRule extends Document {
-  @Prop({ required: true }) role: string;
-  @Prop({ required: true }) categoryId: string;
-  @Prop({ required: true }) percentage: number;
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true, default: 'Global', index: true })
+  ruleType: string; // Global, Category, Product, Seller, Vendor
+
+  @Prop({ required: true })
+  rate: number; // percentage
+
+  @Prop({ default: 0 })
+  flatAmount: number;
+
+  @Prop({ required: true, default: 'percentage' })
+  calculationType: string; // percentage, flat, percentage+flat
+
+  @Prop({ type: Types.ObjectId, ref: 'Category', default: null })
+  categoryId: Types.ObjectId | null;
+
+  @Prop({ type: Types.ObjectId, ref: 'Product', default: null })
+  productId: Types.ObjectId | null;
+
+  @Prop({ type: Types.ObjectId, ref: 'Seller', default: null })
+  sellerId: Types.ObjectId | null;
+
+  @Prop({ type: Types.ObjectId, ref: 'Vendor', default: null })
+  vendorId: Types.ObjectId | null;
+
+  @Prop({ default: true })
+  isActive: boolean;
+
+  @Prop({ type: Date, default: null })
+  effectiveFrom: Date | null;
+
+  @Prop({ type: Date, default: null })
+  effectiveTo: Date | null;
 }
 export const CommissionRuleSchema = SchemaFactory.createForClass(CommissionRule);
 
+// --- FRAUD CASE ---
 @Schema({ timestamps: true })
 export class FraudCase extends Document {
-  @Prop({ type: Types.ObjectId, ref: 'User' }) userId: Types.ObjectId;
-  @Prop({ type: Types.ObjectId, ref: 'Order' }) orderId: Types.ObjectId;
-  @Prop({ required: true }) riskScore: number;
-  @Prop({ required: true }) reason: string;
-  @Prop({ default: 'Open' }) status: string;
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null, index: true })
+  userId: Types.ObjectId | null;
+
+  @Prop({ required: true, index: true })
+  caseType: string; // FakeAccount, MultipleAccounts, SuspiciousOrder, PaymentAbuse, ReviewManipulation
+
+  @Prop({ required: true })
+  description: string;
+
+  @Prop({ required: true, default: 'Medium', index: true })
+  riskLevel: string; // Low, Medium, High, Critical
+
+  @Prop({ default: 0 })
+  riskScore: number; // 0 - 100
+
+  @Prop({ required: true, default: 'Open', index: true })
+  status: string; // Open, Under Review, Resolved, False Positive
+
+  @Prop({ default: '' })
+  ipAddress: string;
+
+  @Prop({ type: Object, default: {} })
+  evidence: Record<string, any>;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  reviewedBy: Types.ObjectId;
+
+  @Prop({ default: '' })
+  resolution: string;
+
+  @Prop({ type: Date, default: null })
+  resolvedAt: Date | null;
 }
 export const FraudCaseSchema = SchemaFactory.createForClass(FraudCase);
 
+// --- INVENTORY FORECAST ---
 @Schema({ timestamps: true })
 export class InventoryForecast extends Document {
-  @Prop({ required: true }) sku: string;
-  @Prop({ required: true }) predictedDemand: number;
-  @Prop({ required: true }) confidenceScore: number;
+  @Prop({ required: true, index: true })
+  sku: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'Product', required: true, index: true })
+  productId: Types.ObjectId;
+
+  @Prop({ required: true })
+  forecastedDemand: number;
+
+  @Prop({ required: true })
+  currentStock: number;
+
+  @Prop({ required: true })
+  reorderPoint: number;
+
+  @Prop({ required: true })
+  suggestedReorderQty: number;
+
+  @Prop({ type: Date, required: true })
+  forecastDate: Date;
+
+  @Prop({ required: true, default: 'Pending', index: true })
+  status: string; // Pending, Reordered, Ignored
+
+  @Prop({ default: 0 })
+  avgDailySales: number;
+
+  @Prop({ default: 0 })
+  leadTimeDays: number;
 }
 export const InventoryForecastSchema = SchemaFactory.createForClass(InventoryForecast);
 
+// --- TRANSLATION ---
 @Schema({ timestamps: true })
 export class Translation extends Document {
-  @Prop({ required: true }) languageCode: string;
-  @Prop({ required: true }) key: string;
-  @Prop({ required: true }) value: string;
+  @Prop({ required: true, index: true })
+  language: string; // en, hi, fr, es, ar
+
+  @Prop({ required: true, index: true })
+  namespace: string; // common, product, checkout, nav, errors
+
+  @Prop({ required: true, index: true })
+  key: string;
+
+  @Prop({ required: true })
+  value: string;
+
+  @Prop({ default: false })
+  isApproved: boolean;
 }
 export const TranslationSchema = SchemaFactory.createForClass(Translation);
+TranslationSchema.index({ language: 1, namespace: 1, key: 1 }, { unique: true });
 
+// --- CURRENCY ---
 @Schema({ timestamps: true })
 export class Currency extends Document {
-  @Prop({ required: true, unique: true }) code: string;
-  @Prop({ required: true }) symbol: string;
-  @Prop({ required: true }) exchangeRateToUSD: number;
+  @Prop({ required: true, unique: true, index: true })
+  code: string; // INR, USD, EUR, GBP
+
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true })
+  symbol: string;
+
+  @Prop({ required: true, default: 1 })
+  exchangeRate: number; // relative to base currency (USD)
+
+  @Prop({ default: 2 })
+  decimalPlaces: number;
+
+  @Prop({ default: true })
+  isActive: boolean;
+
+  @Prop({ default: false })
+  isDefault: boolean;
+
+  @Prop({ type: Date, default: null })
+  rateUpdatedAt: Date | null;
 }
 export const CurrencySchema = SchemaFactory.createForClass(Currency);
 
+// --- PRIVACY REQUEST (GDPR) ---
 @Schema({ timestamps: true })
 export class PrivacyRequest extends Document {
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true }) userId: Types.ObjectId;
-  @Prop({ required: true }) requestType: string;
-  @Prop({ default: 'Pending' }) status: string;
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null, index: true })
+  userId: Types.ObjectId | null;
+
+  @Prop({ required: true, index: true })
+  email: string;
+
+  @Prop({ required: true, index: true })
+  requestType: string; // DataExport, DataDeletion, ConsentWithdrawal, AccessRequest, RectificationRequest
+
+  @Prop({ required: true, default: 'Pending', index: true })
+  status: string; // Pending, In Progress, Completed, Rejected
+
+  @Prop({ default: '' })
+  notes: string;
+
+  @Prop({ default: '' })
+  adminNotes: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  processedBy: Types.ObjectId;
+
+  @Prop({ type: Date, default: null })
+  completedAt: Date | null;
+
+  @Prop({ default: '' })
+  exportUrl: string; // for DataExport requests
 }
 export const PrivacyRequestSchema = SchemaFactory.createForClass(PrivacyRequest);
 
+// --- RETENTION POLICY ---
 @Schema({ timestamps: true })
 export class RetentionPolicy extends Document {
-  @Prop({ required: true }) collectionName: string;
-  @Prop({ required: true }) retentionDays: number;
+  @Prop({ required: true, unique: true, index: true })
+  dataType: string; // AuditLogs, ActivityLogs, ApiLogs, SecurityLogs, LoginLogs, ChatbotLogs
+
+  @Prop({ required: true })
+  retentionDays: number;
+
+  @Prop({ required: true, default: 'Archive', index: true })
+  action: string; // Archive, Delete
+
+  @Prop({ default: true })
+  isActive: boolean;
+
+  @Prop({ type: Date, default: null })
+  lastRunAt: Date | null;
+
+  @Prop({ default: 0 })
+  totalProcessed: number;
 }
 export const RetentionPolicySchema = SchemaFactory.createForClass(RetentionPolicy);
 
+// --- BACKUP LOG ---
 @Schema({ timestamps: true })
 export class BackupLog extends Document {
-  @Prop({ required: true }) fileName: string;
-  @Prop({ required: true }) status: string;
-  @Prop({ required: true }) sizeBytes: number;
+  @Prop({ required: true, index: true })
+  backupType: string; // Manual, Scheduled, Incremental, Full
+
+  @Prop({ required: true, default: 'Pending', index: true })
+  status: string; // Pending, Running, Completed, Failed
+
+  @Prop({ default: '' })
+  filePath: string;
+
+  @Prop({ default: 0 })
+  fileSizeBytes: number;
+
+  @Prop({ type: [String], default: [] })
+  includedCollections: string[];
+
+  @Prop({ default: 0 })
+  durationSeconds: number;
+
+  @Prop({ default: '' })
+  error: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  triggeredBy: Types.ObjectId;
+
+  @Prop({ type: Date, default: null })
+  completedAt: Date | null;
 }
 export const BackupLogSchema = SchemaFactory.createForClass(BackupLog);
 
+// --- CRON LOG ---
 @Schema({ timestamps: true })
 export class CronLog extends Document {
-  @Prop({ required: true }) jobName: string;
-  @Prop({ required: true }) status: string;
-  @Prop({ default: 0 }) durationMs: number;
-  @Prop({ default: '' }) errorDetail: string;
+  @Prop({ required: true, index: true })
+  jobName: string;
+
+  @Prop({ required: true })
+  cronExpression: string;
+
+  @Prop({ required: true, default: 'Running', index: true })
+  status: string; // Running, Completed, Failed, Skipped
+
+  @Prop({ type: Date, required: true })
+  startedAt: Date;
+
+  @Prop({ type: Date, default: null })
+  completedAt: Date | null;
+
+  @Prop({ default: 0 })
+  durationMs: number;
+
+  @Prop({ default: 0 })
+  recordsProcessed: number;
+
+  @Prop({ default: '' })
+  error: string;
+
+  @Prop({ type: Object, default: {} })
+  metadata: Record<string, any>;
 }
 export const CronLogSchema = SchemaFactory.createForClass(CronLog);
 
+// --- QUEUE LOG ---
 @Schema({ timestamps: true })
 export class QueueLog extends Document {
-  @Prop({ required: true }) queueName: string;
-  @Prop({ required: true }) jobId: string;
-  @Prop({ required: true }) status: string;
+  @Prop({ required: true, index: true })
+  queueName: string; // email, notification, payment, ai, webhook
+
+  @Prop({ required: true, index: true })
+  jobId: string;
+
+  @Prop({ required: true, index: true })
+  jobType: string;
+
+  @Prop({ required: true, default: 'Queued', index: true })
+  status: string; // Queued, Processing, Completed, Failed, Retrying, Dead
+
+  @Prop({ default: 0 })
+  attemptNumber: number;
+
+  @Prop({ default: 3 })
+  maxAttempts: number;
+
+  @Prop({ type: Object, default: {} })
+  payload: Record<string, any>;
+
+  @Prop({ default: '' })
+  error: string;
+
+  @Prop({ default: 0 })
+  processingTimeMs: number;
+
+  @Prop({ type: Date, default: null })
+  processedAt: Date | null;
 }
 export const QueueLogSchema = SchemaFactory.createForClass(QueueLog);
 
+// --- SYSTEM HEALTH LOG ---
 @Schema({ timestamps: true })
 export class SystemHealthLog extends Document {
-  @Prop({ required: true }) serviceName: string;
-  @Prop({ required: true }) status: string;
-  @Prop({ type: Object }) metrics: Record<string, any>;
+  @Prop({ required: true, index: true })
+  service: string; // api, database, redis, queue, storage
+
+  @Prop({ required: true, default: 'Healthy', index: true })
+  status: string; // Healthy, Degraded, Down
+
+  @Prop({ default: 0 })
+  cpuPercent: number;
+
+  @Prop({ default: 0 })
+  memoryPercent: number;
+
+  @Prop({ default: 0 })
+  diskPercent: number;
+
+  @Prop({ default: 0 })
+  responseTimeMs: number;
+
+  @Prop({ default: 0 })
+  activeConnections: number;
+
+  @Prop({ type: Object, default: {} })
+  details: Record<string, any>;
 }
 export const SystemHealthLogSchema = SchemaFactory.createForClass(SystemHealthLog);
 
+// --- AI USAGE LOG ---
 @Schema({ timestamps: true })
 export class AiUsageLog extends Document {
-  @Prop({ required: true }) service: string;
-  @Prop({ required: true }) promptTokens: number;
-  @Prop({ required: true }) completionTokens: number;
-  @Prop({ required: true }) cost: number;
+  @Prop({ required: true, index: true })
+  service: string; // chatbot, recommendation, fraud_detection, sentiment, search
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null, index: true })
+  userId: Types.ObjectId | null;
+
+  @Prop({ required: true })
+  modelName: string; // renamed from model to avoid collision with Document.model
+
+  @Prop({ default: 0 })
+  promptTokens: number;
+
+  @Prop({ default: 0 })
+  completionTokens: number;
+
+  @Prop({ default: 0 })
+  totalTokens: number;
+
+  @Prop({ default: 0 })
+  estimatedCostUsd: number;
+
+  @Prop({ default: 0 })
+  responseTimeMs: number;
+
+  @Prop({ required: true, default: 'Success', index: true })
+  status: string; // Success, Failed, Timeout
+
+  @Prop({ default: '' })
+  error: string;
+
+  @Prop({ default: '' })
+  sessionId: string;
 }
 export const AiUsageLogSchema = SchemaFactory.createForClass(AiUsageLog);
 
+// --- AI FEEDBACK ---
 @Schema({ timestamps: true })
 export class AiFeedback extends Document {
-  @Prop({ type: Types.ObjectId, ref: 'ChatbotLog' }) sessionId: Types.ObjectId;
-  @Prop({ required: true }) rating: number;
-  @Prop({ default: '' }) comment: string;
+  @Prop({ required: true, index: true })
+  sessionId: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null, index: true })
+  userId: Types.ObjectId | null;
+
+  @Prop({ required: true })
+  query: string;
+
+  @Prop({ required: true })
+  response: string;
+
+  @Prop({ required: true, default: 'positive', index: true })
+  rating: string; // positive, negative, neutral
+
+  @Prop({ default: '' })
+  feedbackText: string;
+
+  @Prop({ default: '' })
+  service: string; // chatbot, recommendation, etc.
 }
 export const AiFeedbackSchema = SchemaFactory.createForClass(AiFeedback);
 
+// --- BULK JOB ---
 @Schema({ timestamps: true })
 export class BulkJob extends Document {
-  @Prop({ required: true }) jobType: string;
-  @Prop({ default: 'Processing' }) status: string;
-  @Prop({ default: 0 }) processedCount: number;
-  @Prop({ default: 0 }) totalCount: number;
+  @Prop({ required: true, index: true })
+  jobType: string; // ProductUpdate, CategoryUpdate, UserUpdate, StatusChange, PriceUpdate, StockUpdate
+
+  @Prop({ required: true, default: 'Queued', index: true })
+  status: string; // Queued, Processing, Completed, Failed, Partial, RolledBack
+
+  @Prop({ default: 0 })
+  totalRecords: number;
+
+  @Prop({ default: 0 })
+  processedRecords: number;
+
+  @Prop({ default: 0 })
+  successRecords: number;
+
+  @Prop({ default: 0 })
+  failedRecords: number;
+
+  @Prop({ type: Object, default: {} })
+  filters: Record<string, any>;
+
+  @Prop({ type: Object, default: {} })
+  updatePayload: Record<string, any>;
+
+  @Prop({ type: [Object], default: [] })
+  jobErrors: Array<{ recordId: string; error: string }>; // renamed from errors to avoid collision with Document.errors
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  initiatedBy: Types.ObjectId;
+
+  @Prop({ type: Date, default: null })
+  completedAt: Date | null;
+
+  @Prop({ default: true })
+  canRollback: boolean;
+
+  @Prop({ default: false })
+  isRolledBack: boolean;
 }
 export const BulkJobSchema = SchemaFactory.createForClass(BulkJob);
 
+// --- KNOWLEDGE BASE ARTICLE ---
 @Schema({ timestamps: true })
 export class KnowledgeBaseArticle extends Document {
-  @Prop({ required: true }) title: string;
-  @Prop({ required: true }) content: string;
-  @Prop({ type: Types.ObjectId, ref: 'FaqCategory' }) categoryId: Types.ObjectId;
-  @Prop({ default: 0 }) views: number;
+  @Prop({ required: true })
+  title: string;
+
+  @Prop({ required: true, unique: true, index: true })
+  slug: string;
+
+  @Prop({ required: true })
+  content: string;
+
+  @Prop({ default: '' })
+  excerpt: string;
+
+  @Prop({ required: true, index: true })
+  category: string; // Getting Started, Orders, Payments, Returns, Account, Sellers, Vendors, Technical
+
+  @Prop({ type: [String], default: [] })
+  tags: string[];
+
+  @Prop({ type: [String], default: [] })
+  relatedArticleSlugs: string[];
+
+  @Prop({ required: true, default: 'draft', index: true })
+  status: string; // draft, published, archived
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  authorId: Types.ObjectId;
+
+  @Prop({ type: [String], default: ['All'] })
+  visibleTo: string[]; // All, Customers, Sellers, Vendors, Admins
+
+  @Prop({ default: 0 })
+  views: number;
+
+  @Prop({ default: 0 })
+  helpfulCount: number;
+
+  @Prop({ default: 0 })
+  notHelpfulCount: number;
+
+  @Prop({ default: 0 })
+  sortOrder: number;
 }
 export const KnowledgeBaseArticleSchema = SchemaFactory.createForClass(KnowledgeBaseArticle);
 
+// --- ROADMAP ITEM ---
 @Schema({ timestamps: true })
 export class RoadmapItem extends Document {
-  @Prop({ required: true }) title: string;
-  @Prop({ required: true }) description: string;
-  @Prop({ default: 'Planned' }) status: string;
-  @Prop({ default: 0 }) votes: number;
+  @Prop({ required: true })
+  title: string;
+
+  @Prop({ required: true })
+  description: string;
+
+  @Prop({ required: true, default: 'Planned', index: true })
+  status: string; // Planned, In Progress, Testing, Released, Rejected
+
+  @Prop({ required: true, default: 'Feature', index: true })
+  category: string; // Feature, Bug Fix, Improvement, Security, Performance
+
+  @Prop({ required: true, default: 'Medium' })
+  priority: string; // Low, Medium, High, Critical
+
+  @Prop({ default: 0 })
+  votesCount: number;
+
+  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
+  votedBy: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
+  subscribedBy: Types.ObjectId[];
+
+  @Prop({ type: Date, default: null })
+  targetDate: Date | null;
+
+  @Prop({ type: Date, default: null })
+  releasedAt: Date | null;
+
+  @Prop({ default: '' })
+  releaseVersion: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  createdBy: Types.ObjectId;
+
+  @Prop({ default: true })
+  isPublic: boolean;
 }
 export const RoadmapItemSchema = SchemaFactory.createForClass(RoadmapItem);
 
+// --- ROLE (RBAC) ---
+@Schema({ timestamps: true })
+export class Role extends Document {
+  @Prop({ required: true, unique: true, index: true })
+  name: string; // Super Admin, Admin, Manager, Customer Support, Product Manager, Seller Manager, Vendor Manager, Finance Manager, Analytics Viewer, Marketing Manager
 
-// --- ROLE PERMISSION ---
+  @Prop({ default: '' })
+  description: string;
+
+  @Prop({ default: true })
+  isSystem: boolean; // Cannot be deleted if system role
+
+  @Prop({ default: true })
+  isActive: boolean;
+
+  @Prop({ type: [String], default: [] })
+  permissions: string[]; // array of permission keys
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  createdBy: Types.ObjectId;
+}
+export const RoleSchema = SchemaFactory.createForClass(Role);
+
+// --- PERMISSION (RBAC) ---
+@Schema({ timestamps: true })
+export class Permission extends Document {
+  @Prop({ required: true, unique: true, index: true })
+  key: string; // products:create, orders:read, users:delete, etc.
+
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true, index: true })
+  resource: string; // products, orders, users, sellers, vendors, reports, settings
+
+  @Prop({ required: true, index: true })
+  action: string; // create, read, update, delete, approve, reject, export, import, manage
+
+  @Prop({ default: '' })
+  description: string;
+
+  @Prop({ default: false })
+  isActive: boolean;
+}
+export const PermissionSchema = SchemaFactory.createForClass(Permission);
+
+// --- ROLE PERMISSION (RBAC) ---
 @Schema({ timestamps: true })
 export class RolePermission extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Role', required: true, index: true })
   roleId: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Permission', required: true, index: true })
-  permissionId: Types.ObjectId;
+  @Prop({ required: true, index: true })
+  permissionKey: string;
+
+  @Prop({ default: true })
+  isGranted: boolean;
 }
 export const RolePermissionSchema = SchemaFactory.createForClass(RolePermission);
+RolePermissionSchema.index({ roleId: 1, permissionKey: 1 }, { unique: true });
 
-// --- USER ROLE ---
+// --- USER ROLE (RBAC) ---
 @Schema({ timestamps: true })
 export class UserRole extends Document {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
@@ -1875,8 +2781,17 @@ export class UserRole extends Document {
 
   @Prop({ type: Types.ObjectId, ref: 'Role', required: true, index: true })
   roleId: Types.ObjectId;
+
+  @Prop({ type: Date, default: null })
+  expiresAt: Date | null;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  grantedBy: Types.ObjectId;
 }
 export const UserRoleSchema = SchemaFactory.createForClass(UserRole);
+UserRoleSchema.index({ userId: 1, roleId: 1 }, { unique: true });
+
+
 
 
 

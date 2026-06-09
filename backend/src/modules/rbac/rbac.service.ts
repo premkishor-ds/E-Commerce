@@ -72,23 +72,23 @@ export class RbacService implements OnModuleInit {
       for (const [, perm] of permissionMap.entries()) {
         const exists = await this.rolePermissionModel.findOne({
           roleId: superAdminRole._id,
-          permissionId: perm._id,
+          permissionKey: perm.name,
         });
         if (!exists) {
           await this.rolePermissionModel.create({
             roleId: superAdminRole._id,
-            permissionId: perm._id,
+            permissionKey: perm.name,
           });
         }
 
         const adminExists = await this.rolePermissionModel.findOne({
           roleId: adminRole._id,
-          permissionId: perm._id,
+          permissionKey: perm.name,
         });
         if (!adminExists) {
           await this.rolePermissionModel.create({
             roleId: adminRole._id,
-            permissionId: perm._id,
+            permissionKey: perm.name,
           });
         }
       }
@@ -105,8 +105,8 @@ export class RbacService implements OnModuleInit {
 
     const userRolesObj = await this.userRoleModel.find({ userId: user._id });
     for (const ur of userRolesObj) {
-      const rolePerms = await this.rolePermissionModel.find({ roleId: ur.roleId }).populate('permissionId');
-      const hasPerm = rolePerms.some((rp: any) => rp.permissionId && rp.permissionId.name === permissionName);
+      const rolePerms = await this.rolePermissionModel.find({ roleId: ur.roleId });
+      const hasPerm = rolePerms.some((rp: any) => rp.permissionKey === permissionName);
       if (hasPerm) return true;
     }
 

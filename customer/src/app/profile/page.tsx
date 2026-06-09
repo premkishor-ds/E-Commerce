@@ -7,7 +7,8 @@ import {
   User, Lock, MapPin, ShoppingBag, CreditCard, Wallet, 
   Award, Shield, HelpCircle, FileText, Activity, Save, 
   Trash2, Plus, Edit2, RotateCw, CheckCircle, AlertTriangle, 
-  LogOut, Upload, Download, Eye, RefreshCw, Star, Trash
+  LogOut, Upload, Download, Eye, RefreshCw, Star, Trash,
+  Tag, Bell, Gift, X
 } from 'lucide-react';
 
 // --- MOCK INVOICE GENERATOR HELPER ---
@@ -63,6 +64,29 @@ export default function ProfilePage() {
   const [ticketForm, setTicketForm] = useState({ subject: '', priority: 'Medium', message: '' });
   const [walletAmount, setWalletAmount] = useState('');
   const [pointsConvert, setPointsConvert] = useState('');
+  
+  // Phase E States
+  const [notifications, setNotifications] = useState<any[]>([
+    { _id: 'notif-1', title: 'Order Shipped!', message: 'Your order #ORD-123 has been shipped and is on its way.', isRead: false, createdAt: new Date(Date.now() - 3600000).toISOString() },
+    { _id: 'notif-2', title: 'Points Converted Successfully', message: 'You converted 500 reward points into $5.00 wallet balance.', isRead: true, createdAt: new Date(Date.now() - 86400000).toISOString() },
+    { _id: 'notif-3', title: 'Security Alert', message: 'Your password was updated successfully.', isRead: true, createdAt: new Date(Date.now() - 172800000).toISOString() }
+  ]);
+  const [coupons, setCoupons] = useState<any[]>([
+    { code: 'SAVE20', discount: '20% OFF', description: '20% off on all items', validUntil: '2026-12-31', claimed: false },
+    { code: 'WELCOME10', discount: '10% OFF', description: '10% off for new signups', validUntil: '2026-08-30', claimed: true },
+    { code: 'FREESHIP', discount: 'FREE SHIPPING', description: 'Free shipping on orders above $50', validUntil: '2026-10-15', claimed: false }
+  ]);
+  const [couponInput, setCouponInput] = useState('');
+  const [referrals, setReferrals] = useState({
+    code: 'REF-JOHNDOE-2026',
+    earnedBalance: 25.00,
+    list: [
+      { email: 'alex.smith@example.com', status: 'Completed', date: '2026-05-12', bonus: '$10.00' },
+      { email: 'sarah.j@example.com', status: 'Completed', date: '2026-06-01', bonus: '$15.00' },
+      { email: 'mike.d@example.com', status: 'Pending', date: '2026-06-08', bonus: '$0.00' }
+    ]
+  });
+  const [trackingOrder, setTrackingOrder] = useState<any | null>(null);
   
   // Avatar editor simulation
   const [avatarPreview, setAvatarPreview] = useState('');
@@ -664,6 +688,9 @@ export default function ProfilePage() {
                 { id: 'orders', label: 'Order History', icon: ShoppingBag },
                 { id: 'payments', label: 'Saved Payments', icon: CreditCard },
                 { id: 'wallet', label: 'Wallet & Rewards', icon: Wallet },
+                { id: 'coupons', label: 'Coupons Center', icon: Tag },
+                { id: 'notifications', label: 'Notifications Inbox', icon: Bell },
+                { id: 'referrals', label: 'Referrals Hub', icon: Gift },
                 { id: 'security', label: 'Security & 2FA', icon: Shield },
                 { id: 'support', label: 'Support helpline', icon: HelpCircle },
                 { id: 'privacy', label: 'Privacy & GDPR', icon: FileText },
@@ -1193,6 +1220,17 @@ export default function ProfilePage() {
                             <span>Download Invoice</span>
                           </button>
                           
+                          
+                          <button 
+                            onClick={() => {
+                              setTrackingOrder(ord);
+                            }}
+                            className="flex items-center gap-1 bg-indigo-600 text-white rounded-xl px-3.5 py-2 text-[10px] font-bold hover:bg-indigo-550 cursor-pointer transition-all"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            <span>Track Order</span>
+                          </button>
+
                           {ord.status === 'Delivered' ? (
                             <button 
                               onClick={() => {
@@ -1217,6 +1255,56 @@ export default function ProfilePage() {
                     </div>
                   ))}
                 </div>
+
+                {trackingOrder && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-zinc-900/50 backdrop-blur-sm" onClick={() => setTrackingOrder(null)} />
+                    <div className="relative bg-white dark:bg-zinc-900 border dark:border-zinc-800 p-6 rounded-2xl w-full max-w-lg space-y-6 shadow-2xl mx-4">
+                      <div className="flex justify-between items-center border-b pb-3 dark:border-zinc-800">
+                        <div>
+                          <h4 className="font-bold text-base text-zinc-900 dark:text-white">Order Shipment Tracking</h4>
+                          <p className="text-xs text-zinc-500">Carrier: FedEx Express &bull; ID: {trackingOrder.id}</p>
+                        </div>
+                        <button onClick={() => setTrackingOrder(null)} className="p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400">
+                          <X className="h-5 w-5" />
+                        </button>
+                      </div>
+                      
+                      {/* Visual Stepper */}
+                      <div className="space-y-6 py-2">
+                        {[
+                          { label: 'Order Placed', desc: 'We received your order and payment authorization.', date: trackingOrder.createdAt, completed: true },
+                          { label: 'Processing', desc: 'Preparing package and generating package labels.', date: trackingOrder.createdAt, completed: true },
+                          { label: 'Shipped', desc: 'Handed over to FedEx carrier branch.', date: trackingOrder.createdAt, completed: trackingOrder.status === 'Delivered' || trackingOrder.status === 'Shipped' },
+                          { label: 'Out for Delivery', desc: 'FedEx delivery driver is en route to address.', date: trackingOrder.status === 'Delivered' ? trackingOrder.createdAt : 'Pending', completed: trackingOrder.status === 'Delivered' },
+                          { label: 'Delivered', desc: 'Package dropped off at destination address front door.', date: trackingOrder.status === 'Delivered' ? trackingOrder.createdAt : 'Pending', completed: trackingOrder.status === 'Delivered' }
+                        ].map((step, idx) => (
+                          <div key={idx} className="flex gap-4 relative">
+                            {idx < 4 && (
+                              <div className={`absolute left-3 top-6 w-[2px] h-10 ${step.completed ? 'bg-indigo-650' : 'bg-zinc-200 dark:bg-zinc-850'}`} />
+                            )}
+                            <div className={`h-6 w-6 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${
+                              step.completed ? 'bg-indigo-600 text-white' : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500'
+                            }`}>
+                              {idx + 1}
+                            </div>
+                            <div>
+                              <h5 className="font-bold text-xs text-zinc-900 dark:text-white">{step.label}</h5>
+                              <p className="text-[11px] text-zinc-500 mt-0.5">{step.desc}</p>
+                              <span className="text-[9px] text-zinc-400 block mt-1">{step.date}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <div className="flex justify-end pt-2 border-t dark:border-zinc-800">
+                        <button onClick={() => setTrackingOrder(null)} className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-4 py-2 text-xs font-semibold">
+                          Close tracking
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1579,6 +1667,206 @@ export default function ProfilePage() {
                       <span className="text-[10px] text-zinc-400 text-right">{new Date(log.createdAt).toLocaleDateString()}</span>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* 12. COUPONS CENTER */}
+            {activeTab === 'coupons' && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Coupons Center</h3>
+                  <p className="text-xs text-zinc-500">View active promotional discounts and check coupon validity.</p>
+                </div>
+                
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const code = couponInput.trim().toUpperCase();
+                  if (!code) return;
+                  const match = coupons.find(c => c.code === code);
+                  if (match) {
+                    showToast(`Coupon ${code} is active! (${match.discount} - ${match.description})`, 'success');
+                  } else {
+                    showToast(`Coupon ${code} not found or expired.`, 'error');
+                  }
+                  setCouponInput('');
+                }} className="bg-zinc-50 dark:bg-zinc-950/40 p-5 rounded-2xl border dark:border-zinc-850 space-y-3">
+                  <h4 className="font-bold text-sm">Verify Promo Code</h4>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Enter Coupon Code (e.g. SAVE20)" 
+                      value={couponInput}
+                      onChange={e => setCouponInput(e.target.value)}
+                      className="flex-1 rounded-xl border border-zinc-200 bg-white p-2.5 text-xs focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-white uppercase"
+                    />
+                    <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl px-4 py-2 cursor-pointer shadow">
+                      Check Coupon
+                    </button>
+                  </div>
+                </form>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  {coupons.map((coupon) => (
+                    <div key={coupon.code} className="border dark:border-zinc-800 rounded-2xl p-5 bg-zinc-50/20 dark:bg-zinc-900/30 flex justify-between items-center relative overflow-hidden">
+                      <div className="space-y-2">
+                        <span className="inline-block bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded">
+                          {coupon.discount}
+                        </span>
+                        <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white">{coupon.code}</h4>
+                        <p className="text-xs text-zinc-500">{coupon.description}</p>
+                        <p className="text-[10px] text-zinc-400">Valid until: {coupon.validUntil}</p>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          if (coupon.claimed) {
+                            showToast('This coupon is already claimed!', 'info');
+                          } else {
+                            setCoupons(coupons.map(c => c.code === coupon.code ? { ...c, claimed: true } : c));
+                            showToast(`Coupon ${coupon.code} claimed successfully!`, 'success');
+                          }
+                        }}
+                        className={`text-xs font-bold rounded-xl px-3 py-1.5 border transition-all ${
+                          coupon.claimed 
+                            ? 'bg-zinc-100 border-zinc-200 text-zinc-400 cursor-not-allowed dark:bg-zinc-800 dark:border-zinc-700' 
+                            : 'bg-white border-zinc-250 text-zinc-700 hover:bg-zinc-50 dark:bg-zinc-950 dark:border-zinc-800 dark:text-zinc-300'
+                        }`}
+                      >
+                        {coupon.claimed ? 'Claimed' : 'Claim'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 13. NOTIFICATIONS INBOX */}
+            {activeTab === 'notifications' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center border-b pb-4 dark:border-zinc-800">
+                  <div>
+                    <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Notifications Inbox</h3>
+                    <p className="text-xs text-zinc-500">Latest alerts, updates, and news from ApexStore.</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => {
+                        setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+                        showToast('All notifications marked as read.', 'success');
+                      }}
+                      className="border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-xl text-xs font-semibold"
+                    >
+                      Mark all read
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setNotifications([]);
+                        showToast('Notifications inbox cleared.', 'success');
+                      }}
+                      className="border border-red-200 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 px-3 py-1.5 rounded-xl text-xs font-semibold"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {notifications.length === 0 ? (
+                    <p className="text-xs text-zinc-400 text-center py-8">Your inbox is empty.</p>
+                  ) : (
+                    notifications.map((notif) => (
+                      <div 
+                        key={notif._id} 
+                        onClick={() => {
+                          setNotifications(notifications.map(n => n._id === notif._id ? { ...n, isRead: true } : n));
+                        }}
+                        className={`p-4 rounded-xl border flex gap-3 cursor-pointer transition-all ${
+                          notif.isRead 
+                            ? 'border-zinc-100 bg-zinc-50/50 dark:border-zinc-800/85 dark:bg-zinc-900/40 opacity-70' 
+                            : 'border-indigo-200 bg-indigo-50/20 dark:border-indigo-900/30'
+                        }`}
+                      >
+                        <div className={`h-2.5 w-2.5 rounded-full mt-1.5 shrink-0 ${notif.isRead ? 'bg-zinc-300' : 'bg-indigo-600'}`} />
+                        <div className="flex-1">
+                          <h4 className="font-bold text-xs text-zinc-900 dark:text-white">{notif.title}</h4>
+                          <p className="text-[11px] text-zinc-650 dark:text-zinc-400 mt-0.5">{notif.message}</p>
+                          <span className="text-[9px] text-zinc-400 block mt-1">{new Date(notif.createdAt).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 14. REFERRALS HUB */}
+            {activeTab === 'referrals' && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Referrals Hub</h3>
+                  <p className="text-xs text-zinc-500">Invite friends and earn shopping cash rewards.</p>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-6">
+                  <div className="bg-zinc-50 dark:bg-zinc-950/40 p-5 rounded-2xl border dark:border-zinc-850 space-y-3">
+                    <Gift className="h-8 w-8 text-indigo-500" />
+                    <h4 className="font-bold text-sm">Your Referral Code</h4>
+                    <div className="flex gap-2">
+                      <div className="flex-1 bg-white dark:bg-zinc-950 border dark:border-zinc-800 rounded-xl px-3 py-2 text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center justify-between">
+                        <span>{referrals.code}</span>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(`http://localhost:3000/register?ref=${referrals.code}`);
+                          showToast('Referral link copied to clipboard!', 'success');
+                        }}
+                        className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl px-4 py-2 cursor-pointer shadow"
+                      >
+                        Copy Link
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-zinc-400">Share your link to earn $10.00 for every friend who places their first order.</p>
+                  </div>
+
+                  <div className="bg-zinc-50 dark:bg-zinc-950/40 p-5 rounded-2xl border dark:border-zinc-850 space-y-3 flex flex-col justify-between">
+                    <div>
+                      <h4 className="font-bold text-sm text-zinc-900 dark:text-white">Total Rewards Earned</h4>
+                      <p className="text-xs text-zinc-500">Credited directly to your shopping wallet balance.</p>
+                    </div>
+                    <div className="text-3xl font-black text-indigo-600 dark:text-indigo-400">${referrals.earnedBalance.toFixed(2)}</div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-bold text-sm">Referred Friends Log</h4>
+                  <div className="border dark:border-zinc-850 rounded-2xl overflow-hidden">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-zinc-50 dark:bg-zinc-950 border-b dark:border-zinc-800 font-bold text-zinc-500">
+                          <th className="p-3">Email Address</th>
+                          <th className="p-3">Status</th>
+                          <th className="p-3">Date</th>
+                          <th className="p-3 text-right">Bonus Earned</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {referrals.list.map((ref, idx) => (
+                          <tr key={idx} className="border-b dark:border-zinc-850 last:border-0 hover:bg-zinc-50/50 dark:hover:bg-zinc-950/25">
+                            <td className="p-3 font-semibold text-zinc-800 dark:text-zinc-200">{ref.email}</td>
+                            <td className="p-3">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                ref.status === 'Completed' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-805'
+                              }`}>
+                                {ref.status}
+                              </span>
+                            </td>
+                            <td className="p-3 text-zinc-400">{ref.date}</td>
+                            <td className="p-3 text-right font-bold text-zinc-805 dark:text-zinc-200">{ref.bonus}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}

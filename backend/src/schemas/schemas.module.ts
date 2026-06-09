@@ -169,6 +169,10 @@ import {
   RolePermissionSchema,
   UserRole,
   UserRoleSchema,
+  Seller,
+  SellerSchema,
+  SellerSettlement,
+  SellerSettlementSchema,
 } from './schemas';
 
 @Module({
@@ -258,6 +262,8 @@ import {
       { name: Permission.name, schema: PermissionSchema },
       { name: RolePermission.name, schema: RolePermissionSchema },
       { name: UserRole.name, schema: UserRoleSchema },
+      { name: Seller.name, schema: SellerSchema },
+      { name: SellerSettlement.name, schema: SellerSettlementSchema },
     ]),
   ],
   exports: [MongooseModule],
