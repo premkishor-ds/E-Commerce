@@ -1,0 +1,40 @@
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+} from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+export interface ResponseEnvelope<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  errors: any[];
+}
+
+@Injectable()
+export class TransformInterceptor<T>
+  implements NestInterceptor<T, ResponseEnvelope<T>>
+{
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<ResponseEnvelope<T>> {
+    // Avoid double wrapping if it's already structured or if it's an SSE / stream
+    return next.handle().pipe(
+      map((data) => {
+        if (data && typeof data === 'object' && 'success' in data && 'data' in data) {
+          return data;
+        }
+        return {
+          success: true,
+          message: 'Operation completed successfully',
+          data: data || null,
+          errors: [],
+        };
+      }),
+    );
+  }
+}

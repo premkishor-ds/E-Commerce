@@ -19,6 +19,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { VoiceModule } from './modules/voice/voice.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ApiLoggerMiddleware } from './modules/admin/api-logger.middleware';
+import { XssSanitizerMiddleware } from './common/middleware/xss-sanitizer.middleware';
 import { FeedbackModule } from './modules/feedback/feedback.module';
 import { RbacModule } from './modules/rbac/rbac.module';
 import { AuditInterceptor } from './modules/admin/audit.interceptor';
@@ -108,6 +109,6 @@ import { SellerProfileModule } from './modules/seller-profile/seller-profile.mod
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ApiLoggerMiddleware).forRoutes('*');
+    consumer.apply(ApiLoggerMiddleware, XssSanitizerMiddleware).forRoutes('*');
   }
 }

@@ -286,120 +286,186 @@ export class SalesService {
 
   // ORDERS & CHECKOUT
   async placeOrder(userId: string | null, dto: any) {
-    // dto contains: items: [{productId, quantity}], shippingAddress, couponCode (optional), guestId (optional)
-    let discount = 0;
-    let subtotal = 0;
-    const itemsWithPrices = [];
+    let session: any = null;
+    try {
+      session = await this.orderRepository['model'].db.startSession();
+      session.startTransaction();
+    } catch (e) {
+      // Fallback if transaction is not supported (e.g. single node dev server)
+      console.warn('MongoDB session/transaction not supported on this instance. Running without transaction.');
+    }
 
-    for (const item of dto.items) {
-      const product = await this.productRepository.findById(item.productId);
-      if (!product)
-        throw new NotFoundException(`Product ${item.productId} not found`);
+    try {
+      // dto contains: items: [{productId, quantity}], shippingAddress, couponCode (optional), guestId (optional)
+      let discount = 0;
+      let subtotal = 0;
+      const itemsWithPrices = [];
 
-      // Check Inventory stock
-      const inventory = await this.inventoryRepository.findOne({
-        sku: product.sku,
-      });
-      if (!inventory || inventory.stock < item.quantity) {
-        throw new BadRequestException(
-          `Insufficient stock for product: ${product.title}`,
-        );
-      }
+      for (const item of dto.items) {
+        let productQuery = this.productRepository['model'].findById(item.productId);
+        if (session && typeof productQuery.session === 'function') {
+          productQuery = productQuery.session(session);
+        }
+        const product = await productQuery.exec();
+        if (!product)
+          throw new NotFoundException(`Product ${item.productId} not found`);
 
-      // Deduct Stock
-      inventory.stock -= item.quantity;
-      inventory.logs.push({
-        quantityChanged: -item.quantity,
-        reason: 'Order Placement',
-        timestamp: new Date(),
-      });
-      await inventory.save();
-
-      subtotal += product.price * item.quantity;
-      itemsWithPrices.push({
-        productId: product._id,
-        quantity: item.quantity,
-        price: product.price,
-      });
-
-      // Track vendor commission calculation triggers
-      if (product.vendorId) {
-        const vendor = await this.vendorRepository.findOne({
-          userId: product.vendorId,
+        // Check Inventory stock
+        let inventoryQuery = this.inventoryRepository['model'].findOne({
+          sku: product.sku,
         });
-        if (vendor) {
-          const settlementAmount =
-            product.price * item.quantity * (1 - vendor.commissionRate / 100);
-          await this.settlementRepository.create({
-            vendorId: vendor._id,
-            amount: settlementAmount,
-            status: 'Pending',
-            processedAt: new Date(),
+        if (session && typeof inventoryQuery.session === 'function') {
+          inventoryQuery = inventoryQuery.session(session);
+        }
+        const inventory = await inventoryQuery.exec();
+        if (!inventory || inventory.stock < item.quantity) {
+          throw new BadRequestException(
+            `Insufficient stock for product: ${product.title}`,
+          );
+        }
+
+        // Deduct Stock
+        inventory.stock -= item.quantity;
+        inventory.logs.push({
+          quantityChanged: -item.quantity,
+          reason: 'Order Placement',
+          timestamp: new Date(),
+        });
+        
+        if (session && typeof inventory.save === 'function') {
+          await inventory.save({ session });
+        } else {
+          await inventory.save();
+        }
+
+        subtotal += product.price * item.quantity;
+        itemsWithPrices.push({
+          productId: product._id,
+          quantity: item.quantity,
+          price: product.price,
+        });
+
+        // Track vendor commission calculation triggers
+        if (product.vendorId) {
+          let vendorQuery = this.vendorRepository['model'].findOne({
+            userId: product.vendorId,
           });
+          if (session && typeof vendorQuery.session === 'function') {
+            vendorQuery = vendorQuery.session(session);
+          }
+          const vendor = await vendorQuery.exec();
+          if (vendor) {
+            const settlementAmount =
+              product.price * item.quantity * (1 - vendor.commissionRate / 100);
+            const settlementData = {
+              vendorId: vendor._id,
+              amount: settlementAmount,
+              status: 'Pending',
+              processedAt: new Date(),
+            };
+            if (session && typeof this.settlementRepository['model'].create === 'function') {
+              await this.settlementRepository['model'].create([settlementData], { session });
+            } else {
+              await this.settlementRepository.create(settlementData);
+            }
+          }
         }
       }
-    }
 
-    if (dto.couponCode) {
-      try {
-        const coupon = await this.validateCoupon(dto.couponCode, subtotal);
-        if (coupon.discountType === 'percentage') {
-          discount = (subtotal * coupon.value) / 100;
-        } else if (coupon.discountType === 'fixed') {
-          discount = coupon.value;
+      if (dto.couponCode) {
+        try {
+          let couponQuery = this.couponRepository['model'].findOne({
+            code: dto.couponCode,
+            isActive: true,
+          });
+          if (session && typeof couponQuery.session === 'function') {
+            couponQuery = couponQuery.session(session);
+          }
+          const coupon = await couponQuery.exec();
+          if (!coupon || coupon.expiresAt < new Date() || subtotal < coupon.minPurchase) {
+            throw new Error();
+          }
+          if (coupon.discountType === 'percentage') {
+            discount = (subtotal * coupon.value) / 100;
+          } else if (coupon.discountType === 'fixed') {
+            discount = coupon.value;
+          }
+        } catch {
+          throw new BadRequestException('Invalid coupon code applied');
         }
-      } catch {
-        // Log coupon invalidity, but let checkout continue or fail depending on business rule. Here, we enforce validation.
-        throw new BadRequestException('Invalid coupon code applied');
       }
+
+      const tax = subtotal * 0.08; // 8% sales tax
+      const total = subtotal + tax - discount;
+
+      const orderData: any = {
+        items: itemsWithPrices,
+        shippingAddress: dto.shippingAddress,
+        totalPrice: total,
+        tax,
+        discount,
+        status: 'Pending',
+        statusHistory: [
+          { status: 'Pending', changedAt: new Date(), note: 'Order created' },
+        ],
+      };
+
+      if (userId) {
+        orderData.userId = safeObjectId(userId);
+      } else if (dto.guestId) {
+        orderData.guestId = dto.guestId;
+        orderData.isGuestOrder = true;
+      }
+
+      let order: any;
+      if (session && typeof this.orderRepository['model'].create === 'function') {
+        const orders = await this.orderRepository['model'].create([orderData], { session });
+        order = orders[0];
+      } else {
+        order = await this.orderRepository.create(orderData);
+      }
+
+      // Create payment entry
+      const paymentData = {
+        orderId: order._id,
+        amount: total,
+        provider: dto.paymentProvider || 'Stripe',
+        status: 'Pending',
+        transactionId:
+          'TXN-' + Math.random().toString(36).substring(2, 10).toUpperCase(),
+      };
+      if (session && typeof this.paymentRepository['model'].create === 'function') {
+        await this.paymentRepository['model'].create([paymentData], { session });
+      } else {
+        await this.paymentRepository.create(paymentData);
+      }
+
+      // Empty User/Guest Cart if logged in or guest
+      const ownerId = userId || dto.guestId;
+      if (ownerId) {
+        let cartQuery = this.cartRepository['model'].findOneAndUpdate(
+          { userId: safeObjectId(ownerId) },
+          { $set: { items: [] } }
+        );
+        if (session && typeof cartQuery.session === 'function') {
+          cartQuery = cartQuery.session(session);
+        }
+        await cartQuery.exec();
+      }
+
+      if (session) {
+        await session.commitTransaction();
+        session.endSession();
+      }
+
+      return order;
+    } catch (error) {
+      if (session) {
+        await session.abortTransaction();
+        session.endSession();
+      }
+      throw error;
     }
-
-    const tax = subtotal * 0.08; // 8% sales tax
-    const total = subtotal + tax - discount;
-
-    const orderData: any = {
-      items: itemsWithPrices,
-      shippingAddress: dto.shippingAddress,
-      totalPrice: total,
-      tax,
-      discount,
-      status: 'Pending',
-      statusHistory: [
-        { status: 'Pending', changedAt: new Date(), note: 'Order created' },
-      ],
-    };
-
-    if (userId) {
-      orderData.userId = safeObjectId(userId);
-    } else if (dto.guestId) {
-      orderData.guestId = dto.guestId;
-      orderData.isGuestOrder = true;
-    }
-
-    const order = await this.orderRepository.create(orderData);
-
-    // Create payment entry
-    await this.paymentRepository.create({
-      orderId: order._id,
-      amount: total,
-      provider: dto.paymentProvider || 'Stripe',
-      status: 'Pending',
-      transactionId:
-        'TXN-' + Math.random().toString(36).substring(2, 10).toUpperCase(),
-    });
-
-    // Empty User/Guest Cart if logged in or guest
-    if (userId) {
-      const cart = await this.getCart(userId);
-      cart.items = [];
-      await cart.save();
-    } else if (dto.guestId) {
-      const cart = await this.getCart(dto.guestId);
-      cart.items = [];
-      await cart.save();
-    }
-
-    return order;
   }
 
   async getOrders(userId: string) {

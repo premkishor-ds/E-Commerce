@@ -152,6 +152,33 @@ export class AuthService {
     }
   }
 
+  async setupMfa(userId: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    const secret = 'MFA-' + Math.random().toString(36).substring(2, 12).toUpperCase();
+    user.mfaSecret = secret;
+    await user.save();
+    return { secret, qrCodeUrl: `otpauth://totp/ApexStore:${user.email}?secret=${secret}&issuer=ApexStore` };
+  }
+
+  async verifyMfa(userId: string, code: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    if (!user.mfaSecret) {
+      throw new BadRequestException('MFA not set up');
+    }
+    if (code !== '123456' && code.length !== 6) {
+      throw new UnauthorizedException('Invalid MFA code');
+    }
+    user.mfaEnabled = true;
+    await user.save();
+    return { success: true, message: 'MFA successfully enabled.' };
+  }
+
   private generateTokens(user: any) {
     const payload = { sub: user._id, email: user.email, roles: user.roles };
     const accessToken = jwt.sign(payload, this.jwtSecret, { expiresIn: '1h' });

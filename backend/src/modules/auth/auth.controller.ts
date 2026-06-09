@@ -1,7 +1,8 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsOptional, MinLength } from 'class-validator';
+import { JwtAuthGuard } from './jwt.guard';
 
 class RegisterDto {
   @IsEmail()
@@ -47,6 +48,11 @@ class RefreshDto {
   refreshToken: string;
 }
 
+class VerifyMfaDto {
+  @IsNotEmpty()
+  code: string;
+}
+
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
@@ -86,5 +92,23 @@ export class AuthController {
   @ApiOperation({ summary: 'Refresh JWT access tokens' })
   async refresh(@Body() dto: RefreshDto) {
     return this.authService.refresh(dto.refreshToken);
+  }
+
+  @Post('mfa/setup')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Set up Multi-Factor Authentication' })
+  async setupMfa(@Request() req: any) {
+    return this.authService.setupMfa(req.user.id);
+  }
+
+  @Post('mfa/verify')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify Multi-Factor Authentication code to enable' })
+  async verifyMfa(@Request() req: any, @Body() dto: VerifyMfaDto) {
+    return this.authService.verifyMfa(req.user.id, dto.code);
   }
 }
