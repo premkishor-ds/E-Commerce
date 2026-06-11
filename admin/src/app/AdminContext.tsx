@@ -675,12 +675,13 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ email: loginEmail, password: loginPassword }),
       });
       if (!res.ok) throw new Error('Invalid credentials');
-      const data = await res.json();
-      if (!data.user.roles?.some((r: string) => ['Admin', 'Super Admin', 'Manager'].includes(r)))
+      const resData = await res.json();
+      const payload = resData.data || resData;
+      if (!payload.user?.roles?.some((r: string) => ['Admin', 'Super Admin', 'Manager'].includes(r)))
         throw new Error('Access denied — admin role required');
-      setToken(data.accessToken);
-      setAdminEmail(data.user.email);
-      localStorage.setItem('apex-admin', JSON.stringify({ token: data.accessToken, email: data.user.email }));
+      setToken(payload.accessToken);
+      setAdminEmail(payload.user.email);
+      localStorage.setItem('apex-admin', JSON.stringify({ token: payload.accessToken, email: payload.user.email }));
       router.push('/overview');
     } catch (err: any) { setLoginError(err.message); }
   };
@@ -701,7 +702,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         throw new Error(msg);
       }
       setApiError('');
-      return res.json();
+      const json = await res.json();
+      return json && json.hasOwnProperty('data') ? json.data : json;
     } catch (err: any) {
       setApiError(err.message || `Failed to fetch GET ${path}`);
       throw err;
@@ -722,7 +724,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         throw new Error(msg);
       }
       setApiError('');
-      return res.json();
+      const json = await res.json();
+      return json && json.hasOwnProperty('data') ? json.data : json;
     } catch (err: any) {
       setApiError(err.message || `Failed to execute ${method} ${path}`);
       throw err;
@@ -1062,7 +1065,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   // Memoized Filterings
   const filteredUsers = useMemo(() => {
-    let result = users.filter((u: any) => u.roles?.includes('Customer'));
+    let result = Array.isArray(users) ? users.filter((u: any) => u.roles?.includes('Customer')) : [];
     if (userSearch.trim()) {
       const q = userSearch.toLowerCase();
       result = result.filter(u => 
@@ -1091,7 +1094,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [users, userSearch, userStatus, userSortField, userSortOrder]);
 
   const filteredOrders = useMemo(() => {
-    let result = [...orders];
+    let result = Array.isArray(orders) ? [...orders] : [];
     if (orderSearch.trim()) {
       const q = orderSearch.toLowerCase();
       result = result.filter(o => 
@@ -1117,7 +1120,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [orders, orderSearch, orderStatus, orderSortField, orderSortOrder]);
 
   const filteredProducts = useMemo(() => {
-    let result = products.filter((p: any) => p.title?.toLowerCase().includes(productSearch.toLowerCase()));
+    let result = Array.isArray(products) ? products.filter((p: any) => p.title?.toLowerCase().includes(productSearch.toLowerCase())) : [];
     if (productSortField) {
       result.sort((a, b) => {
         let valA = a[productSortField]; let valB = b[productSortField];
@@ -1135,12 +1138,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [products, productSearch, productSortField, productSortOrder]);
 
   const filteredVendors = useMemo(() => {
-    let result = vendors.filter((v: any) => {
+    let result = Array.isArray(vendors) ? vendors.filter((v: any) => {
       const roles = v.userId?.roles || [];
       if (vendorType === 'seller') return roles.includes('Seller');
       if (vendorType === 'vendor') return roles.includes('Vendor');
       return true;
-    });
+    }) : [];
     if (vendorSearch.trim()) {
       const q = vendorSearch.toLowerCase();
       result = result.filter(v => 
@@ -1167,7 +1170,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [vendors, vendorType, vendorSearch, vendorStatus, vendorSortField, vendorSortOrder]);
 
   const filteredAudits = useMemo(() => {
-    let result = [...auditLogs];
+    let result = Array.isArray(auditLogs) ? [...auditLogs] : [];
     if (auditSearch.trim()) {
       const q = auditSearch.toLowerCase();
       result = result.filter(l => 
@@ -1195,7 +1198,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [auditLogs, auditSearch, auditRole, auditSortField, auditSortOrder]);
 
   const filteredSearches = useMemo(() => {
-    let result = [...searchLogs];
+    let result = Array.isArray(searchLogs) ? [...searchLogs] : [];
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(l => l.keyword && l.keyword.toLowerCase().includes(q));
@@ -1220,7 +1223,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [searchLogs, searchQuery, searchRole, searchSource, searchSortField, searchSortOrder]);
 
   const filteredActivities = useMemo(() => {
-    let result = [...activityLogs];
+    let result = Array.isArray(activityLogs) ? [...activityLogs] : [];
     if (activitySearch.trim()) {
       const q = activitySearch.toLowerCase();
       result = result.filter(l => 
@@ -1244,7 +1247,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [activityLogs, activitySearch, activityCategory, activitySortField, activitySortOrder]);
 
   const filteredSessions = useMemo(() => {
-    let result = [...chatbotLogs];
+    let result = Array.isArray(chatbotLogs) ? [...chatbotLogs] : [];
     if (chatSearch.trim()) {
       const q = chatSearch.toLowerCase();
       result = result.filter(session => 

@@ -15,7 +15,9 @@ export default function VendorPurchaseOrdersPage() {
           headers: { 'Authorization': `Bearer ${user.token}` }
         });
         if (poRes.ok) {
-          setPurchaseOrders(await poRes.ok ? await poRes.json() : []);
+          const resJson = await poRes.json();
+          const list = Array.isArray(resJson) ? resJson : (resJson && Array.isArray(resJson.data) ? resJson.data : []);
+          setPurchaseOrders(list);
         } else {
           setPurchaseOrders([
             { id: 'PO-7721', sellerStore: 'ApexTech Partner Shop', item: 'NexaHome Bamboo Sheets', quantity: 120, total: 3600.00, status: 'Approved', date: '2026-06-08' },

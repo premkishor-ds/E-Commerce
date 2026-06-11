@@ -33,15 +33,19 @@ export default function VendorDashboardOverview() {
 
         if (settlementsRes.ok) {
           const s = await settlementsRes.json();
-          setSettledAmount(s.totalEarnings || 0);
-          setPendingAmount(s.pendingSettlement || 0);
+          const sData = s.data || s;
+          setSettledAmount(sData.totalEarnings || 0);
+          setPendingAmount(sData.pendingSettlement || 0);
         }
         if (profileRes.ok) {
           const prof = await profileRes.json();
-          setVendorStatus(prof.vendorStatus || 'Active');
+          const profData = prof.data || prof;
+          setVendorStatus(profData.vendorStatus || 'Active');
         }
         if (poRes.ok) {
-          setPurchaseOrders(await poRes.json());
+          const po = await poRes.json();
+          const poData = Array.isArray(po) ? po : (po && Array.isArray(po.data) ? po.data : []);
+          setPurchaseOrders(poData);
         } else {
           setPurchaseOrders([
             { id: 'PO-7721', sellerStore: 'ApexTech Partner Shop', item: 'NexaHome Bamboo Sheets', quantity: 120, total: 3600.00, status: 'Approved', date: '2026-06-08' },

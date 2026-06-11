@@ -39,11 +39,16 @@ export default function VendorProductsPage() {
           fetch('http://localhost:5001/api/v1/catalog/brands')
         ]);
         if (catRes.ok) {
-          const catData = await catRes.json();
+          const catJson = await catRes.json();
+          const catData = Array.isArray(catJson) ? catJson : (catJson && Array.isArray(catJson.data) ? catJson.data : []);
           setCategories(catData);
           if (catData.length > 0) setNewCategory(catData[0]._id);
         }
-        if (brandRes.ok) setBrands(await brandRes.json());
+        if (brandRes.ok) {
+          const brandJson = await brandRes.json();
+          const brandData = Array.isArray(brandJson) ? brandJson : (brandJson && Array.isArray(brandJson.data) ? brandJson.data : []);
+          setBrands(brandData);
+        }
       } catch (err) { console.error(err); }
     };
     fetchMetadata();
@@ -63,12 +68,14 @@ export default function VendorProductsPage() {
         ]);
 
         if (prodRes.ok) {
-          const data = await prodRes.json();
-          setVendorProducts(data.map((p: any) => mapProduct(p)));
+          const resJson = await prodRes.json();
+          const list = Array.isArray(resJson) ? resJson : (resJson && Array.isArray(resJson.data) ? resJson.data : []);
+          setVendorProducts(list.map((p: any) => mapProduct(p)));
         }
         if (profileRes.ok) {
           const prof = await profileRes.json();
-          setVendorStatus(prof.vendorStatus || 'Active');
+          const profData = prof.data || prof;
+          setVendorStatus(profData.vendorStatus || 'Active');
         }
       } catch (err) { console.error(err); }
     };

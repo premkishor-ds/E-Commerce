@@ -15,7 +15,9 @@ export default function OrdersPage() {
           headers: { 'Authorization': `Bearer ${user.token}` }
         });
         if (ordersRes.ok) {
-          setOrders(await ordersRes.json());
+          const resJson = await ordersRes.json();
+          const list = Array.isArray(resJson) ? resJson : (resJson && Array.isArray(resJson.data) ? resJson.data : []);
+          setOrders(list);
         } else {
           setOrders([
             { id: 'ORD-9921', customerName: 'John Doe', total: 249.99, status: 'Shipped', date: '2026-06-08' },

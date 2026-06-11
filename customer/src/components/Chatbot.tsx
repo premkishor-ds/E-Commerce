@@ -705,7 +705,7 @@ export default function Chatbot() {
   }, [isTyping, isOnline, activeStep, stepData, callAgent, handleLocalStep, localFallback, executeActions, user]);
 
   const renderMessageText = (text: string) => {
-    const lines = text.split('\n');
+    const lines = (text || '').split('\n');
     return lines.map((line, lineIdx) => {
       const elements: React.ReactNode[] = [];
       let currentIdx = 0;

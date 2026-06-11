@@ -15,8 +15,9 @@ export default function VendorInventoryPage() {
           headers: { 'Authorization': `Bearer ${user.token}` }
         });
         if (prodRes.ok) {
-          const data = await prodRes.json();
-          setVendorProducts(data.map((p: any) => ({
+          const resJson = await prodRes.json();
+          const list = Array.isArray(resJson) ? resJson : (resJson && Array.isArray(resJson.data) ? resJson.data : []);
+          setVendorProducts(list.map((p: any) => ({
             id: p._id,
             title: p.title,
             sku: p.sku,

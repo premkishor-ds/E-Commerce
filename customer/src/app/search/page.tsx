@@ -55,12 +55,12 @@ function SearchPageContent() {
     fetch(`http://127.0.0.1:5001/api/v1/catalog/products?${params.toString()}`)
       .then((res) => res.json())
       .then((data) => {
-        setProducts(data || []);
+        setProducts(Array.isArray(data) ? data : (data && Array.isArray(data.products) ? data.products : []));
         setLoading(false);
       })
       .catch(() => {
         // Fallback to static mock data if backend is offline
-        let result = [...PRODUCTS];
+        let result = Array.isArray(PRODUCTS) ? [...PRODUCTS] : [];
         if (query.trim()) {
           const q = query.toLowerCase();
           result = result.filter(
@@ -85,7 +85,7 @@ function SearchPageContent() {
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
-    let result = [...products];
+    let result = Array.isArray(products) ? [...products] : [];
 
     // Rating filter
     if (activeRating > 0) {

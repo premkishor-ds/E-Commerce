@@ -35,8 +35,9 @@ export default function VendorRootPage() {
         body: JSON.stringify({ email, password })
       });
       if (!res.ok) throw new Error('Invalid credentials');
-      const data = await res.json();
-      login(data.user.email, data.user.roles[0], data.accessToken, data.user.id);
+      const resData = await res.json();
+      const payload = resData.data || resData;
+      login(payload.user.email, payload.user.roles[0], payload.accessToken, payload.user.id);
     } catch (err: any) { alert(err.message); }
   };
 
@@ -57,8 +58,9 @@ export default function VendorRootPage() {
         const errData = await res.json();
         throw new Error(errData.message || 'Registration failed');
       }
-      const data = await res.json();
-      login(data.user.email, data.user.roles[0], data.accessToken, data.user.id);
+      const resData = await res.json();
+      const payload = resData.data || resData;
+      login(payload.user.email, payload.user.roles[0], payload.accessToken, payload.user.id);
     } catch (err: any) { alert(err.message); }
   };
 

@@ -29,8 +29,9 @@ export default function InventoryPage() {
       try {
         const res = await fetch(`http://localhost:5001/api/v1/catalog/products?vendorId=${user.id}`);
         if (res.ok) {
-          const data = await res.json();
-          setCatalog(data.map((p: any) => mapProduct(p)));
+          const resJson = await res.json();
+          const list = Array.isArray(resJson) ? resJson : (resJson && Array.isArray(resJson.data) ? resJson.data : []);
+          setCatalog(list.map((p: any) => mapProduct(p)));
         }
       } catch (err) { console.error(err); }
     };

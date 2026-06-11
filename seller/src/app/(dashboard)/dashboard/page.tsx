@@ -31,16 +31,20 @@ export default function OverviewPage() {
         ]);
 
         if (catalogRes.ok) {
-          const data = await catalogRes.ok ? await catalogRes.json() : [];
+          const rawCatalog = await catalogRes.json();
+          const data = Array.isArray(rawCatalog) ? rawCatalog : (rawCatalog && Array.isArray(rawCatalog.data) ? rawCatalog.data : []);
           setCatalog(data.slice(0, 3));
         }
         if (settlementsRes.ok) {
           const s = await settlementsRes.json();
-          setTotalSettledAmount(s.totalEarnings || 0);
-          setPendingSettlement(s.pendingSettlement || 0);
+          const sData = s.data || s;
+          setTotalSettledAmount(sData.totalEarnings || 0);
+          setPendingSettlement(sData.pendingSettlement || 0);
         }
         if (ordersRes.ok) {
-          setOrders(await ordersRes.json());
+          const ord = await ordersRes.json();
+          const ordData = Array.isArray(ord) ? ord : (ord && Array.isArray(ord.data) ? ord.data : []);
+          setOrders(ordData);
         } else {
           setOrders([
             { id: 'ORD-9921', customerName: 'John Doe', total: 249.99, status: 'Shipped', date: '2026-06-08' },
