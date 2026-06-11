@@ -59,26 +59,34 @@ export class PaymentService {
     fromAccount: string,
     toAccount: string,
     description: string,
+    session?: any,
   ) {
     const userObjectId = new Types.ObjectId(userId);
     // 1. Debit Entry (Adding money to target account, or reducing cash)
-    await this.ledgerEntryRepository.create({
+    const debitData = {
       userId: userObjectId,
       amount: Math.abs(amount),
       entryType: 'Debit',
       accountName: toAccount,
       transactionId,
       description,
-    });
+    };
     // 2. Credit Entry (Reducing money from source account)
-    await this.ledgerEntryRepository.create({
+    const creditData = {
       userId: userObjectId,
       amount: -Math.abs(amount),
       entryType: 'Credit',
       accountName: fromAccount,
       transactionId,
       description,
-    });
+    };
+
+    if (session) {
+      await this.ledgerEntryRepository['model'].create([debitData, creditData], { session });
+    } else {
+      await this.ledgerEntryRepository.create(debitData);
+      await this.ledgerEntryRepository.create(creditData);
+    }
   }
 
   // AUDIT LOG HELPER
@@ -210,43 +218,80 @@ export class PaymentService {
       refundTxId = `re_${Math.random().toString(36).substring(2, 12)}`;
     }
 
-    await this.refundTransactionRepository.create({
-      orderId: payment.orderId,
-      paymentId: payment._id,
-      amount: refundAmount,
-      provider: 'Stripe',
-      refundTransactionId: refundTxId,
-      status: 'Completed',
-      reason: reason || 'Customer request',
-    });
-
-    payment.status =
-      refundAmount === payment.amount ? 'Refunded' : 'Partially Refunded';
-    await payment.save();
-
-    await this.orderRepository.update(orderId, { status: 'Returned' });
-
-    // Ledger record: Debit Revenue (reversal), Credit Cash (Refund payout)
-    if (userId) {
-      await this.recordDoubleEntry(
-        userId,
-        refundTxId,
-        refundAmount,
-        'Revenue',
-        'Cash',
-        `Stripe Refund for Order #${orderId.slice(-6)}`
-      );
+    let session: any = null;
+    try {
+      session = await this.orderRepository['model'].db.startSession();
+      session.startTransaction();
+    } catch (e) {
+      // Fallback
     }
 
-    await this.logAudit(
-      userId || null,
-      orderId,
-      'StripePaymentRefunded',
-      'Success',
-      { refundTxId, amount: refundAmount },
-    );
+    try {
+      const refundData = {
+        orderId: payment.orderId,
+        paymentId: payment._id,
+        amount: refundAmount,
+        provider: 'Stripe',
+        refundTransactionId: refundTxId,
+        status: 'Completed',
+        reason: reason || 'Customer request',
+      };
 
-    return { success: true, refundTransactionId: refundTxId, refundAmount };
+      if (session) {
+        await this.refundTransactionRepository['model'].create([refundData], { session });
+      } else {
+        await this.refundTransactionRepository.create(refundData);
+      }
+
+      payment.status =
+        refundAmount === payment.amount ? 'Refunded' : 'Partially Refunded';
+
+      if (session) {
+        await payment.save({ session });
+      } else {
+        await payment.save();
+      }
+
+      if (session) {
+        await this.orderRepository['model'].findByIdAndUpdate(orderId, { status: 'Returned' }).session(session);
+      } else {
+        await this.orderRepository.update(orderId, { status: 'Returned' });
+      }
+
+      // Ledger record: Debit Revenue (reversal), Credit Cash (Refund payout)
+      if (userId) {
+        await this.recordDoubleEntry(
+          userId,
+          refundTxId,
+          refundAmount,
+          'Revenue',
+          'Cash',
+          `Stripe Refund for Order #${orderId.slice(-6)}`,
+          session
+        );
+      }
+
+      await this.logAudit(
+        userId || null,
+        orderId,
+        'StripePaymentRefunded',
+        'Success',
+        { refundTxId, amount: refundAmount },
+      );
+
+      if (session) {
+        await session.commitTransaction();
+        session.endSession();
+      }
+
+      return { success: true, refundTransactionId: refundTxId, refundAmount };
+    } catch (error) {
+      if (session) {
+        await session.abortTransaction();
+        session.endSession();
+      }
+      throw error;
+    }
   }
 
   async syncStripeStatus(transactionId: string) {
@@ -288,6 +333,49 @@ export class PaymentService {
       const intentId = payload.data?.object?.id;
       if (intentId) {
         await this.confirmStripePayment(intentId, null);
+      }
+    }
+    return { verified: true };
+  }
+
+  async verifyRazorpayWebhook(signature: string, payload: any) {
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+
+    await this.paymentWebhookLogRepository.create({
+      provider: 'Razorpay',
+      eventType: payload.event || 'unknown',
+      payload,
+      status: 'Processed',
+    });
+
+    if (webhookSecret && webhookSecret !== 'mock_secret') {
+      const expectedSignature = crypto
+        .createHmac('sha256', webhookSecret)
+        .update(typeof payload === 'string' ? payload : JSON.stringify(payload))
+        .digest('hex');
+      if (expectedSignature !== signature) {
+        throw new BadRequestException('Invalid Razorpay webhook signature');
+      }
+    } else {
+      if (!signature || signature.length < 10) {
+        throw new BadRequestException('Invalid or missing Razorpay webhook signature');
+      }
+    }
+
+    if (payload.event === 'payment.captured') {
+      const orderId = payload.payload?.payment?.entity?.order_id;
+      const paymentId = payload.payload?.payment?.entity?.id;
+      if (orderId && paymentId) {
+        const payment = await this.paymentRepository.findOne({ transactionId: orderId });
+        if (payment) {
+          payment.status = 'Completed';
+          payment.transactionId = paymentId;
+          await payment.save();
+
+          await this.orderRepository.update(payment.orderId.toString(), {
+            status: 'Paid',
+          });
+        }
       }
     }
     return { verified: true };
@@ -425,40 +513,77 @@ export class PaymentService {
       refundTxId = `rfnd_${Math.random().toString(36).substring(2, 12)}`;
     }
 
-    await this.refundTransactionRepository.create({
-      orderId: payment.orderId,
-      paymentId: payment._id,
-      amount: refundAmount,
-      provider: 'Razorpay',
-      refundTransactionId: refundTxId,
-      status: 'Completed',
-      reason: reason || 'Customer request',
-    });
-
-    payment.status =
-      refundAmount === payment.amount ? 'Refunded' : 'Partially Refunded';
-    await payment.save();
-
-    await this.orderRepository.update(orderId, { status: 'Returned' });
-
-    // Ledger Entry: Debit Revenue, Credit Cash
-    if (userId) {
-      await this.recordDoubleEntry(
-        userId,
-        refundTxId,
-        refundAmount,
-        'Revenue',
-        'Cash',
-        `Razorpay Refund for Order #${orderId.slice(-6)}`
-      );
+    let session: any = null;
+    try {
+      session = await this.orderRepository['model'].db.startSession();
+      session.startTransaction();
+    } catch (e) {
+      // Fallback
     }
 
-    await this.logAudit(userId || null, orderId, 'RazorpayRefund', 'Success', {
-      refundTxId,
-      amount: refundAmount,
-    });
+    try {
+      const refundData = {
+        orderId: payment.orderId,
+        paymentId: payment._id,
+        amount: refundAmount,
+        provider: 'Razorpay',
+        refundTransactionId: refundTxId,
+        status: 'Completed',
+        reason: reason || 'Customer request',
+      };
 
-    return { success: true, refundTransactionId: refundTxId };
+      if (session) {
+        await this.refundTransactionRepository['model'].create([refundData], { session });
+      } else {
+        await this.refundTransactionRepository.create(refundData);
+      }
+
+      payment.status =
+        refundAmount === payment.amount ? 'Refunded' : 'Partially Refunded';
+
+      if (session) {
+        await payment.save({ session });
+      } else {
+        await payment.save();
+      }
+
+      if (session) {
+        await this.orderRepository['model'].findByIdAndUpdate(orderId, { status: 'Returned' }).session(session);
+      } else {
+        await this.orderRepository.update(orderId, { status: 'Returned' });
+      }
+
+      // Ledger Entry: Debit Revenue, Credit Cash
+      if (userId) {
+        await this.recordDoubleEntry(
+          userId,
+          refundTxId,
+          refundAmount,
+          'Revenue',
+          'Cash',
+          `Razorpay Refund for Order #${orderId.slice(-6)}`,
+          session
+        );
+      }
+
+      await this.logAudit(userId || null, orderId, 'RazorpayRefund', 'Success', {
+        refundTxId,
+        amount: refundAmount,
+      });
+
+      if (session) {
+        await session.commitTransaction();
+        session.endSession();
+      }
+
+      return { success: true, refundTransactionId: refundTxId };
+    } catch (error) {
+      if (session) {
+        await session.abortTransaction();
+        session.endSession();
+      }
+      throw error;
+    }
   }
 
   // --- WALLET & HYBRID PAYMENTS ---

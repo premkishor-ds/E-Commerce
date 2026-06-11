@@ -88,9 +88,10 @@ import { ChatbotQaModule } from './modules/chatbot-qa/chatbot-qa.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: 100000,
+        limit: 120, // Strict API rate limit for production readiness
       },
     ]),
+
   ],
   controllers: [AppController],
   providers: [

@@ -16,6 +16,7 @@ import {
   ReviewRepository,
   UserRepository,
   NotificationRepository,
+  LedgerEntryRepository,
 } from '../../repositories/concrete.repositories';
 import { Types } from 'mongoose';
 import { createHash } from 'crypto';
@@ -43,6 +44,7 @@ export class SalesService {
     private readonly reviewRepository: ReviewRepository,
     private readonly userRepository: UserRepository,
     private readonly notificationRepository: NotificationRepository,
+    private readonly ledgerEntryRepository: LedgerEntryRepository,
   ) {}
 
   // CART
@@ -494,11 +496,90 @@ export class SalesService {
         `Order in ${order.status} state cannot be cancelled`,
       );
     }
-    return this.updateOrderStatus(
-      id,
-      'Cancelled',
-      'Cancelled by customer via chatbot',
-    );
+
+    let session: any = null;
+    try {
+      session = await this.orderRepository['model'].db.startSession();
+      session.startTransaction();
+    } catch (e) {
+      console.warn('MongoDB session/transaction not supported on this instance. Running without transaction.');
+    }
+
+    try {
+      const orderModel = this.orderRepository['model'];
+      const paymentModel = this.paymentRepository['model'];
+      const ledgerModel = this.ledgerEntryRepository['model'];
+
+      let currentOrder = await orderModel.findById(id);
+      if (session) {
+        currentOrder = await orderModel.findById(id).session(session);
+      }
+      if (!currentOrder) {
+        throw new NotFoundException('Order not found');
+      }
+
+      const previousStatus = currentOrder.status;
+      currentOrder.status = 'Cancelled';
+      currentOrder.statusHistory.push({
+        status: 'Cancelled',
+        changedAt: new Date(),
+        note: 'Cancelled by customer via chatbot',
+      });
+
+      if (session) {
+        await currentOrder.save({ session });
+      } else {
+        await currentOrder.save();
+      }
+
+      if (previousStatus === 'Paid') {
+        let paymentQuery = paymentModel.findOne({ orderId: currentOrder._id });
+        if (session) {
+          paymentQuery = paymentQuery.session(session);
+        }
+        const payment = await paymentQuery.exec();
+        const provider = payment?.provider || 'Cash';
+        const toAccount = provider === 'Wallet' ? 'Wallet' : 'Cash';
+        const txnId = payment?.transactionId || `TXN-CANCEL-${currentOrder._id}`;
+        const amount = currentOrder.totalPrice;
+
+        const ledgerDataDebit = {
+          userId: new Types.ObjectId(userId),
+          amount: Math.abs(amount),
+          entryType: 'Debit',
+          accountName: toAccount,
+          transactionId: txnId,
+          description: `Reversal for Cancelled Order #${currentOrder._id.toString().slice(-6)}`,
+        };
+        const ledgerDataCredit = {
+          userId: new Types.ObjectId(userId),
+          amount: -Math.abs(amount),
+          entryType: 'Credit',
+          accountName: 'Revenue',
+          transactionId: txnId,
+          description: `Reversal for Cancelled Order #${currentOrder._id.toString().slice(-6)}`,
+        };
+
+        if (session) {
+          await ledgerModel.create([ledgerDataDebit, ledgerDataCredit], { session });
+        } else {
+          await this.ledgerEntryRepository.create(ledgerDataDebit);
+          await this.ledgerEntryRepository.create(ledgerDataCredit);
+        }
+      }
+
+      if (session) {
+        await session.commitTransaction();
+        session.endSession();
+      }
+      return currentOrder;
+    } catch (error) {
+      if (session) {
+        await session.abortTransaction();
+        session.endSession();
+      }
+      throw error;
+    }
   }
 
   async updateOrderAddress(orderId: string, userId: string, newAddress: any) {

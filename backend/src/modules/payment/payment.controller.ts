@@ -7,6 +7,7 @@ import {
   UseGuards,
   Request,
   Headers,
+  BadRequestException,
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { JwtAuthGuard } from '../auth/jwt.guard';
@@ -45,7 +46,22 @@ export class PaymentController {
     @Headers('stripe-signature') signature: string,
     @Body() payload: any,
   ) {
+    if (!signature) {
+      throw new BadRequestException('Missing stripe-signature header');
+    }
     return this.paymentService.verifyStripeWebhook(signature, payload);
+  }
+
+  @Post('razorpay/webhook')
+  @ApiOperation({ summary: 'Razorpay Webhook Handler' })
+  async razorpayWebhook(
+    @Headers('x-razorpay-signature') signature: string,
+    @Body() payload: any,
+  ) {
+    if (!signature) {
+      throw new BadRequestException('Missing x-razorpay-signature header');
+    }
+    return this.paymentService.verifyRazorpayWebhook(signature, payload);
   }
 
   @Post('razorpay/order')
