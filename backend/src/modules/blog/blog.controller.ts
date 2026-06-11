@@ -4,6 +4,8 @@ import { BlogService } from './blog.service';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { RolesGuard } from '../auth/rbac.guard';
 import { Roles } from '../auth/rbac.decorator';
+import { CreateBlogPostDto } from './dto/create-blog.dto';
+import { UpdateBlogPostDto } from './dto/update-blog.dto';
 
 @ApiTags('Blog Engine')
 @Controller('blog')
@@ -27,7 +29,7 @@ export class BlogController {
   @Roles('Admin', 'Super Admin')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create Blog post' })
-  async createPost(@Request() req: any, @Body() dto: any) {
+  async createPost(@Request() req: any, @Body() dto: CreateBlogPostDto) {
     return this.blogService.createPost(dto, req.user.id);
   }
 
@@ -36,7 +38,7 @@ export class BlogController {
   @Roles('Admin', 'Super Admin')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update Blog post' })
-  async updatePost(@Param('id') id: string, @Body() dto: any) {
+  async updatePost(@Param('id') id: string, @Body() dto: UpdateBlogPostDto) {
     return this.blogService.updatePost(id, dto);
   }
 
@@ -49,3 +51,4 @@ export class BlogController {
     return this.blogService.deletePost(id);
   }
 }
+

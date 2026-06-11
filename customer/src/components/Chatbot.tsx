@@ -970,6 +970,12 @@ export default function Chatbot() {
                     ? 'bg-indigo-600 text-white rounded-tr-none shadow-sm'
                     : `${msg.isError ? 'bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800' : 'bg-white dark:bg-zinc-900 border dark:border-zinc-800'} text-zinc-800 dark:text-zinc-200 rounded-tl-none shadow-sm border border-zinc-100`
                 }`}>
+                  {msg.sender === 'bot' && !msg.isError && (
+                    <div className="flex items-center gap-1 text-[9px] font-semibold text-indigo-600 dark:text-indigo-400 mb-1 select-none border-b border-zinc-100 dark:border-zinc-800/50 pb-1">
+                      <Zap className="h-2.5 w-2.5 text-indigo-500 fill-indigo-100 dark:fill-indigo-950/20" />
+                      <span>AI Assistant Response</span>
+                    </div>
+                  )}
                   <div className="whitespace-pre-line break-words text-zinc-800 dark:text-zinc-200">{renderMessageText(msg.text)}</div>
                   <span className="text-[9px] opacity-50 mt-1 block text-right">{msg.timestamp}</span>
                 </div>

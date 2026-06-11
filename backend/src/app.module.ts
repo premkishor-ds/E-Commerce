@@ -38,6 +38,7 @@ import { RoadmapModule } from './modules/roadmap/roadmap.module';
 import { KnowledgeBaseModule } from './modules/knowledge-base/knowledge-base.module';
 import { SystemHealthModule } from './modules/system-health/system-health.module';
 import { SellerProfileModule } from './modules/seller-profile/seller-profile.module';
+import { ChatbotQaModule } from './modules/chatbot-qa/chatbot-qa.module';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { SellerProfileModule } from './modules/seller-profile/seller-profile.mod
     KnowledgeBaseModule,
     SystemHealthModule,
     SellerProfileModule,
+    ChatbotQaModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000,

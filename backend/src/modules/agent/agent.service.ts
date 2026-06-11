@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { Types, Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 import { AgentMemoryService } from './agent.memory.service';
+import { ChatbotAILog } from './agent.schemas';
+import { OllamaService } from './services/OllamaService';
+import { IntentRouter } from './services/IntentRouter';
+import { ResponseValidator } from './middleware/ResponseValidator';
+import { GENERAL_ASSISTANT_PROMPT } from './prompts/generalAssistantPrompt';
 import {
   classifyIntent,
   extractEntities,
@@ -168,6 +174,10 @@ export class AgentService {
     private readonly voiceService: VoiceService,
     private readonly notificationService: NotificationService,
     private readonly chatbotIntelligenceService: ChatbotIntelligenceService,
+    @InjectModel(ChatbotAILog.name) private readonly aiLogModel: Model<ChatbotAILog>,
+    private readonly ollamaService: OllamaService,
+    private readonly intentRouter: IntentRouter,
+    private readonly responseValidator: ResponseValidator,
   ) {}
 
   // ─── TRANSLATION HELPERS ──────────────────────────────────────────────────
@@ -231,6 +241,53 @@ export class AgentService {
 
   // ─── LOCAL GEMMA INTEGRATION ──────────────────────────────────────────────
   private async callLocalGemma(prompt: string): Promise<string | null> {
+    // 1. Try Ollama connection
+    const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
+    const model = process.env.QA_MODEL || 'gemma3:1b';
+    const timeout = parseInt(process.env.QA_TIMEOUT || '30000', 10);
+
+    try {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 3000); // Fast connection check
+
+      const response = await fetch(`${ollamaUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, prompt, stream: false, options: { temperature: 0.1 } }),
+        signal: controller.signal,
+      });
+      clearTimeout(id);
+      if (response.ok) {
+        const data = await response.json();
+        return data.response || null;
+      }
+    } catch (e) {
+      // Ollama offline, fallback to Gemini API Key if available
+    }
+
+    // 2. Fallback to Gemini API Key
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (apiKey) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.1 }
+            }),
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+        }
+      } catch (err) {
+        // Fallback failed
+      }
+    }
     return null;
   }
 
@@ -264,13 +321,100 @@ Intent:`;
     reply: string,
     contextPrompt?: string,
   ): Promise<string> {
-    const prompt = `You are the ApexStore AI Assistant. Enhance the following system reply to be friendly, helpful, and conversational. Do not add details not present in the system reply. Keep markdown formatting and hyperlinks as they are.
-System Reply:
-${reply}
-${contextPrompt ? `Context: ${contextPrompt}` : ''}
-Enhanced Reply:`;
+    const prompt = `You are the ApexStore AI Assistant.
+Your task is to refine the system's reply into a conversational, highly helpful AI response.
+You must structure your response to:
+1. First, show you understand the user's query by briefly and naturally acknowledging it (e.g., "I understand you'd like to check your order..." or "It looks like you're looking for headphones...").
+2. Second, provide the direct answer/information from the system reply in a clear, easy-to-read layout. Use bullet points, bold text, or paragraphs where appropriate to make it digestible.
+
+System Reply to enhance:
+"${reply}"
+
+${contextPrompt ? `Context (User message/context): "${contextPrompt}"` : ''}
+
+Rules:
+- Do NOT invent or add any mock numbers, order IDs, product names, or facts not present in the System Reply.
+- Preserve all existing links, markdown links (e.g. [Link Text](/path)), bold markers (**), and formatting.
+- Ensure the language matches the language used in the user's query/system reply.
+
+Enhanced AI Response:`;
     const gemmaResponse = await this.callLocalGemma(prompt);
     return gemmaResponse ? gemmaResponse.trim() : reply;
+  }
+
+  private async handleGeneralQuery(
+    message: string,
+    intent: string,
+    resolvedWorkMessage: string,
+    sessionId: string,
+    state: any,
+    lang: string,
+  ): Promise<AgentResponse> {
+    const startTime = Date.now();
+    const prompt = GENERAL_ASSISTANT_PROMPT.replace('{{USER_QUERY}}', resolvedWorkMessage);
+    const fallbackMessage = "I'm unable to process that request right now. Please try again in a few moments.";
+    
+    let reply = '';
+    let errorMsg: string | null = null;
+    const modelUsed = process.env.AI_FALLBACK_MODEL || 'gemma3:1b';
+
+    try {
+      reply = await this.ollamaService.generate(prompt);
+      
+      // Run response validator guardrails
+      const validation = this.responseValidator.validateResponse(reply);
+      if (!validation.isValid) {
+        errorMsg = `Response validation failed: ${validation.reason}`;
+        reply = fallbackMessage;
+      }
+    } catch (e: any) {
+      errorMsg = e.message;
+      reply = fallbackMessage;
+    }
+
+    const responseTimeMs = Date.now() - startTime;
+
+    // Log in MongoDB chatbot_ai_logs
+    try {
+      await new this.aiLogModel({
+        userQuery: resolvedWorkMessage,
+        detectedIntent: intent,
+        selectedRoute: 'general',
+        modelUsed,
+        responseTimeMs,
+        tokenUsage: {
+          promptTokens: Math.ceil(prompt.length / 4),
+          completionTokens: Math.ceil(reply.length / 4),
+          totalTokens: Math.ceil((prompt.length + reply.length) / 4),
+        },
+        error: errorMsg,
+      }).save();
+    } catch (logErr) {
+      // ignore logging write error in production
+    }
+
+    const translatedReply = this.translateReply(intent, reply, lang);
+
+    await this.memory.appendMessage(
+      sessionId,
+      'bot',
+      translatedReply,
+      intent,
+      [],
+    );
+
+    state.activeIntent = intent;
+    state.workflowStep = 'NONE';
+    state.previousMessages.push({ role: 'bot', text: translatedReply, timestamp: new Date() });
+    await this.memory.saveConversationState(sessionId, state);
+
+    return {
+      reply: translatedReply,
+      intent,
+      confidence: 10,
+      actions: [],
+      suggestions: ['Search headphones', 'My orders', 'Help'],
+    };
   }
 
   private resolveEntity(userMessage: string, state: any): { resolvedMessage: string; entityScore: number; entities: Record<string, string> } {
@@ -768,6 +912,13 @@ Enhanced Reply:`;
     // 3. Detect emotional tone and inject empathy prefix into reply later
     const emotionalTone = detectEmotionalTone(resolvedWorkMessage);
     const empathyPrefix = getEmpathyPrefix(emotionalTone);
+
+    // Route to General AI Fallback if classified as general
+    const route = this.intentRouter.classifyRoute(intent, resolvedWorkMessage);
+    if (route === 'general') {
+      await this.memory.appendMessage(sessionId, 'user', message, intent);
+      return this.handleGeneralQuery(message, intent, resolvedWorkMessage, sessionId, state, lang);
+    }
 
     // Save user message to database history
     await this.memory.appendMessage(sessionId, 'user', message, intent);

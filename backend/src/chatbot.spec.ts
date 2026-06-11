@@ -93,6 +93,9 @@ import { VoiceService } from './modules/voice/voice.service';
 import { NotificationService } from './modules/notification/notification.service';
 import { SupportGateway } from './modules/support/support.gateway';
 import { UploadService } from './modules/catalog/upload.service';
+import { OllamaService } from './modules/agent/services/OllamaService';
+import { IntentRouter } from './modules/agent/services/IntentRouter';
+import { ResponseValidator } from './modules/agent/middleware/ResponseValidator';
 
 function createQuery(result: any) {
   const query = {
@@ -362,10 +365,14 @@ describe('Chatbot Conversational Flows (e2e)', () => {
       'BulkJob',
       'KnowledgeBaseArticle',
       'RoadmapItem',
+      'ChatbotAILog',
     ];
 
     const providers: any[] = [
       AgentService,
+      OllamaService,
+      IntentRouter,
+      ResponseValidator,
       ChatbotIntelligenceService,
       IntelligenceLoaderService,
       SemanticSearchService,

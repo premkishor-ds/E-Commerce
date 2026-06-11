@@ -26,7 +26,8 @@ export class SettlementReleaseService implements OnModuleInit {
     let count = 0;
 
     for (const settlement of pendingSettlements) {
-      if (settlement.createdAt && settlement.createdAt < sevenDaysAgo) {
+      const s = settlement as any;
+      if (s.createdAt && s.createdAt < sevenDaysAgo) {
         settlement.status = 'Completed';
         await settlement.save();
         count++;

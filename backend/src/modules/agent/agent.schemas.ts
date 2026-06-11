@@ -101,3 +101,33 @@ export class UserMemory extends Document {
   mergedGuestIds: string[];
 }
 export const UserMemorySchema = SchemaFactory.createForClass(UserMemory);
+
+// --- CHATBOT AI LOGS ---
+@Schema({ timestamps: true, collection: 'chatbot_ai_logs' })
+export class ChatbotAILog extends Document {
+  @Prop({ required: true })
+  userQuery: string;
+
+  @Prop({ required: true })
+  detectedIntent: string;
+
+  @Prop({ required: true, enum: ['ecommerce', 'general'] })
+  selectedRoute: 'ecommerce' | 'general';
+
+  @Prop({ required: true })
+  modelUsed: string;
+
+  @Prop({ required: true })
+  responseTimeMs: number;
+
+  @Prop({ type: Object, default: {} })
+  tokenUsage: {
+    promptTokens?: number;
+    completionTokens?: number;
+    totalTokens?: number;
+  };
+
+  @Prop({ default: null })
+  error: string;
+}
+export const ChatbotAILogSchema = SchemaFactory.createForClass(ChatbotAILog);

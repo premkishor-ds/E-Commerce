@@ -107,6 +107,7 @@ export default function Header() {
               <Headphones className="h-4 w-4" /> Support Help
             </Link>
             <Link href="/search" className="hover:text-indigo-600 dark:hover:text-indigo-400">Browse Catalog</Link>
+            <Link href="/blog" className="hover:text-indigo-600 dark:hover:text-indigo-400">Blog / News</Link>
           </nav>
           
           {/* Header Search Bar */}
