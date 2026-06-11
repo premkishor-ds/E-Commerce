@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '../../AdminContext';
 import { Section, SectionHeader } from '../../../components/AdminUI';
 
 export default function FlagsPage() {
+  const router = useRouter();
   const { featureFlags, setFeatureFlags } = useAdmin();
   const [newFlagName, setNewFlagName] = useState('');
   const [newFlagKey, setNewFlagKey] = useState('');
@@ -72,7 +74,12 @@ export default function FlagsPage() {
                 <span className="inline-block bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-[9px] font-bold px-2 py-0.5 rounded">
                   {flag.group}
                 </span>
-                <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white">{flag.name}</h4>
+                <h4 
+                  onClick={() => router.push(`/flags/${flag._id}`)}
+                  className="font-extrabold text-sm text-indigo-650 dark:text-indigo-400 hover:underline cursor-pointer"
+                >
+                  {flag.name}
+                </h4>
                 <code className="text-[10px] text-zinc-400 font-mono block">{flag.key}</code>
                 <p className="text-xs text-zinc-500 mt-1">{flag.description}</p>
               </div>

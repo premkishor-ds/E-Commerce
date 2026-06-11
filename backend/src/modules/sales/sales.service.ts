@@ -17,6 +17,7 @@ import {
   UserRepository,
   NotificationRepository,
   LedgerEntryRepository,
+  OrderLogRepository,
 } from '../../repositories/concrete.repositories';
 import { Types } from 'mongoose';
 import { createHash } from 'crypto';
@@ -45,9 +46,24 @@ export class SalesService {
     private readonly userRepository: UserRepository,
     private readonly notificationRepository: NotificationRepository,
     private readonly ledgerEntryRepository: LedgerEntryRepository,
+    private readonly orderLogRepository: OrderLogRepository,
   ) {}
 
   // CART
+  private async logOrderAction(orderId: string, action: string, performedBy: string, details: any = {}, session?: any) {
+    const data = {
+      orderId: new Types.ObjectId(orderId),
+      action,
+      performedBy,
+      details,
+    };
+    if (session) {
+      await this.orderLogRepository['model'].create([data], { session });
+    } else {
+      await this.orderLogRepository.create(data);
+    }
+  }
+
   async getCart(userId: string) {
     let cart = await this.cartRepository.findOne({
       userId: safeObjectId(userId),
@@ -326,11 +342,12 @@ export class SalesService {
           );
         }
 
-        // Deduct Stock
+        // Reserve Stock
         inventory.stock -= item.quantity;
+        inventory.reservedStock = (inventory.reservedStock || 0) + item.quantity;
         inventory.logs.push({
           quantityChanged: -item.quantity,
-          reason: 'Order Placement',
+          reason: 'Order Placement - Stock Reserved',
           timestamp: new Date(),
         });
         
@@ -455,6 +472,15 @@ export class SalesService {
         await cartQuery.exec();
       }
 
+      // Log order creation
+      await this.logOrderAction(
+        order._id.toString(),
+        'Created',
+        userId || 'Guest',
+        { totalPrice: total },
+        session
+      );
+
       if (session) {
         await session.commitTransaction();
         session.endSession();
@@ -484,7 +510,38 @@ export class SalesService {
     const order = await this.getOrderById(id);
     order.status = status;
     order.statusHistory.push({ status, changedAt: new Date(), note });
-    return order.save();
+    const saved = await order.save();
+    await this.logOrderAction(id, 'Status_Updated', 'System', { status, note });
+    await this.updateProductSalesStats(id);
+    return saved;
+  }
+
+  private async updateProductSalesStats(orderId: string) {
+    try {
+      const order = await this.orderRepository.findById(orderId);
+      if (!order) return;
+      for (const item of order.items) {
+        const product = await this.productRepository.findById(item.productId.toString());
+        if (product) {
+          // Aggregate all paid/delivered/shipped orders containing this product to get real units sold
+          const orderList = await this.orderRepository.find({
+            'items.productId': product._id,
+            status: { $in: ['Paid', 'Delivered', 'Shipped'] },
+          });
+          const totalUnitsSold = orderList.reduce((sum: number, o: any) => {
+            const match = o.items.find((i: any) => i.productId.toString() === product._id.toString());
+            return sum + (match ? match.quantity : 0);
+          }, 0);
+
+          await this.productRepository.update(product._id.toString(), {
+            totalUnitsSold,
+            salesCount: totalUnitsSold,
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to update product sales stats:', err.message);
+    }
   }
 
   async cancelOrder(id: string, userId: string) {
@@ -568,6 +625,55 @@ export class SalesService {
         }
       }
 
+      await this.logOrderAction(
+        id,
+        'Cancelled',
+        userId,
+        { note: 'Cancelled by customer via chatbot' },
+        session
+      );
+
+      // Restore/release stock on cancellation
+      const productModel = this.productRepository['model'];
+      const inventoryModel = this.inventoryRepository['model'];
+      for (const item of currentOrder.items) {
+        let product = await productModel.findById(item.productId);
+        if (session) {
+          product = await productModel.findById(item.productId).session(session);
+        }
+        if (!product) continue;
+
+        let inventory = await inventoryModel.findOne({ sku: product.sku });
+        if (session) {
+          inventory = await inventoryModel.findOne({ sku: product.sku }).session(session);
+        }
+        if (inventory) {
+          if (previousStatus === 'Pending') {
+            inventory.stock += item.quantity;
+            inventory.reservedStock = Math.max(0, (inventory.reservedStock || 0) - item.quantity);
+            inventory.logs.push({
+              quantityChanged: item.quantity,
+              reason: `Order Cancelled - Reservation Released for Order #${currentOrder._id.toString().slice(-6)}`,
+              timestamp: new Date(),
+            });
+          } else if (previousStatus === 'Paid') {
+            inventory.stock += item.quantity;
+            inventory.logs.push({
+              quantityChanged: item.quantity,
+              reason: `Order Cancelled - Stock Returned for Order #${currentOrder._id.toString().slice(-6)}`,
+              timestamp: new Date(),
+            });
+          }
+          if (session) {
+            await inventory.save({ session });
+          } else {
+            await inventory.save();
+          }
+        }
+      }
+
+      await this.updateProductSalesStats(id);
+
       if (session) {
         await session.commitTransaction();
         session.endSession();
@@ -592,7 +698,9 @@ export class SalesService {
       );
     }
     (order as any).shippingAddress = newAddress;
-    return (order as any).save();
+    const saved = await (order as any).save();
+    await this.logOrderAction(orderId, 'Address_Changed', userId, { newAddress });
+    return saved;
   }
 
   async updateOrderDeliverySlot(orderId: string, userId: string, slot: string) {
@@ -605,7 +713,9 @@ export class SalesService {
       );
     }
     order.deliverySlot = slot;
-    return order.save();
+    const saved = await order.save();
+    await this.logOrderAction(orderId, 'DeliverySlot_Changed', userId, { slot });
+    return saved;
   }
 
   async updateOrderPaymentMethod(
@@ -628,7 +738,9 @@ export class SalesService {
       payment.provider = paymentMethod;
       await payment.save();
     }
-    return order.save();
+    const saved = await order.save();
+    await this.logOrderAction(orderId, 'PaymentMethod_Changed', userId, { paymentMethod });
+    return saved;
   }
 
   async updateOrderItemQuantity(
@@ -711,7 +823,9 @@ export class SalesService {
       await payment.save();
     }
 
-    return order.save();
+    const saved = await order.save();
+    await this.logOrderAction(orderId, 'Item_Modified', userId, { productId, quantity });
+    return saved;
   }
 
   async getAllOrders(filters: any = {}) {
@@ -748,14 +862,20 @@ export class SalesService {
       fakeScore = 80; // suspicious spam
     }
 
-    // Verified purchase check: check if user has a paid order containing this product
+    // Verified purchase check: check if user has a paid or delivered order containing this product
     const orders = await this.orderRepository.find({
       userId: new Types.ObjectId(userId),
-      status: 'Paid',
+      status: { $in: ['Paid', 'Delivered', 'Shipped'] },
     });
     const verifiedPurchase = orders.some((order) =>
       order.items.some((item) => item.productId.toString() === dto.productId),
     );
+
+    if (!verifiedPurchase) {
+      throw new BadRequestException(
+        'You can only review products that you have purchased and paid for.',
+      );
+    }
 
     const existing = await this.reviewRepository.findOne({
       userId: new Types.ObjectId(userId),
@@ -770,7 +890,9 @@ export class SalesService {
       existing.sentiment = sentiment;
       existing.fakeScore = fakeScore;
       existing.verifiedPurchase = verifiedPurchase;
-      return existing.save();
+      const saved = await existing.save();
+      await this.updateProductReviewStats(dto.productId);
+      return saved;
     }
 
     const review = await this.reviewRepository.create({
@@ -790,20 +912,27 @@ export class SalesService {
       reportsCount: 0,
     });
 
-    // Update product average rating
+    await this.updateProductReviewStats(dto.productId);
+    return review;
+  }
+
+  private async updateProductReviewStats(productId: string) {
     try {
       const reviews = await this.reviewRepository.find({
-        productId: new Types.ObjectId(dto.productId),
+        productId: new Types.ObjectId(productId),
+        status: 'Approved',
       });
-      const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
-      await this.productRepository.update(dto.productId, {
-        averageRating: Math.round(avg * 10) / 10,
+      const reviewCount = reviews.length;
+      const averageRating = reviewCount > 0
+        ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviewCount) * 10) / 10
+        : 0;
+      await this.productRepository.update(productId, {
+        averageRating,
+        reviewCount,
       });
-    } catch {
-      /* ignore */
+    } catch (err) {
+      console.warn('Failed to update product review stats:', err.message);
     }
-
-    return review;
   }
 
   async getProductReviews(
@@ -858,7 +987,9 @@ export class SalesService {
     if (review.reportsCount >= 5) {
       review.status = 'Flagged';
     }
-    return review.save();
+    const saved = await review.save();
+    await this.updateProductReviewStats(review.productId.toString());
+    return saved;
   }
 
   async moderateReview(reviewId: string, status: 'Approved' | 'Rejected') {
@@ -866,7 +997,9 @@ export class SalesService {
     if (!review) throw new NotFoundException('Review not found');
 
     review.status = status;
-    return review.save();
+    const saved = await review.save();
+    await this.updateProductReviewStats(review.productId.toString());
+    return saved;
   }
 
   async getReviewSummary(productId: string) {

@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useStore } from '../../../store/store';
 import { Plus, Trash2, Pencil, X, DollarSign, Tag, Package, ImageIcon, AlignLeft, Box, AlertCircle } from 'lucide-react';
 
 export default function VendorProductsPage() {
+  const router = useRouter();
   const { user } = useStore();
   const [vendorStatus, setVendorStatus] = useState('Verification In Progress');
   const [vendorProducts, setVendorProducts] = useState<any[]>([]);
@@ -341,7 +343,11 @@ export default function VendorProductsPage() {
             <p className="col-span-2 text-center text-sm text-zinc-400 py-8">No products yet. Add your first wholesale listing.</p>
           )}
           {vendorProducts.map(p => (
-            <div key={p.id} className="flex gap-4 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 items-center bg-zinc-50/30 dark:bg-zinc-900/30 group">
+            <div
+              key={p.id}
+              onClick={() => router.push(`/products/${p.id}`)}
+              className="flex gap-4 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 items-center bg-zinc-50/30 dark:bg-zinc-900/30 group cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-900/60 transition-colors"
+            >
               <img src={p.images[0]} alt={p.title} className="h-16 w-16 object-cover rounded-lg border dark:border-zinc-800 shrink-0" />
               <div className="flex-1 min-w-0">
                 <h4 className="font-bold text-sm text-zinc-900 dark:text-white truncate">{p.title}</h4>
@@ -349,10 +355,24 @@ export default function VendorProductsPage() {
                 <p className="text-[10px] text-zinc-400 mt-0.5">Brand: {p.brand} · SKU: {p.sku}</p>
               </div>
               <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={() => openEditModal(p)} className="p-2 text-zinc-400 hover:text-indigo-500 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-955/20 cursor-pointer border-0 bg-transparent" aria-label="Edit">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/products/${p.id}`);
+                  }}
+                  className="p-2 text-zinc-400 hover:text-indigo-500 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-955/20 cursor-pointer border-0 bg-transparent"
+                  aria-label="Edit"
+                >
                   <Pencil className="h-4 w-4" />
                 </button>
-                <button onClick={() => handleDeleteProduct(p.id)} className="p-2 text-zinc-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-955/20 cursor-pointer border-0 bg-transparent" aria-label="Delete">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteProduct(p.id);
+                  }}
+                  className="p-2 text-zinc-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-955/20 cursor-pointer border-0 bg-transparent"
+                  aria-label="Delete"
+                >
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>

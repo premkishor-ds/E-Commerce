@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '../../AdminContext';
 import { RefreshCw, X, CheckCircle, Lock, Activity, Star } from 'lucide-react';
 import {
@@ -8,6 +9,7 @@ import {
 } from '../../../components/AdminUI';
 
 export default function SupportPage() {
+  const router = useRouter();
   const {
     loading, loadTickets, tickets, userPage, limit, selectedTicket, setSelectedTicket,
     ticketSearch, setTicketSearch, ticketStatusFilter, setTicketStatusFilter, ticketPage, setTicketPage,
@@ -232,7 +234,7 @@ export default function SupportPage() {
                         <tr key={t._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-xs">
                           <td 
                             className="px-4 py-3 font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
-                            onClick={() => setSelectedTicket(t)}
+                            onClick={() => router.push(`/support/${t._id}`)}
                           >
                             {t.subject}
                           </td>

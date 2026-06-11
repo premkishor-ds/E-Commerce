@@ -143,6 +143,9 @@ export class User extends Document {
     quantity: number;
     variantKey?: string;
   }>;
+
+  @Prop({ type: Date, default: null })
+  deletedAt: Date | null;
 }
 export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.index({ email: 1 });
@@ -164,6 +167,9 @@ export class Category extends Document {
 
   @Prop({ default: '' })
   metaDescription: string;
+
+  @Prop({ type: Date, default: null })
+  deletedAt: Date | null;
 }
 export const CategorySchema = SchemaFactory.createForClass(Category);
 
@@ -227,6 +233,9 @@ export class Inventory extends Document {
 
   @Prop({ default: false })
   allowBackorder: boolean;
+
+  @Prop({ type: Date, default: null })
+  deletedAt: Date | null;
 }
 export const InventorySchema = SchemaFactory.createForClass(Inventory);
 
@@ -275,6 +284,12 @@ export class Product extends Document {
   @Prop({ default: 0 })
   salesCount: number;
 
+  @Prop({ default: 0 })
+  reviewCount: number;
+
+  @Prop({ default: 0 })
+  totalUnitsSold: number;
+
   @Prop({ type: Types.ObjectId, ref: 'User', default: null })
   vendorId: Types.ObjectId;
 
@@ -283,6 +298,9 @@ export class Product extends Document {
 
   @Prop({ default: true })
   isActive: boolean;
+
+  @Prop({ type: Date, default: null })
+  deletedAt: Date | null;
 }
 export const ProductSchema = SchemaFactory.createForClass(Product);
 ProductSchema.index({ title: 'text', description: 'text', tags: 'text' });
@@ -402,6 +420,9 @@ export class Order extends Document {
 
   @Prop({ default: '' })
   deliverySlot: string;
+
+  @Prop({ type: Date, default: null })
+  deletedAt: Date | null;
 }
 export const OrderSchema = SchemaFactory.createForClass(Order);
 OrderSchema.index({ userId: 1, createdAt: -1 });
@@ -2790,6 +2811,23 @@ export class UserRole extends Document {
 }
 export const UserRoleSchema = SchemaFactory.createForClass(UserRole);
 UserRoleSchema.index({ userId: 1, roleId: 1 }, { unique: true });
+
+// --- ORDER LOG (Audit trail of every order action) ---
+@Schema({ timestamps: true })
+export class OrderLog extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'Order', required: true, index: true })
+  orderId: Types.ObjectId;
+
+  @Prop({ required: true, index: true })
+  action: string;
+
+  @Prop({ default: 'System' })
+  performedBy: string;
+
+  @Prop({ type: Object, default: {} })
+  details: Record<string, any>;
+}
+export const OrderLogSchema = SchemaFactory.createForClass(OrderLog);
 
 
 

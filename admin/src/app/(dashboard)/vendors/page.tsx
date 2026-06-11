@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '../../AdminContext';
 import { RefreshCw, CheckCircle, XCircle, X } from 'lucide-react';
 import {
@@ -8,6 +9,7 @@ import {
 } from '../../../components/AdminUI';
 
 export default function VendorsPage() {
+  const router = useRouter();
   const {
     loadVendors, vendorSearch, setVendorSearch, vendorStatus, setVendorStatus,
     vendorType, setVendorType, vendorSortField, setVendorSortField, vendorSortOrder, setVendorSortOrder,
@@ -135,7 +137,7 @@ export default function VendorsPage() {
                 return (
                   <tr key={v._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-xs">
                     <td 
-                      onClick={() => { setSelectedSeller(v); setSellerCommission(v.commissionRate || 10); }} 
+                      onClick={() => router.push(`/vendors/${v._id}`)} 
                       className="px-4 py-3 font-semibold text-indigo-650 dark:text-indigo-400 hover:underline cursor-pointer"
                     >
                       {v.shopName}

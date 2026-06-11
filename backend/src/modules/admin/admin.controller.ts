@@ -12,6 +12,8 @@ import {
   VendorRepository,
   CouponRepository,
   TicketRepository,
+  ProductRepository,
+  InventoryRepository,
 } from '../../repositories/concrete.repositories';
 import { AdminService } from './admin.service';
 import { AuditService } from './audit.service';
@@ -33,6 +35,8 @@ export class AdminController {
     private readonly ticketRepository: TicketRepository,
     private readonly adminService: AdminService,
     private readonly auditService: AuditService,
+    private readonly productRepository: ProductRepository,
+    private readonly inventoryRepository: InventoryRepository,
   ) {}
 
   // --- OVERVIEW STATS ---
@@ -431,6 +435,150 @@ export class AdminController {
     ];
     const csv = this.adminService.exportToCsv(logs, ['ID', 'Action', 'Resource', 'Role', 'IP', 'Date']);
     return { csv, filename: `audit_logs_export_${Date.now()}.csv` };
+  }
+
+  @Get('reports/sales/csv')
+  @ApiOperation({ summary: 'Export sales report to CSV' })
+  async exportSalesReportCsv() {
+    const orders = await this.orderRepository.find({});
+    const formatted = orders.map((o: any) => ({
+      OrderID: o._id.toString(),
+      CustomerID: o.userId ? o.userId.toString() : 'Guest',
+      Status: o.status,
+      TotalPrice: o.totalPrice,
+      Tax: o.tax,
+      Discount: o.discount,
+      Date: o.createdAt ? new Date(o.createdAt).toLocaleDateString() : 'N/A',
+    }));
+    const csv = this.adminService.exportToCsv(formatted, ['OrderID', 'CustomerID', 'Status', 'TotalPrice', 'Tax', 'Discount', 'Date']);
+    return { csv, filename: `sales_report_${Date.now()}.csv` };
+  }
+
+  @Get('reports/inventory/csv')
+  @ApiOperation({ summary: 'Export inventory report to CSV' })
+  async exportInventoryReportCsv() {
+    const inventoryList = await this.inventoryRepository.find({});
+    const formatted = inventoryList.map((i: any) => ({
+      SKU: i.sku,
+      Stock: i.stock,
+      ReservedStock: i.reservedStock || 0,
+      IncomingStock: i.incomingStock || 0,
+      DamagedStock: i.damagedStock || 0,
+      Warehouse: i.warehouseName || 'Primary Warehouse',
+    }));
+    const csv = this.adminService.exportToCsv(formatted, ['SKU', 'Stock', 'ReservedStock', 'IncomingStock', 'DamagedStock', 'Warehouse']);
+    return { csv, filename: `inventory_report_${Date.now()}.csv` };
+  }
+
+  @Get('reports/products/csv')
+  @ApiOperation({ summary: 'Export products report to CSV' })
+  async exportProductsReportCsv() {
+    const products = await this.productRepository.find({});
+    const formatted = products.map((p: any) => ({
+      ID: p._id.toString(),
+      Title: p.title,
+      Price: p.price,
+      SKU: p.sku,
+      SalesCount: p.salesCount || 0,
+      Approved: p.isApproved ? 'Yes' : 'No',
+      Active: p.isActive ? 'Yes' : 'No',
+    }));
+    const csv = this.adminService.exportToCsv(formatted, ['ID', 'Title', 'Price', 'SKU', 'SalesCount', 'Approved', 'Active']);
+    return { csv, filename: `products_report_${Date.now()}.csv` };
+  }
+
+  @Get('reports/revenue/csv')
+  @ApiOperation({ summary: 'Export revenue report to CSV' })
+  async exportRevenueReportCsv() {
+    const orders = await this.orderRepository.find({});
+    const months: Record<string, { totalOrders: number; tax: number; discount: number; gross: number; net: number }> = {};
+    for (const o of orders) {
+      if (o.status === 'Cancelled') continue;
+      const date = (o as any).createdAt ? new Date((o as any).createdAt) : new Date();
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!months[key]) {
+        months[key] = { totalOrders: 0, tax: 0, discount: 0, gross: 0, net: 0 };
+      }
+      months[key].totalOrders += 1;
+      months[key].tax += o.tax || 0;
+      months[key].discount += o.discount || 0;
+      months[key].gross += o.totalPrice || 0;
+      months[key].net += (o.totalPrice || 0) - (o.tax || 0);
+    }
+    const rows = Object.entries(months).map(([key, data]) => ({
+      Period: key,
+      TotalOrders: data.totalOrders,
+      TaxCollected: data.tax.toFixed(2),
+      DiscountGiven: data.discount.toFixed(2),
+      GrossRevenue: data.gross.toFixed(2),
+      NetRevenue: data.net.toFixed(2),
+    }));
+    const csv = this.adminService.exportToCsv(rows, ['Period', 'TotalOrders', 'TaxCollected', 'DiscountGiven', 'GrossRevenue', 'NetRevenue']);
+    return { csv, filename: `revenue_report_${Date.now()}.csv` };
+  }
+
+  @Get('reports/sales/pdf')
+  @ApiOperation({ summary: 'Export sales report to PDF stream' })
+  async exportSalesPdf() {
+    const orders = await this.orderRepository.find({});
+    let report = `==================================================\n`;
+    report += `               SALES REPORT\n`;
+    report += `==================================================\n\n`;
+    orders.forEach((o: any) => {
+      report += `Order ID: ${o._id.toString()} | Status: ${o.status} | Total: $${o.totalPrice.toFixed(2)}\n`;
+    });
+    return { pdf: Buffer.from(report).toString('base64'), filename: `sales_report_${Date.now()}.pdf` };
+  }
+
+  @Get('reports/inventory/pdf')
+  @ApiOperation({ summary: 'Export inventory report to PDF stream' })
+  async exportInventoryPdf() {
+    const inventoryList = await this.inventoryRepository.find({});
+    let report = `==================================================\n`;
+    report += `               INVENTORY REPORT\n`;
+    report += `==================================================\n\n`;
+    inventoryList.forEach((i: any) => {
+      report += `SKU: ${i.sku} | Stock: ${i.stock} | Reserved: ${i.reservedStock || 0} | Warehouse: ${i.warehouseName || 'Primary'}\n`;
+    });
+    return { pdf: Buffer.from(report).toString('base64'), filename: `inventory_report_${Date.now()}.pdf` };
+  }
+
+  @Get('reports/products/pdf')
+  @ApiOperation({ summary: 'Export products report to PDF stream' })
+  async exportProductsPdf() {
+    const products = await this.productRepository.find({});
+    let report = `==================================================\n`;
+    report += `               PRODUCTS REPORT\n`;
+    report += `==================================================\n\n`;
+    products.forEach((p: any) => {
+      report += `SKU: ${p.sku} | Title: ${p.title} | Price: $${p.price.toFixed(2)} | Sales: ${p.salesCount || 0}\n`;
+    });
+    return { pdf: Buffer.from(report).toString('base64'), filename: `products_report_${Date.now()}.pdf` };
+  }
+
+  @Get('reports/revenue/pdf')
+  @ApiOperation({ summary: 'Export revenue report to PDF stream' })
+  async exportRevenuePdf() {
+    const orders = await this.orderRepository.find({});
+    const months: Record<string, { totalOrders: number; gross: number; net: number }> = {};
+    for (const o of orders) {
+      if (o.status === 'Cancelled') continue;
+      const date = (o as any).createdAt ? new Date((o as any).createdAt) : new Date();
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!months[key]) {
+        months[key] = { totalOrders: 0, gross: 0, net: 0 };
+      }
+      months[key].totalOrders += 1;
+      months[key].gross += o.totalPrice || 0;
+      months[key].net += (o.totalPrice || 0) - (o.tax || 0);
+    }
+    let report = `==================================================\n`;
+    report += `               REVENUE REPORT\n`;
+    report += `==================================================\n\n`;
+    Object.entries(months).forEach(([key, data]) => {
+      report += `Month: ${key} | Orders: ${data.totalOrders} | Gross: $${data.gross.toFixed(2)} | Net: $${data.net.toFixed(2)}\n`;
+    });
+    return { pdf: Buffer.from(report).toString('base64'), filename: `revenue_report_${Date.now()}.pdf` };
   }
 
   // --- PLATFORM ANALYTICS ---

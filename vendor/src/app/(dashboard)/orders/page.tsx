@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useStore } from '../../../store/store';
 
 export default function VendorPurchaseOrdersPage() {
+  const router = useRouter();
   const { user } = useStore();
   const [purchaseOrders, setPurchaseOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,19 +72,28 @@ export default function VendorPurchaseOrdersPage() {
             <p className="text-xs text-zinc-400 text-center py-4">No purchase orders found.</p>
           )}
           {purchaseOrders.map(po => (
-            <div key={po.id} className="flex justify-between items-center border-b pb-3 dark:border-zinc-800 last:border-0 last:pb-0">
+            <div
+              key={po.id || po._id}
+              onClick={() => router.push(`/orders/${po.id || po._id}`)}
+              className="flex justify-between items-center border-b pb-3 dark:border-zinc-800 last:border-0 last:pb-0 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-950 p-2 rounded-xl transition-colors"
+            >
               <div>
                 <div className="font-bold text-sm text-zinc-900 dark:text-white">{po.sellerStore}</div>
-                <div className="text-xs text-zinc-400">PO: {po.id} · Item: {po.item} · Qty: {po.quantity}</div>
+                <div className="text-xs text-zinc-400">PO: {po.id || po._id} · Item: {po.item} · Qty: {po.quantity}</div>
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <div className="text-sm font-bold text-zinc-900 dark:text-white">${po.total.toFixed(2)}</div>
                   <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">{po.status}</span>
                 </div>
-                <button onClick={() => alert('PO request approved & dispatched!')}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-1.5 text-xs font-semibold border-0 cursor-pointer shadow">
-                  Approve
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/orders/${po.id || po._id}`);
+                  }}
+                  className="bg-indigo-650 hover:bg-indigo-500 text-white rounded-lg px-3 py-1.5 text-xs font-semibold border-0 cursor-pointer shadow"
+                >
+                  View Details
                 </button>
               </div>
             </div>

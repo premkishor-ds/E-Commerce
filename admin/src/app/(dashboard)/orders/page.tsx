@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '../../AdminContext';
 import { RefreshCw, X } from 'lucide-react';
 import {
@@ -8,6 +9,7 @@ import {
 } from '../../../components/AdminUI';
 
 export default function OrdersPage() {
+  const router = useRouter();
   const {
     loadOrders, orderSearch, setOrderSearch, orderStatus, setOrderStatus,
     orderSortField, setOrderSortField, orderSortOrder, setOrderSortOrder, orderPage, setOrderPage,
@@ -98,7 +100,7 @@ export default function OrdersPage() {
             {paginatedOrders.map((o: any) => (
               <tr key={o._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-xs">
                 <td 
-                  onClick={() => setSelectedOrder(o)} 
+                  onClick={() => router.push(`/orders/${o._id}`)} 
                   className="px-4 py-3 font-mono font-bold text-indigo-650 dark:text-indigo-400 hover:underline cursor-pointer"
                 >
                   #{o._id?.toString().slice(-8).toUpperCase()}

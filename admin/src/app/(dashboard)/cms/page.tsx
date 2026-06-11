@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '../../AdminContext';
 import { RefreshCw, X } from 'lucide-react';
 import {
@@ -8,6 +9,7 @@ import {
 } from '../../../components/AdminUI';
 
 export default function CMSPage() {
+  const router = useRouter();
   const {
     loading, loadBlogs, blogsFiltered, blogSearch, setBlogSearch, apiAction,
     selectedBlog, setSelectedBlog, blogTitle, setBlogTitle, blogSlug, setBlogSlug,
@@ -94,8 +96,11 @@ export default function CMSPage() {
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {blogsFiltered.map((blog: any) => (
               <tr key={blog._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-xs">
-                <td className="px-4 py-3 text-left">
-                  <div className="font-semibold text-zinc-900 dark:text-white">{blog.title}</div>
+                <td 
+                  onClick={() => router.push(`/cms/${blog._id}`)}
+                  className="px-4 py-3 text-left cursor-pointer hover:underline text-indigo-600 dark:text-indigo-400"
+                >
+                  <div className="font-semibold">{blog.title}</div>
                   <div className="text-[10px] text-zinc-400 font-mono">/{blog.slug}</div>
                 </td>
                 <td className="px-4 py-3 text-left">

@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '../../AdminContext';
 import { Section, SectionHeader } from '../../../components/AdminUI';
 
 export default function AnnouncementsPage() {
+  const router = useRouter();
   const { announcements, setAnnouncements } = useAdmin();
   const [newAnnTitle, setNewAnnTitle] = useState('');
   const [newAnnMsg, setNewAnnMsg] = useState('');
@@ -68,7 +70,12 @@ export default function AnnouncementsPage() {
                       {ann.isActive ? 'Active Broadcast' : 'Archived'}
                     </span>
                   </div>
-                  <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white">{ann.title}</h4>
+                  <h4 
+                    onClick={() => router.push(`/announcements/${ann._id}`)}
+                    className="font-extrabold text-sm text-indigo-650 dark:text-indigo-400 hover:underline cursor-pointer"
+                  >
+                    {ann.title}
+                  </h4>
                   <p className="text-xs text-zinc-650 dark:text-zinc-350">{ann.message}</p>
                   <span className="text-[10px] text-zinc-400 block">{new Date(ann.createdAt).toLocaleString()}</span>
                 </div>

@@ -13,6 +13,8 @@ import {
   UserRepository,
   WalletTransactionRepository,
   LedgerEntryRepository,
+  ProductRepository,
+  InventoryRepository,
 } from '../../repositories/concrete.repositories';
 import Stripe from 'stripe';
 import Razorpay from 'razorpay';
@@ -33,6 +35,8 @@ export class PaymentService {
     private readonly userRepository: UserRepository,
     private readonly walletTransactionRepository: WalletTransactionRepository,
     private readonly ledgerEntryRepository: LedgerEntryRepository,
+    private readonly productRepository: ProductRepository,
+    private readonly inventoryRepository: InventoryRepository,
   ) {
     // Instantiate Stripe if key is provided and not mocked
     const stripeKey = process.env.STRIPE_SECRET_KEY;
@@ -86,6 +90,54 @@ export class PaymentService {
     } else {
       await this.ledgerEntryRepository.create(debitData);
       await this.ledgerEntryRepository.create(creditData);
+    }
+  }
+
+  // COMMIT STOCK RESERVATION ON PAYMENT
+  private async commitReservation(orderId: string, session?: any) {
+    const orderModel = this.orderRepository['model'];
+    const productModel = this.productRepository['model'];
+    const inventoryModel = this.inventoryRepository['model'];
+
+    let order = await orderModel.findById(orderId);
+    if (session) {
+      order = await orderModel.findById(orderId).session(session);
+    }
+    if (!order) return;
+
+    for (const item of order.items) {
+      let product = await productModel.findById(item.productId);
+      if (session) {
+        product = await productModel.findById(item.productId).session(session);
+      }
+      if (!product) continue;
+
+      // Increment sales count and total units sold
+      product.salesCount = (product.salesCount || 0) + item.quantity;
+      product.totalUnitsSold = (product.totalUnitsSold || 0) + item.quantity;
+      if (session) {
+        await product.save({ session });
+      } else {
+        await product.save();
+      }
+
+      let inventory = await inventoryModel.findOne({ sku: product.sku });
+      if (session) {
+        inventory = await inventoryModel.findOne({ sku: product.sku }).session(session);
+      }
+      if (inventory) {
+        inventory.reservedStock = Math.max(0, (inventory.reservedStock || 0) - item.quantity);
+        inventory.logs.push({
+          quantityChanged: 0,
+          reason: `Payment Confirmed - Reservation Committed for Order #${orderId.slice(-6)}`,
+          timestamp: new Date(),
+        });
+        if (session) {
+          await inventory.save({ session });
+        } else {
+          await inventory.save();
+        }
+      }
     }
   }
 
@@ -163,6 +215,8 @@ export class PaymentService {
     await this.orderRepository.update(payment.orderId.toString(), {
       status: 'Paid',
     });
+
+    await this.commitReservation(payment.orderId.toString());
 
     // Double entry accounting recording: Debit Cash (Asset), Credit Revenue (Equity/Income)
     if (userId) {
@@ -375,6 +429,8 @@ export class PaymentService {
           await this.orderRepository.update(payment.orderId.toString(), {
             status: 'Paid',
           });
+
+          await this.commitReservation(payment.orderId.toString());
         }
       }
     }
@@ -461,6 +517,8 @@ export class PaymentService {
     await this.orderRepository.update(payment.orderId.toString(), {
       status: 'Paid',
     });
+
+    await this.commitReservation(payment.orderId.toString());
 
     // Accounting Record: Debit Cash (Asset), Credit Revenue (Equity)
     if (userId) {

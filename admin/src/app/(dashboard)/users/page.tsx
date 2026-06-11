@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '../../AdminContext';
 import { RefreshCw, Download, X } from 'lucide-react';
 import {
@@ -8,11 +9,13 @@ import {
 } from '../../../components/AdminUI';
 
 export default function UsersPage() {
+  const router = useRouter();
   const {
     loadUsers, userSearch, setUserSearch, userRole, setUserRole, userStatus, setUserStatus,
     userSortField, setUserSortField, userSortOrder, setUserSortOrder, userPage, setUserPage,
     paginatedUsers, totalUserPages, selectedUser, setSelectedUser, handleExportCustomers, apiAction
   } = useAdmin();
+
 
   const [editStatus, setEditStatus] = useState('Active');
   const [editWallet, setEditWallet] = useState(0);
@@ -108,7 +111,7 @@ export default function UsersPage() {
             {paginatedUsers.map((u: any) => (
               <tr key={u._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-xs">
                 <td 
-                  onClick={() => setSelectedUser(u)} 
+                  onClick={() => router.push(`/users/${u._id}`)} 
                   className="px-4 py-3 font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
                 >
                   {u.firstName} {u.lastName}

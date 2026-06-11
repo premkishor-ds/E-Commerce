@@ -70,6 +70,18 @@ export class AuthService {
     }
     // ─────────────────────────────────────────────────────────────────────────
 
+    if (user.accountStatus === 'Suspended' || user.accountStatus === 'Blocked') {
+      await this.auditService.logSecurity({
+        userId: user._id,
+        role: user.roles[0],
+        action: 'Suspended login attempt',
+        details: `Suspended user ${user.email} attempted to log in.`,
+      });
+      throw new UnauthorizedException(
+        'Your account has been suspended or blocked. Please contact support.',
+      );
+    }
+
     if (user.lockoutUntil && user.lockoutUntil > new Date()) {
       await this.auditService.logSecurity({
         userId: user._id,
@@ -109,7 +121,34 @@ export class AuthService {
     // Reset attempts on success
     user.loginAttempts = 0;
     user.lockoutUntil = null;
+    user.lastLogin = new Date();
+
+    // Register device details if passed in dto
+    if (dto.deviceId || dto.os || dto.browser) {
+      const devices = user.devices || [];
+      const idx = devices.findIndex((d) => d.deviceId === dto.deviceId);
+      if (idx > -1) {
+        devices[idx].lastLogin = new Date();
+      } else {
+        devices.push({
+          deviceId: dto.deviceId || 'unknown',
+          os: dto.os || 'unknown',
+          browser: dto.browser || 'unknown',
+          lastLogin: new Date(),
+        });
+      }
+      user.devices = devices;
+      user.markModified('devices');
+    }
+
     await user.save();
+
+    await this.auditService.logSecurity({
+      userId: user._id,
+      role: user.roles[0],
+      action: 'Login success',
+      details: `User logged in from ${dto.os || 'unknown'} / ${dto.browser || 'unknown'}.`,
+    });
 
     return this.generateTokens(user);
   }

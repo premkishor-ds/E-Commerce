@@ -87,6 +87,7 @@ import {
   RoadmapItem,
   Seller,
   SellerSettlement,
+  OrderLog,
 } from '../schemas/schemas';
 
 @Injectable()
@@ -621,6 +622,13 @@ export class FeedbackVoteRepository extends BaseRepository<FeedbackVote> {
 @Injectable()
 export class FeedbackActivityLogRepository extends BaseRepository<FeedbackActivityLog> {
   constructor(@InjectModel(FeedbackActivityLog.name) model: Model<FeedbackActivityLog>) {
+    super(model);
+  }
+}
+
+@Injectable()
+export class OrderLogRepository extends BaseRepository<OrderLog> {
+  constructor(@InjectModel(OrderLog.name) model: Model<OrderLog>) {
     super(model);
   }
 }

@@ -1,10 +1,12 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '../../AdminContext';
 import { Section, SectionHeader, Table, Thead, badge } from '../../../components/AdminUI';
 
 export default function GDPRPage() {
+  const router = useRouter();
   const { gdprRequests, setGdprRequests } = useAdmin();
 
   return (
@@ -26,7 +28,12 @@ export default function GDPRPage() {
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {gdprRequests.map((req) => (
                 <tr key={req._id} className="text-xs hover:bg-zinc-55 dark:hover:bg-zinc-800/40">
-                  <td className="px-4 py-3 font-semibold text-zinc-900 dark:text-white">{req.email}</td>
+                  <td 
+                    onClick={() => router.push(`/gdpr/${req._id}`)}
+                    className="px-4 py-3 font-semibold text-indigo-650 dark:text-indigo-400 hover:underline cursor-pointer"
+                  >
+                    {req.email}
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                       req.requestType === 'Delete Profile' 

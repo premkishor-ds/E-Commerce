@@ -1,11 +1,13 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '../../AdminContext';
 import { ShieldAlert, AlertCircle, Lock } from 'lucide-react';
 import { Section, SectionHeader, Table, Thead, badge, StatCard } from '../../../components/AdminUI';
 
 export default function FraudPage() {
+  const router = useRouter();
   const { fraudLogs, setFraudLogs } = useAdmin();
 
   return (
@@ -34,7 +36,12 @@ export default function FraudPage() {
               {fraudLogs.map((log) => (
                 <tr key={log._id} className="text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
                   <td className="px-4 py-3">
-                    <div className="font-semibold text-zinc-900 dark:text-white">{log.email}</div>
+                    <div 
+                      onClick={() => router.push(`/fraud/${log._id}`)}
+                      className="font-semibold text-indigo-650 dark:text-indigo-400 hover:underline cursor-pointer"
+                    >
+                      {log.email}
+                    </div>
                     <div className="text-[10px] text-zinc-400 font-mono">IP: {log.ipAddress}</div>
                   </td>
                   <td className="px-4 py-3">

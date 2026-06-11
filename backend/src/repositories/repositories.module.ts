@@ -83,6 +83,7 @@ import {
   RoadmapItemRepository,
   SellerRepository,
   SellerSettlementRepository,
+  OrderLogRepository,
 } from './concrete.repositories';
 
 const REPOSITORIES = [
@@ -168,6 +169,7 @@ const REPOSITORIES = [
   RoadmapItemRepository,
   SellerRepository,
   SellerSettlementRepository,
+  OrderLogRepository,
 ];
 
 

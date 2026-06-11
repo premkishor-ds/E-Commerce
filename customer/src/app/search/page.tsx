@@ -55,7 +55,12 @@ function SearchPageContent() {
     fetch(`http://127.0.0.1:5001/api/v1/catalog/products?${params.toString()}`)
       .then((res) => res.json())
       .then((data) => {
-        setProducts(Array.isArray(data) ? data : (data && Array.isArray(data.products) ? data.products : []));
+        const list = Array.isArray(data)
+          ? data
+          : (data && Array.isArray(data.data)
+              ? data.data
+              : (data && Array.isArray(data.products) ? data.products : []));
+        setProducts(list);
         setLoading(false);
       })
       .catch(() => {

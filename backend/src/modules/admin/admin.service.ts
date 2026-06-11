@@ -172,7 +172,7 @@ export class AdminService {
     let totalRevenue = 0;
 
     orders.forEach((o: any) => {
-      if (o.status !== 'Cancelled') {
+      if (['Paid', 'Delivered', 'Shipped'].includes(o.status)) {
         const val = o.totalPrice || 0;
         totalRevenue += val;
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '../../AdminContext';
 import { RefreshCw, CheckCircle, Trash2, Package, X, Store } from 'lucide-react';
 import {
@@ -8,6 +9,7 @@ import {
 } from '../../../components/AdminUI';
 
 export default function ProductsPage() {
+  const router = useRouter();
   const {
     loadProducts, loadVendors, productSearch, setProductSearch,
     productSortField, setProductSortField, productSortOrder, setProductSortOrder,
@@ -69,7 +71,7 @@ export default function ProductsPage() {
               {paginatedProducts.map((p: any) => (
                 <tr key={p._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-xs">
                   <td 
-                    onClick={() => setSelectedProduct(p)} 
+                    onClick={() => router.push(`/products/${p._id}`)} 
                     className="px-4 py-3 font-semibold text-indigo-655 dark:text-indigo-400 hover:underline cursor-pointer"
                   >
                     {p.title}

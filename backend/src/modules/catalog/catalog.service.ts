@@ -13,6 +13,9 @@ import {
   OrderRepository,
   VendorRepository,
   SearchLogRepository,
+  ReviewRepository,
+  SellerRepository,
+  AddressRepository,
 } from '../../repositories/concrete.repositories';
 import { Types } from 'mongoose';
 
@@ -31,6 +34,9 @@ export class CatalogService {
     private readonly orderRepository: OrderRepository,
     private readonly vendorRepository: VendorRepository,
     private readonly searchLogRepository: SearchLogRepository,
+    private readonly reviewRepository: ReviewRepository,
+    private readonly sellerRepository: SellerRepository,
+    private readonly addressRepository: AddressRepository,
   ) {}
 
   private normalizeCategoryName(name: string): string {
@@ -280,7 +286,111 @@ export class CatalogService {
   async getProductById(id: string) {
     const product = await this.productRepository.findById(id);
     if (!product) throw new NotFoundException('Product not found');
-    return product;
+
+    let reviews: any[] = [];
+    try {
+      reviews = await this.reviewRepository.find({
+        productId: new Types.ObjectId(id),
+        status: 'Approved',
+      });
+    } catch (e) {
+      console.warn('Failed to fetch reviews for product:', e.message);
+    }
+
+    const reviewsWithUsers = [];
+    for (const r of reviews) {
+      try {
+        const user = await this.userRepository.findById(r.userId.toString());
+        reviewsWithUsers.push({
+          user: user ? (user.displayName || user.email.split('@')[0]) : 'Customer',
+          rating: r.rating,
+          comment: r.comment,
+          verified: r.verifiedPurchase || false,
+        });
+      } catch (err) {
+        reviewsWithUsers.push({
+          user: 'Customer',
+          rating: r.rating,
+          comment: r.comment,
+          verified: r.verifiedPurchase || false,
+        });
+      }
+    }
+
+    let categoryDoc = null;
+    if (product.category) {
+      try {
+        categoryDoc = await this.categoryRepository.findById(product.category.toString());
+      } catch (e) {}
+    }
+
+    let brandDoc = null;
+    if (product.brand) {
+      try {
+        brandDoc = await this.brandRepository.findById(product.brand.toString());
+      } catch (e) {}
+    }
+
+    let sellerDetails: any = null;
+    let shipsFrom = 'Amazon';
+    if (product.vendorId) {
+      try {
+        const sellerDoc = await this.sellerRepository.findOne({
+          userId: product.vendorId,
+        });
+        if (sellerDoc) {
+          sellerDetails = {
+            id: sellerDoc._id,
+            name: sellerDoc.storeName,
+            type: 'Seller',
+            userId: sellerDoc.userId,
+            location: null,
+          };
+        } else {
+          const vendorDoc = await this.vendorRepository.findOne({
+            userId: product.vendorId,
+          });
+          if (vendorDoc) {
+            sellerDetails = {
+              id: vendorDoc._id,
+              name: vendorDoc.shopName,
+              type: 'Vendor',
+              userId: vendorDoc.userId,
+              location: null,
+            };
+          }
+        }
+
+        if (sellerDetails) {
+          const addressDoc = await this.addressRepository.findOne({
+            userId: product.vendorId,
+            addressType: 'Office',
+          }) || await this.addressRepository.findOne({
+            userId: product.vendorId,
+          });
+
+          if (addressDoc) {
+            sellerDetails.location = {
+              pincode: addressDoc.pincode,
+              city: addressDoc.city,
+              state: addressDoc.state,
+              country: addressDoc.country,
+            };
+            shipsFrom = `${addressDoc.city}, ${addressDoc.state}`;
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to resolve seller details:', e.message);
+      }
+    }
+
+    const plain = typeof product.toObject === 'function' ? product.toObject() : product;
+    if (categoryDoc) plain.category = categoryDoc;
+    if (brandDoc) plain.brand = brandDoc;
+    plain.reviews = reviewsWithUsers;
+    plain.seller = sellerDetails;
+    plain.shipsFrom = shipsFrom;
+    return plain;
   }
 
   async updateProduct(id: string, dto: any, vendorId?: string) {
@@ -326,7 +436,9 @@ export class CatalogService {
     );
     const conversionRate = totalViews > 0 ? (totalSales / totalViews) * 100 : 0;
 
-    const orders = await this.orderRepository.find({});
+    const orders = await this.orderRepository.find({
+      status: { $in: ['Paid', 'Delivered', 'Shipped'] }
+    });
     let vendorRevenue = 0;
     let vendorOrdersCount = 0;
 

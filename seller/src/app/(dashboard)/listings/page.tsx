@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useStore } from '../../../store/store';
 import {
   Wallet, Receipt, Percent, Plus, AlertCircle, Box, DollarSign, Tag, Package,
@@ -8,6 +9,7 @@ import {
 } from 'lucide-react';
 
 export default function ListingsPage() {
+  const router = useRouter();
   const { user } = useStore();
   const [vendorStatus, setVendorStatus] = useState('Verification In Progress');
   const [totalSettledAmount, setTotalSettledAmount] = useState(0);
@@ -382,18 +384,36 @@ export default function ListingsPage() {
             <p className="col-span-2 text-center text-sm text-zinc-400 py-8">No products yet. Add your first listing.</p>
           )}
           {catalog.map(p => (
-            <div key={p.id} className="flex gap-4 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 items-center bg-zinc-50/30 dark:bg-zinc-900/30 group">
+            <div
+              key={p.id}
+              onClick={() => router.push(`/listings/${p.id}`)}
+              className="flex gap-4 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 items-center bg-zinc-50/30 dark:bg-zinc-900/30 group cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-900/60 transition-colors"
+            >
               <img src={p.images[0]} alt={p.title} className="h-16 w-16 object-cover rounded-lg border dark:border-zinc-800 shrink-0" />
               <div className="flex-1 min-w-0">
                 <h4 className="font-bold text-sm text-zinc-900 dark:text-white truncate">{p.title}</h4>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Price: <strong className="text-zinc-900 dark:text-zinc-200">${p.price.toFixed(2)}</strong> · Stock: <strong className="text-zinc-900 dark:text-zinc-200">{p.stock}</strong></p>
+                <p className="text-xs text-zinc-550 dark:text-zinc-400 mt-0.5">Price: <strong className="text-zinc-900 dark:text-zinc-200">${p.price.toFixed(2)}</strong> · Stock: <strong className="text-zinc-900 dark:text-zinc-200">{p.stock}</strong></p>
                 <p className="text-[10px] text-zinc-400 mt-0.5">SKU: {p.sku} · {p.category}</p>
               </div>
               <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={() => openEditModal(p)} className="p-2 text-zinc-400 hover:text-emerald-500 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-950/20 cursor-pointer bg-transparent border-0" aria-label="Edit">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/listings/${p.id}`);
+                  }}
+                  className="p-2 text-zinc-400 hover:text-emerald-500 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-950/20 cursor-pointer bg-transparent border-0"
+                  aria-label="Edit"
+                >
                   <Pencil className="h-4 w-4" />
                 </button>
-                <button onClick={() => handleDeleteProduct(p.id)} className="p-2 text-zinc-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 cursor-pointer bg-transparent border-0" aria-label="Delete">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteProduct(p.id);
+                  }}
+                  className="p-2 text-zinc-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 cursor-pointer bg-transparent border-0"
+                  aria-label="Delete"
+                >
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>

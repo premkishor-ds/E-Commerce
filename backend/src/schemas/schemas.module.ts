@@ -173,6 +173,8 @@ import {
   SellerSchema,
   SellerSettlement,
   SellerSettlementSchema,
+  OrderLog,
+  OrderLogSchema,
 } from './schemas';
 
 @Module({
@@ -264,6 +266,7 @@ import {
       { name: UserRole.name, schema: UserRoleSchema },
       { name: Seller.name, schema: SellerSchema },
       { name: SellerSettlement.name, schema: SellerSettlementSchema },
+      { name: OrderLog.name, schema: OrderLogSchema },
     ]),
   ],
   exports: [MongooseModule],
