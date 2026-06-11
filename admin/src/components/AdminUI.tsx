@@ -62,7 +62,17 @@ export function ApplyBtn({ onClick }: { onClick: () => void }) {
 }
 
 export function Loading() {
-  return <div className="px-6 py-10 text-sm text-zinc-450 flex items-center gap-2"><RefreshCw className="h-4 w-4 animate-spin" /> Loading…</div>;
+  return (
+    <div className="w-full animate-pulse divide-y divide-zinc-150 dark:divide-zinc-800 border-t dark:border-zinc-800 bg-white dark:bg-zinc-900">
+      {Array(5).fill(0).map((_, i) => (
+        <div key={i} className="flex items-center gap-6 px-6 py-4.5">
+          <div className="h-3.5 w-1/4 bg-zinc-200 dark:bg-zinc-850 rounded-lg" />
+          <div className="h-3.5 w-2/4 bg-zinc-200 dark:bg-zinc-850 rounded-lg" />
+          <div className="h-3.5 w-1/4 bg-zinc-200 dark:bg-zinc-850 rounded-lg" />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function Sel({ value, onChange, options, placeholder }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[]; placeholder?: string }) {

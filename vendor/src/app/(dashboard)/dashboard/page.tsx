@@ -10,6 +10,7 @@ export default function VendorDashboardOverview() {
   const [pendingAmount, setPendingAmount] = useState(0);
   const [vendorStatus, setVendorStatus] = useState('Verification In Progress');
   const [purchaseOrders, setPurchaseOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [contracts] = useState<any[]>([
     { id: 'CTR-4412', partner: 'ApexTech Global LLC', startDate: '2026-01-10', endDate: '2027-01-10', status: 'Active', terms: '10% Commission Cap, Net-30 Settlements' },
     { id: 'CTR-1102', partner: 'GizmoStore Group', startDate: '2026-03-01', endDate: '2027-03-01', status: 'Active', terms: 'Wholesale Distribution Contract' }
@@ -19,6 +20,7 @@ export default function VendorDashboardOverview() {
     if (!user) return;
     const fetchDashboardData = async () => {
       try {
+        setLoading(true);
         const [settlementsRes, profileRes, poRes] = await Promise.all([
           fetch('http://localhost:5001/api/v1/sales/vendor/settlements', {
             headers: { 'Authorization': `Bearer ${user.token}` }
@@ -54,10 +56,34 @@ export default function VendorDashboardOverview() {
         }
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchDashboardData();
   }, [user]);
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="space-y-2 animate-pulse">
+          <div className="h-9 w-64 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+          <div className="h-4 w-96 bg-zinc-200/80 dark:bg-zinc-800/80 rounded-lg" />
+        </div>
+        <div className="grid sm:grid-cols-4 gap-6">
+          {Array(4).fill(0).map((_, i) => (
+            <div key={i} className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 dark:border-zinc-800 shadow-sm flex items-center justify-between animate-pulse">
+              <div className="space-y-2">
+                <div className="h-3.5 w-24 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                <div className="h-7 w-32 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+              </div>
+              <div className="h-10 w-10 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

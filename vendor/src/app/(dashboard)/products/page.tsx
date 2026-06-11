@@ -10,6 +10,7 @@ export default function VendorProductsPage() {
   const [vendorProducts, setVendorProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Add form
   const [showAddForm, setShowAddForm] = useState(false);
@@ -58,6 +59,7 @@ export default function VendorProductsPage() {
     if (!user) return;
     const fetchVendorData = async () => {
       try {
+        setLoading(true);
         const [prodRes, profileRes] = await Promise.all([
           fetch(`http://localhost:5001/api/v1/catalog/products?vendorId=${user.id}`, {
             headers: { 'Authorization': `Bearer ${user.token}` }
@@ -78,9 +80,29 @@ export default function VendorProductsPage() {
           setVendorStatus(profData.vendorStatus || 'Active');
         }
       } catch (err) { console.error(err); }
+      finally { setLoading(false); }
     };
     fetchVendorData();
   }, [user]);
+
+  if (loading) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="space-y-2">
+          <div className="h-9 w-64 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+          <div className="h-4 w-96 bg-zinc-200/80 dark:bg-zinc-800/80 rounded-lg" />
+        </div>
+        <div className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm space-y-6 dark:border-zinc-800">
+          <div className="h-16 w-full bg-zinc-150 dark:bg-zinc-800 rounded-xl" />
+          <div className="grid sm:grid-cols-2 gap-4">
+            {Array(4).fill(0).map((_, i) => (
+              <div key={i} className="h-24 w-full bg-zinc-100 dark:bg-zinc-950 rounded-xl" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   function mapProduct(p: any) {
     return {

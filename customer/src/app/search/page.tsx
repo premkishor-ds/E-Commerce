@@ -294,7 +294,24 @@ function SearchPageContent() {
 
           {/* Product Grid Area */}
           <div className="lg:col-span-3">
-            {filteredProducts.length === 0 ? (
+            {loading ? (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array(6).fill(0).map((_, i) => (
+                  <div key={i} className="rounded-2xl border border-zinc-200/80 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 animate-pulse space-y-4">
+                    <div className="aspect-square w-full rounded-xl bg-zinc-200 dark:bg-zinc-800" />
+                    <div className="space-y-2">
+                      <div className="h-3 w-16 bg-zinc-200 dark:bg-zinc-800 rounded" />
+                      <div className="h-4 w-40 bg-zinc-200 dark:bg-zinc-800 rounded" />
+                      <div className="h-3 w-32 bg-zinc-200 dark:bg-zinc-800 rounded" />
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-zinc-105 dark:border-zinc-800">
+                      <div className="h-5 w-16 bg-zinc-200 dark:bg-zinc-800 rounded" />
+                      <div className="h-8 w-16 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredProducts.length === 0 ? (
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-12 text-center text-zinc-500 shadow-sm flex flex-col items-center justify-center space-y-4">
                 <SlidersHorizontal className="h-10 w-10 text-zinc-300 dark:text-zinc-700" />
                 <h3 className="font-bold text-zinc-900 dark:text-white text-lg">No Results Found</h3>

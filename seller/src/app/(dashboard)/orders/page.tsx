@@ -6,11 +6,13 @@ import { useStore } from '../../../store/store';
 export default function OrdersPage() {
   const { user } = useStore();
   const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     const fetchOrders = async () => {
       try {
+        setLoading(true);
         const ordersRes = await fetch('http://localhost:5001/api/v1/sales/orders', {
           headers: { 'Authorization': `Bearer ${user.token}` }
         });
@@ -25,9 +27,32 @@ export default function OrdersPage() {
           ]);
         }
       } catch (err) { console.error(err); }
+      finally { setLoading(false); }
     };
     fetchOrders();
   }, [user]);
+
+  if (loading) {
+    return (
+      <section className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm space-y-6 dark:border-zinc-800 animate-pulse">
+        <div className="space-y-2">
+          <div className="h-6 w-40 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+          <div className="h-4 w-72 bg-zinc-200/80 dark:bg-zinc-800/80 rounded-lg" />
+        </div>
+        <div className="space-y-4">
+          {Array(3).fill(0).map((_, i) => (
+            <div key={i} className="flex justify-between items-center border-b pb-3 dark:border-zinc-800 last:border-0 last:pb-0">
+              <div className="space-y-2">
+                <div className="h-4.5 w-32 bg-zinc-200 dark:bg-zinc-800 rounded-md" />
+                <div className="h-3.5 w-48 bg-zinc-200 dark:bg-zinc-800 rounded-md" />
+              </div>
+              <div className="h-8 w-16 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <>

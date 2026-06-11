@@ -10,6 +10,7 @@ export default function OverviewPage() {
   const [pendingSettlement, setPendingSettlement] = useState(0);
   const [orders, setOrders] = useState<any[]>([]);
   const [catalog, setCatalog] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [analyticsData] = useState<any>({
     conversionRate: 2.4,
     salesCount: 124,
@@ -20,6 +21,7 @@ export default function OverviewPage() {
     if (!user) return;
     const fetchData = async () => {
       try {
+        setLoading(true);
         const [catalogRes, settlementsRes, ordersRes] = await Promise.all([
           fetch(`http://localhost:5001/api/v1/catalog/products?vendorId=${user.id}`),
           fetch('http://localhost:5001/api/v1/sales/vendor/settlements', {
@@ -53,10 +55,34 @@ export default function OverviewPage() {
         }
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, [user]);
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="space-y-2 animate-pulse">
+          <div className="h-9 w-64 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+          <div className="h-4 w-96 bg-zinc-200/80 dark:bg-zinc-800/80 rounded-lg" />
+        </div>
+        <div className="grid sm:grid-cols-4 gap-6">
+          {Array(4).fill(0).map((_, i) => (
+            <div key={i} className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 dark:border-zinc-800 shadow-sm flex items-center justify-between animate-pulse">
+              <div className="space-y-2">
+                <div className="h-3.5 w-24 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                <div className="h-7 w-32 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+              </div>
+              <div className="h-10 w-10 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

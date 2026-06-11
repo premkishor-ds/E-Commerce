@@ -15,6 +15,7 @@ export default function ListingsPage() {
   const [catalog, setCatalog] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Add form
   const [showAddForm, setShowAddForm] = useState(false);
@@ -81,6 +82,7 @@ export default function ListingsPage() {
     if (!user) return;
     const fetchSellerData = async () => {
       try {
+        setLoading(true);
         const [catalogRes, settlementsRes, profileRes] = await Promise.all([
           fetch(`http://localhost:5001/api/v1/catalog/products?vendorId=${user.id}`),
           fetch('http://localhost:5001/api/v1/sales/vendor/settlements', {
@@ -107,9 +109,40 @@ export default function ListingsPage() {
           setVendorStatus(profData.vendorStatus || 'Active');
         }
       } catch (err) { console.error(err); }
+      finally { setLoading(false); }
     };
     fetchSellerData();
   }, [user]);
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="space-y-2 animate-pulse">
+          <div className="h-9 w-64 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+          <div className="h-4 w-96 bg-zinc-200/80 dark:bg-zinc-800/80 rounded-lg" />
+        </div>
+        <div className="grid sm:grid-cols-3 gap-6">
+          {Array(3).fill(0).map((_, i) => (
+            <div key={i} className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 dark:border-zinc-800 shadow-sm flex items-center justify-between animate-pulse">
+              <div className="space-y-2">
+                <div className="h-3.5 w-24 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                <div className="h-7 w-32 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+              </div>
+              <div className="h-10 w-10 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+            </div>
+          ))}
+        </div>
+        <div className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm space-y-6 dark:border-zinc-800 animate-pulse">
+          <div className="h-16 w-full bg-zinc-250 dark:bg-zinc-800 rounded-xl" />
+          <div className="grid sm:grid-cols-2 gap-4">
+            {Array(4).fill(0).map((_, i) => (
+              <div key={i} className="h-24 w-full bg-zinc-100 dark:bg-zinc-950 rounded-xl" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
