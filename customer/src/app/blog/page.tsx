@@ -137,9 +137,26 @@ export default function BlogListPage() {
 
         {/* Blog Post Cards Grid */}
         {loading ? (
-          <div className="flex justify-center items-center py-20 text-zinc-400 gap-2">
-            <span className="h-4 w-4 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin"></span>
-            <span className="text-sm font-semibold">Loading articles...</span>
+          <div className="grid md:grid-cols-2 gap-8 animate-pulse">
+            {Array(4).fill(0).map((_, i) => (
+              <div key={i} className="flex flex-col bg-white dark:bg-zinc-900 border dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-sm space-y-4 pb-6">
+                <div className="h-56 bg-zinc-200 dark:bg-zinc-800 w-full" />
+                <div className="px-6 space-y-3 flex-1 flex flex-col justify-between">
+                  <div className="space-y-2.5">
+                    <div className="flex gap-4">
+                      <div className="h-3 w-20 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                      <div className="h-3 w-16 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                    </div>
+                    <div className="h-6 w-3/4 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+                    <div className="space-y-1.5 pt-2">
+                      <div className="h-3 w-full bg-zinc-150 dark:bg-zinc-800 rounded-lg" />
+                      <div className="h-3 w-5/6 bg-zinc-150 dark:bg-zinc-800 rounded-lg" />
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t dark:border-zinc-800/60 h-4 w-24 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-8">

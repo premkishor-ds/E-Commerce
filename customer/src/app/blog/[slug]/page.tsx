@@ -83,9 +83,31 @@ export default function BlogPostPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center py-20 text-zinc-400 gap-2 bg-zinc-50 dark:bg-zinc-950">
-        <span className="h-4 w-4 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin"></span>
-        <span className="text-sm font-semibold">Loading article details...</span>
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300 pb-20 animate-pulse">
+        {/* Banner Skeleton */}
+        <div className="h-[400px] w-full bg-zinc-200 dark:bg-zinc-800" />
+        
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 mt-10 space-y-8">
+          <div className="h-4 w-36 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+          <div className="space-y-4">
+            <div className="h-10 w-full bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+            <div className="h-10 w-2/3 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+            <div className="flex justify-between items-center py-4 border-y border-zinc-200/80 dark:border-zinc-800/80">
+              <div className="flex gap-4">
+                <div className="h-3.5 w-24 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                <div className="h-3.5 w-16 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+              </div>
+              <div className="h-3.5 w-20 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="h-3 w-full bg-zinc-150 dark:bg-zinc-850 rounded-lg" />
+            <div className="h-3 w-full bg-zinc-150 dark:bg-zinc-850 rounded-lg" />
+            <div className="h-3 w-5/6 bg-zinc-150 dark:bg-zinc-850 rounded-lg" />
+            <div className="h-3 w-full bg-zinc-150 dark:bg-zinc-850 rounded-lg" />
+            <div className="h-3 w-2/3 bg-zinc-150 dark:bg-zinc-850 rounded-lg" />
+          </div>
+        </div>
       </div>
     );
   }

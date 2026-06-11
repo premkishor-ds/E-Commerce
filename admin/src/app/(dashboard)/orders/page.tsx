@@ -1,23 +1,38 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAdmin } from '../../AdminContext';
 import { RefreshCw, X } from 'lucide-react';
 import {
-  Section, SectionHeader, FilterBar, SearchBar, Sel, ApplyBtn, Table, Thead, renderSortableHeader, Pagination, Loading, badge, statusColor
+  Section, SectionHeader, FilterBar, SearchBar, Sel, ApplyBtn, Table, Thead, renderSortableHeader, Pagination, Loading, TableSkeleton, badge, statusColor
 } from '../../../components/AdminUI';
 
 export default function OrdersPage() {
   const {
-    loading, loadOrders, orderSearch, setOrderSearch, orderStatus, setOrderStatus,
+    loadOrders, orderSearch, setOrderSearch, orderStatus, setOrderStatus,
     orderSortField, setOrderSortField, orderSortOrder, setOrderSortOrder, orderPage, setOrderPage,
     paginatedOrders, totalOrderPages, selectedOrder, setSelectedOrder, apiAction,
     orderTrackingCode, setOrderTrackingCode, orderStatusSelect, setOrderStatusSelect
   } = useAdmin();
 
+  const [localLoading, setLocalLoading] = useState(true);
+
   useEffect(() => {
-    loadOrders();
+    let active = true;
+    const init = async () => {
+      setLocalLoading(true);
+      await loadOrders();
+      if (active) setLocalLoading(false);
+    };
+    init();
+    return () => { active = false; };
   }, []);
+
+  const handleApply = async () => {
+    setLocalLoading(true);
+    await loadOrders();
+    setLocalLoading(false);
+  };
 
   const saveOrderStatus = async () => {
     if (!selectedOrder) return;
@@ -28,7 +43,9 @@ export default function OrdersPage() {
       });
       alert('Order status and tracking updated!');
       setSelectedOrder(null);
-      loadOrders();
+      setLocalLoading(true);
+      await loadOrders();
+      setLocalLoading(false);
     } catch (err: any) {
       alert(err.message || 'Failed to update order');
     }
@@ -40,7 +57,7 @@ export default function OrdersPage() {
         title="Orders Workspace" 
         desc="Audit platform sales orders, logistics, and tracking status updates." 
         right={
-          <button onClick={loadOrders} className="p-2 rounded-lg border dark:border-zinc-800 text-zinc-400 hover:text-indigo-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
+          <button onClick={handleApply} className="p-2 rounded-lg border dark:border-zinc-800 text-zinc-400 hover:text-indigo-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
             <RefreshCw className="h-4 w-4" />
           </button>
         }
@@ -60,68 +77,68 @@ export default function OrdersPage() {
             { value: 'Cancelled', label: 'Cancelled' }
           ]} 
         />
-        <ApplyBtn onClick={loadOrders} />
+        <ApplyBtn onClick={handleApply} />
       </FilterBar>
 
-      {loading ? <Loading /> : (
-        <>
-          <Table>
-            <Thead>
-              <tr>
-                {renderSortableHeader('Order ID', '_id', orderSortField, orderSortOrder, (f, o) => { setOrderSortField(f); setOrderSortOrder(o); })}
-                {renderSortableHeader('Status', 'status', orderSortField, orderSortOrder, (f, o) => { setOrderSortField(f); setOrderSortOrder(o); })}
-                {renderSortableHeader('Total Price', 'totalPrice', orderSortField, orderSortOrder, (f, o) => { setOrderSortField(f); setOrderSortOrder(o); })}
-                {renderSortableHeader('Tracking Code', 'trackingCode', orderSortField, orderSortOrder, (f, o) => { setOrderSortField(f); setOrderSortOrder(o); })}
-                {renderSortableHeader('Date', 'createdAt', orderSortField, orderSortOrder, (f, o) => { setOrderSortField(f); setOrderSortOrder(o); })}
-                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500 text-right">Quick Action</th>
+      <Table>
+        <Thead>
+          <tr>
+            {renderSortableHeader('Order ID', '_id', orderSortField, orderSortOrder, (f, o) => { setOrderSortField(f); setOrderSortOrder(o); })}
+            {renderSortableHeader('Status', 'status', orderSortField, orderSortOrder, (f, o) => { setOrderSortField(f); setOrderSortOrder(o); })}
+            {renderSortableHeader('Total Price', 'totalPrice', orderSortField, orderSortOrder, (f, o) => { setOrderSortField(f); setOrderSortOrder(o); })}
+            {renderSortableHeader('Tracking Code', 'trackingCode', orderSortField, orderSortOrder, (f, o) => { setOrderSortField(f); setOrderSortOrder(o); })}
+            {renderSortableHeader('Date', 'createdAt', orderSortField, orderSortOrder, (f, o) => { setOrderSortField(f); setOrderSortOrder(o); })}
+            <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500 text-right">Quick Action</th>
+          </tr>
+        </Thead>
+        {localLoading ? (
+          <TableSkeleton cols={6} />
+        ) : (
+          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {paginatedOrders.map((o: any) => (
+              <tr key={o._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-xs">
+                <td 
+                  onClick={() => setSelectedOrder(o)} 
+                  className="px-4 py-3 font-mono font-bold text-indigo-650 dark:text-indigo-400 hover:underline cursor-pointer"
+                >
+                  #{o._id?.toString().slice(-8).toUpperCase()}
+                </td>
+                <td className="px-4 py-3">{badge(statusColor(o.status), o.status)}</td>
+                <td className="px-4 py-3 text-sm font-semibold text-zinc-900 dark:text-white">
+                  ${(o.totalPrice ?? 0).toFixed(2)}
+                </td>
+                <td className="px-4 py-3 text-zinc-400 font-mono">{o.trackingCode || '—'}</td>
+                <td className="px-4 py-3 text-zinc-400">
+                  {o.createdAt ? new Date(o.createdAt).toLocaleString() : '—'}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  {o.status === 'Pending' || o.status === 'Paid' ? (
+                    <button 
+                      onClick={async () => {
+                        try {
+                          await apiAction('PUT', `/admin/orders/${o._id}/status`, { status: 'Shipped' });
+                          handleApply();
+                        } catch (err: any) {
+                          alert(err.message);
+                        }
+                      }}
+                      className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-bold cursor-pointer border-0 text-[10px]"
+                    >
+                      Mark Shipped
+                    </button>
+                  ) : '—'}
+                </td>
               </tr>
-            </Thead>
-            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {paginatedOrders.map((o: any) => (
-                <tr key={o._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-xs">
-                  <td 
-                    onClick={() => setSelectedOrder(o)} 
-                    className="px-4 py-3 font-mono font-bold text-indigo-650 dark:text-indigo-400 hover:underline cursor-pointer"
-                  >
-                    #{o._id?.toString().slice(-8).toUpperCase()}
-                  </td>
-                  <td className="px-4 py-3">{badge(statusColor(o.status), o.status)}</td>
-                  <td className="px-4 py-3 text-sm font-semibold text-zinc-900 dark:text-white">
-                    ${(o.totalPrice ?? 0).toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3 text-zinc-400 font-mono">{o.trackingCode || '—'}</td>
-                  <td className="px-4 py-3 text-zinc-400">
-                    {o.createdAt ? new Date(o.createdAt).toLocaleString() : '—'}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    {o.status === 'Pending' || o.status === 'Paid' ? (
-                      <button 
-                        onClick={async () => {
-                          try {
-                            await apiAction('PUT', `/admin/orders/${o._id}/status`, { status: 'Shipped' });
-                            loadOrders();
-                          } catch (err: any) {
-                            alert(err.message);
-                          }
-                        }}
-                        className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-bold cursor-pointer border-0 text-[10px]"
-                      >
-                        Mark Shipped
-                      </button>
-                    ) : '—'}
-                  </td>
-                </tr>
-              ))}
-              {paginatedOrders.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="text-center py-8 text-zinc-400">No orders found.</td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
-          <Pagination currentPage={orderPage} totalPages={totalOrderPages} onPageChange={setOrderPage} />
-        </>
-      )}
+            ))}
+            {paginatedOrders.length === 0 && (
+              <tr>
+                <td colSpan={6} className="text-center py-8 text-zinc-400">No orders found.</td>
+              </tr>
+            )}
+          </tbody>
+        )}
+      </Table>
+      {!localLoading && <Pagination currentPage={orderPage} totalPages={totalOrderPages} onPageChange={setOrderPage} />}
 
       {/* Selected Order Details Modal */}
       {selectedOrder && (

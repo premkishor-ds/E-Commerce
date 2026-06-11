@@ -41,11 +41,14 @@ export class AuthService {
         shopName: dto.shopName || 'My Partner Shop',
         status: 'Verification In Progress',
         commissionRate: 10,
+        companyLegalName: dto.shopName || 'Partner Corp',
+        businessPhone: dto.phone || '9999999999'
       });
     }
 
     return this.generateTokens(user);
   }
+
 
   async login(dto: any) {
     let user = await this.userRepository.findOne({ email: dto.email });

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useStore } from '../../store/store';
+import FeedbackWidget from '../../components/FeedbackWidget';
 import {
   LayoutDashboard, Wallet, LogOut, Sun, Moon, ShieldCheck, Store, Box, Tag, Package,
   ShoppingCart, Star, BarChart3, Bell, HelpCircle
@@ -45,7 +46,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
     }
   }, [mounted, user, router]);
 
-  if (!mounted || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
@@ -69,7 +70,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col transition-colors duration-300">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-955 flex flex-col transition-colors duration-300">
       {/* Topbar */}
       <header className="sticky top-0 z-40 w-full border-b border-zinc-200/80 bg-white/80 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/80 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between">
@@ -122,9 +123,19 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
         </aside>
 
         <main className="flex-1 p-6 sm:p-8 space-y-8 overflow-y-auto">
-          {children}
+          {!mounted ? (
+            <div className="space-y-8 animate-pulse">
+              <div className="space-y-2">
+                <div className="h-9 w-64 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+                <div className="h-4 w-96 bg-zinc-200/80 dark:bg-zinc-800/80 rounded-lg" />
+              </div>
+            </div>
+          ) : children}
         </main>
       </div>
+
+      <FeedbackWidget />
     </div>
   );
 }
+

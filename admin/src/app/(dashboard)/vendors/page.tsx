@@ -1,24 +1,39 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAdmin } from '../../AdminContext';
 import { RefreshCw, CheckCircle, XCircle, X } from 'lucide-react';
 import {
-  Section, SectionHeader, FilterBar, SearchBar, Sel, ApplyBtn, Table, Thead, renderSortableHeader, Pagination, Loading, badge, statusColor
+  Section, SectionHeader, FilterBar, SearchBar, Sel, ApplyBtn, Table, Thead, renderSortableHeader, Pagination, Loading, TableSkeleton, badge, statusColor
 } from '../../../components/AdminUI';
 
 export default function VendorsPage() {
   const {
-    loading, loadVendors, vendorSearch, setVendorSearch, vendorStatus, setVendorStatus,
+    loadVendors, vendorSearch, setVendorSearch, vendorStatus, setVendorStatus,
     vendorType, setVendorType, vendorSortField, setVendorSortField, vendorSortOrder, setVendorSortOrder,
     vendorPage, setVendorPage, paginatedVendors, totalVendorPages, selectedSeller, setSelectedSeller,
     sellerCommission, setSellerCommission, editCompanyLegalName, setEditCompanyLegalName,
     editBusinessPhone, setEditBusinessPhone, apiAction
   } = useAdmin();
 
+  const [localLoading, setLocalLoading] = useState(true);
+
   useEffect(() => {
-    loadVendors();
+    let active = true;
+    const init = async () => {
+      setLocalLoading(true);
+      await loadVendors();
+      if (active) setLocalLoading(false);
+    };
+    init();
+    return () => { active = false; };
   }, []);
+
+  const handleApply = async () => {
+    setLocalLoading(true);
+    await loadVendors();
+    setLocalLoading(false);
+  };
 
   const saveMerchantChanges = async () => {
     if (!selectedSeller) return;
@@ -38,7 +53,9 @@ export default function VendorsPage() {
       });
       alert('Merchant details and commission updated successfully!');
       setSelectedSeller(null);
-      loadVendors();
+      setLocalLoading(true);
+      await loadVendors();
+      setLocalLoading(false);
     } catch (err: any) {
       alert(`Failed to save merchant changes: ${err.message}`);
     }
@@ -50,7 +67,7 @@ export default function VendorsPage() {
         title="Merchant Partner Directory" 
         desc="Validate and manage B2C Retail Sellers and B2B Wholesale Vendors."
         right={
-          <button onClick={loadVendors} className="p-2 rounded-lg border dark:border-zinc-800 text-zinc-405 hover:text-indigo-500 hover:bg-zinc-55 dark:hover:bg-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
+          <button onClick={handleApply} className="p-2 rounded-lg border dark:border-zinc-800 text-zinc-405 hover:text-indigo-500 hover:bg-zinc-55 dark:hover:bg-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
             <RefreshCw className="h-4 w-4" />
           </button>
         }
@@ -64,7 +81,9 @@ export default function VendorsPage() {
         ].map(t => (
           <button 
             key={t.key} 
-            onClick={() => setVendorType(t.key)}
+            onClick={() => {
+              setVendorType(t.key);
+            }}
             className={`px-4 py-3 text-xs font-bold border-b-2 -mb-[2px] transition-all cursor-pointer border-0 bg-transparent ${
               vendorType === t.key
                 ? 'border-indigo-600 text-indigo-650 dark:text-indigo-400 font-extrabold'
@@ -88,24 +107,25 @@ export default function VendorsPage() {
             { value: 'Suspended', label: 'Suspended' }
           ]} 
         />
-        <ApplyBtn onClick={loadVendors} />
+        <ApplyBtn onClick={handleApply} />
       </FilterBar>
 
-      {loading ? <Loading /> : (
-        <>
-          <Table>
-            <Thead>
-              <tr>
-                {renderSortableHeader('Shop', 'shopName', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
-                {renderSortableHeader('Type', 'type', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
-                {renderSortableHeader('Email Address', 'email', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
-                {renderSortableHeader('Company Name', 'companyLegalName', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
-                {renderSortableHeader('Phone', 'businessPhone', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
-                {renderSortableHeader('Commission', 'commissionRate', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
-                {renderSortableHeader('Status', 'status', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
-                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Actions</th>
-              </tr>
-            </Thead>
+      <Table>
+        <Thead>
+          <tr>
+            {renderSortableHeader('Shop', 'shopName', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
+            {renderSortableHeader('Type', 'type', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
+            {renderSortableHeader('Email Address', 'email', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
+            {renderSortableHeader('Company Name', 'companyLegalName', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
+            {renderSortableHeader('Phone', 'businessPhone', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
+            {renderSortableHeader('Commission', 'commissionRate', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
+            {renderSortableHeader('Status', 'status', vendorSortField, vendorSortOrder, (f, o) => { setVendorSortField(f); setVendorSortOrder(o); })}
+            <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Actions</th>
+          </tr>
+        </Thead>
+        {localLoading ? (
+          <TableSkeleton cols={8} />
+        ) : (
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {paginatedVendors.map((v: any) => {
                 const isSeller = v.userId?.roles?.includes('Seller');
@@ -132,8 +152,10 @@ export default function VendorsPage() {
                           <button 
                             onClick={async () => {
                               try {
+                                setLocalLoading(true);
                                 await apiAction('PUT', `/admin/vendors/${v._id}/status`, { status: 'Active' });
-                                loadVendors();
+                                await loadVendors();
+                                setLocalLoading(false);
                               } catch (err: any) { alert(err.message); }
                             }}
                             className="p-1.5 rounded-lg border-0 text-zinc-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 cursor-pointer bg-transparent" 
@@ -146,8 +168,10 @@ export default function VendorsPage() {
                           <button 
                             onClick={async () => {
                               try {
+                                setLocalLoading(true);
                                 await apiAction('PUT', `/admin/vendors/${v._id}/status`, { status: 'Suspended' });
-                                loadVendors();
+                                await loadVendors();
+                                setLocalLoading(false);
                               } catch (err: any) { alert(err.message); }
                             }}
                             className="p-1.5 rounded-lg border-0 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 cursor-pointer bg-transparent" 
@@ -167,10 +191,9 @@ export default function VendorsPage() {
                 </tr>
               )}
             </tbody>
-          </Table>
-          <Pagination currentPage={vendorPage} totalPages={totalVendorPages} onPageChange={setVendorPage} />
-        </>
-      )}
+          )}
+      </Table>
+      {!localLoading && <Pagination currentPage={vendorPage} totalPages={totalVendorPages} onPageChange={setVendorPage} />}
 
       {/* Verify / Details Modal */}
       {selectedSeller && (

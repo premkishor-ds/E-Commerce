@@ -63,33 +63,11 @@ export default function VendorDashboardOverview() {
     fetchDashboardData();
   }, [user]);
 
-  if (loading) {
-    return (
-      <div className="space-y-8">
-        <div className="space-y-2 animate-pulse">
-          <div className="h-9 w-64 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
-          <div className="h-4 w-96 bg-zinc-200/80 dark:bg-zinc-800/80 rounded-lg" />
-        </div>
-        <div className="grid sm:grid-cols-4 gap-6">
-          {Array(4).fill(0).map((_, i) => (
-            <div key={i} className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 dark:border-zinc-800 shadow-sm flex items-center justify-between animate-pulse">
-              <div className="space-y-2">
-                <div className="h-3.5 w-24 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
-                <div className="h-7 w-32 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
-              </div>
-              <div className="h-10 w-10 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       <title>Supply Dashboard - ApexStore Vendor</title>
 
-      {vendorStatus !== 'Active' && (
+      {vendorStatus !== 'Active' && !loading && (
         <div className="bg-amber-50 border border-amber-200 dark:bg-amber-955/20 dark:border-amber-900/30 rounded-2xl p-4 flex items-start gap-3 text-amber-800 dark:text-amber-300">
           <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-amber-500" />
           <div>
@@ -108,15 +86,19 @@ export default function VendorDashboardOverview() {
 
       <section className="grid sm:grid-cols-4 gap-6">
         {[
-          { label: 'Total Earnings', value: `$${settledAmount.toFixed(2)}`, icon: <Wallet className="h-10 w-10 text-indigo-500 bg-indigo-50 dark:bg-indigo-950/20 p-2 rounded-xl" /> },
-          { label: 'Pending Payouts', value: `$${pendingAmount.toFixed(2)}`, icon: <Receipt className="h-10 w-10 text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 p-2 rounded-xl" /> },
-          { label: 'Active Contracts', value: contracts.length, icon: <FileText className="h-10 w-10 text-amber-500 bg-amber-50 dark:bg-amber-950/20 p-2 rounded-xl" /> },
-          { label: 'Pending POs', value: purchaseOrders.filter(po => po.status === 'Pending').length, icon: <ClipboardList className="h-10 w-10 text-rose-500 bg-rose-50 dark:bg-rose-950/20 p-2 rounded-xl" /> }
+          { label: 'Total Earnings', value: loading ? null : `$${settledAmount.toFixed(2)}`, icon: <Wallet className="h-10 w-10 text-indigo-500 bg-indigo-50 dark:bg-indigo-950/20 p-2 rounded-xl" /> },
+          { label: 'Pending Payouts', value: loading ? null : `$${pendingAmount.toFixed(2)}`, icon: <Receipt className="h-10 w-10 text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 p-2 rounded-xl" /> },
+          { label: 'Active Contracts', value: loading ? null : contracts.length, icon: <FileText className="h-10 w-10 text-amber-500 bg-amber-50 dark:bg-amber-950/20 p-2 rounded-xl" /> },
+          { label: 'Pending POs', value: loading ? null : purchaseOrders.filter(po => po.status === 'Pending').length, icon: <ClipboardList className="h-10 w-10 text-rose-500 bg-rose-50 dark:bg-rose-950/20 p-2 rounded-xl" /> }
         ].map(s => (
           <div key={s.label} className="bg-white p-6 rounded-2xl border dark:bg-zinc-900 shadow-sm flex items-center justify-between dark:border-zinc-800">
             <div>
               <div className="text-xs text-zinc-400 font-bold uppercase tracking-wider">{s.label}</div>
-              <div className="text-2xl font-black mt-1 text-zinc-900 dark:text-white">{s.value}</div>
+              {s.value === null ? (
+                <div className="h-7 w-24 bg-zinc-200 dark:bg-zinc-800 rounded-lg animate-pulse mt-1" />
+              ) : (
+                <div className="text-2xl font-black mt-1 text-zinc-900 dark:text-white">{s.value}</div>
+              )}
             </div>
             {s.icon}
           </div>
@@ -125,3 +107,4 @@ export default function VendorDashboardOverview() {
     </>
   );
 }
+

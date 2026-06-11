@@ -91,9 +91,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <aside className="hidden lg:flex w-56 flex-col border-r dark:border-zinc-800 bg-white dark:bg-zinc-900 py-6 px-4 gap-1">
           {navItems.map(n => (
             <button key={n.key} onClick={() => router.push(`/${n.key}`)}
-              className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold w-full text-left transition-colors ${subRoute === n.key
-                ? 'bg-indigo-50 dark:bg-indigo-950/20 text-indigo-705 dark:text-indigo-300 border border-indigo-100/50 dark:border-indigo-900/30'
-                : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}>
+              className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold w-full text-left transition-colors border ${subRoute === n.key
+                ? 'bg-indigo-50 dark:bg-indigo-950/20 text-indigo-705 dark:text-indigo-300 border-indigo-100/50 dark:border-indigo-900/30'
+                : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}>
               {n.icon}{n.label}
             </button>
           ))}

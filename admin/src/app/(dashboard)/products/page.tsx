@@ -1,25 +1,39 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAdmin } from '../../AdminContext';
 import { RefreshCw, CheckCircle, Trash2, Package, X, Store } from 'lucide-react';
 import {
-  Section, SectionHeader, FilterBar, SearchBar, ApplyBtn, Table, Thead, renderSortableHeader, Pagination, Loading, badge
+  Section, SectionHeader, FilterBar, SearchBar, ApplyBtn, Table, Thead, renderSortableHeader, Pagination, Loading, TableSkeleton, badge
 } from '../../../components/AdminUI';
 
 export default function ProductsPage() {
   const {
-    loading, loadProducts, loadVendors, productSearch, setProductSearch,
+    loadProducts, loadVendors, productSearch, setProductSearch,
     productSortField, setProductSortField, productSortOrder, setProductSortOrder,
     productPage, setProductPage, paginatedProducts, totalProductPages,
     selectedProduct, setSelectedProduct, apiAction, vendors, setSelectedSeller, setActiveTab,
     activeProductImageIndex, setActiveProductImageIndex
   } = useAdmin();
 
+  const [localLoading, setLocalLoading] = useState(true);
+
   useEffect(() => {
-    loadProducts();
-    loadVendors();
+    let active = true;
+    const init = async () => {
+      setLocalLoading(true);
+      await Promise.all([loadProducts(), loadVendors()]);
+      if (active) setLocalLoading(false);
+    };
+    init();
+    return () => { active = false; };
   }, []);
+
+  const handleApply = async () => {
+    setLocalLoading(true);
+    await loadProducts();
+    setLocalLoading(false);
+  };
 
   return (
     <Section>
@@ -27,7 +41,7 @@ export default function ProductsPage() {
         title="Wholesale Supply Catalog" 
         desc="Moderate wholesale listings and manage catalog classifications." 
         right={
-          <button onClick={loadProducts} className="p-2 rounded-lg border dark:border-zinc-800 text-zinc-400 hover:text-indigo-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
+          <button onClick={handleApply} className="p-2 rounded-lg border dark:border-zinc-800 text-zinc-400 hover:text-indigo-500 hover:bg-zinc-55 dark:hover:bg-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
             <RefreshCw className="h-4 w-4" />
           </button>
         }
@@ -35,21 +49,22 @@ export default function ProductsPage() {
 
       <FilterBar>
         <SearchBar value={productSearch} onChange={setProductSearch} placeholder="Search product title..." />
-        <ApplyBtn onClick={loadProducts} />
+        <ApplyBtn onClick={handleApply} />
       </FilterBar>
 
-      {loading ? <Loading /> : (
-        <>
-          <Table>
-            <Thead>
-              <tr>
-                {renderSortableHeader('Product', 'title', productSortField, productSortOrder, (f, o) => { setProductSortField(f); setProductSortOrder(o); })}
-                {renderSortableHeader('Price', 'price', productSortField, productSortOrder, (f, o) => { setProductSortField(f); setProductSortOrder(o); })}
-                {renderSortableHeader('SKU', 'sku', productSortField, productSortOrder, (f, o) => { setProductSortField(f); setProductSortOrder(o); })}
-                {renderSortableHeader('Approval', 'isApproved', productSortField, productSortOrder, (f, o) => { setProductSortField(f); setProductSortOrder(o); })}
-                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Actions</th>
-              </tr>
-            </Thead>
+      <Table>
+        <Thead>
+          <tr>
+            {renderSortableHeader('Product', 'title', productSortField, productSortOrder, (f, o) => { setProductSortField(f); setProductSortOrder(o); })}
+            {renderSortableHeader('Price', 'price', productSortField, productSortOrder, (f, o) => { setProductSortField(f); setProductSortOrder(o); })}
+            {renderSortableHeader('SKU', 'sku', productSortField, productSortOrder, (f, o) => { setProductSortField(f); setProductSortOrder(o); })}
+            {renderSortableHeader('Approval', 'isApproved', productSortField, productSortOrder, (f, o) => { setProductSortField(f); setProductSortOrder(o); })}
+            <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Actions</th>
+          </tr>
+        </Thead>
+        {localLoading ? (
+          <TableSkeleton cols={5} />
+        ) : (
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {paginatedProducts.map((p: any) => (
                 <tr key={p._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-xs">
@@ -82,8 +97,10 @@ export default function ProductsPage() {
                         onClick={async () => {
                           if (!confirm('Delete product?')) return;
                           try {
+                            setLocalLoading(true);
                             await apiAction('DELETE', `/admin/products/${p._id}`);
-                            loadProducts();
+                            await loadProducts();
+                            setLocalLoading(false);
                           } catch (err: any) { alert(err.message); }
                         }}
                         className="p-1.5 rounded-lg border-0 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 cursor-pointer bg-transparent"
@@ -101,10 +118,9 @@ export default function ProductsPage() {
                 </tr>
               )}
             </tbody>
-          </Table>
-          <Pagination currentPage={productPage} totalPages={totalProductPages} onPageChange={setProductPage} />
-        </>
-      )}
+          )}
+      </Table>
+      {!localLoading && <Pagination currentPage={productPage} totalPages={totalProductPages} onPageChange={setProductPage} />}
 
       {/* Selected Product Drawer */}
       {selectedProduct && (

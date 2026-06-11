@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "../components/Providers";
 import Header from "../components/Header";
+import FeedbackWidget from "../components/FeedbackWidget";
 import React from "react";
 
 const inter = Inter({
@@ -40,8 +41,10 @@ export default function RootLayout({
               &copy; {new Date().getFullYear()} ApexStore Inc. All rights reserved. UCP Compliant / SEO Optimized.
             </div>
           </footer>
+          <FeedbackWidget />
         </Providers>
       </body>
     </html>
   );
 }
+

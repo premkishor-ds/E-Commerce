@@ -75,6 +75,22 @@ export function Loading() {
   );
 }
 
+export function TableSkeleton({ cols, rows = 5 }: { cols: number; rows?: number }) {
+  return (
+    <tbody className="animate-pulse bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
+      {Array(rows).fill(0).map((_, rowIndex) => (
+        <tr key={rowIndex}>
+          {Array(cols).fill(0).map((_, colIndex) => (
+            <td key={colIndex} className="px-4 py-4.5">
+              <div className="h-3.5 bg-zinc-200 dark:bg-zinc-850 rounded-lg w-2/3" />
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  );
+}
+
 export function Sel({ value, onChange, options, placeholder }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[]; placeholder?: string }) {
   return (
     <select value={value} onChange={e => onChange(e.target.value)}

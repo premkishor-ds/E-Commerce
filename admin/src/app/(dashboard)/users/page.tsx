@@ -4,22 +4,36 @@ import React, { useEffect, useState } from 'react';
 import { useAdmin } from '../../AdminContext';
 import { RefreshCw, Download, X } from 'lucide-react';
 import {
-  Section, SectionHeader, FilterBar, SearchBar, Sel, ApplyBtn, Table, Thead, renderSortableHeader, Pagination, Loading, badge, statusColor
+  Section, SectionHeader, FilterBar, SearchBar, Sel, ApplyBtn, Table, Thead, renderSortableHeader, Pagination, Loading, TableSkeleton, badge, statusColor
 } from '../../../components/AdminUI';
 
 export default function UsersPage() {
   const {
-    loading, loadUsers, userSearch, setUserSearch, userRole, setUserRole, userStatus, setUserStatus,
+    loadUsers, userSearch, setUserSearch, userRole, setUserRole, userStatus, setUserStatus,
     userSortField, setUserSortField, userSortOrder, setUserSortOrder, userPage, setUserPage,
     paginatedUsers, totalUserPages, selectedUser, setSelectedUser, handleExportCustomers, apiAction
   } = useAdmin();
 
   const [editStatus, setEditStatus] = useState('Active');
   const [editWallet, setEditWallet] = useState(0);
+  const [localLoading, setLocalLoading] = useState(true);
 
   useEffect(() => {
-    loadUsers();
+    let active = true;
+    const init = async () => {
+      setLocalLoading(true);
+      await loadUsers();
+      if (active) setLocalLoading(false);
+    };
+    init();
+    return () => { active = false; };
   }, []);
+
+  const handleApply = async () => {
+    setLocalLoading(true);
+    await loadUsers();
+    setLocalLoading(false);
+  };
 
   useEffect(() => {
     if (selectedUser) {
@@ -37,7 +51,9 @@ export default function UsersPage() {
       });
       alert('Customer updated successfully!');
       setSelectedUser(null);
-      loadUsers();
+      setLocalLoading(true);
+      await loadUsers();
+      setLocalLoading(false);
     } catch (err: any) {
       alert(err.message || 'Failed to update user');
     }
@@ -50,7 +66,7 @@ export default function UsersPage() {
         desc="Audit customer registrations, account standings, and wallet values." 
         right={
           <div className="flex gap-2">
-            <button onClick={loadUsers} className="p-2 rounded-lg border dark:border-zinc-800 text-zinc-400 hover:text-indigo-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
+            <button onClick={handleApply} className="p-2 rounded-lg border dark:border-zinc-800 text-zinc-400 hover:text-indigo-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
               <RefreshCw className="h-4 w-4" />
             </button>
             <button onClick={handleExportCustomers} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow cursor-pointer border-0">
@@ -72,50 +88,50 @@ export default function UsersPage() {
             { value: 'Inactive', label: 'Inactive' }
           ]} 
         />
-        <ApplyBtn onClick={loadUsers} />
+        <ApplyBtn onClick={handleApply} />
       </FilterBar>
 
-      {loading ? <Loading /> : (
-        <>
-          <Table>
-            <Thead>
-              <tr>
-                {renderSortableHeader('Name', 'name', userSortField, userSortOrder, (f, o) => { setUserSortField(f); setUserSortOrder(o); })}
-                {renderSortableHeader('Email Address', 'email', userSortField, userSortOrder, (f, o) => { setUserSortField(f); setUserSortOrder(o); })}
-                {renderSortableHeader('Wallet Value', 'walletBalance', userSortField, userSortOrder, (f, o) => { setUserSortField(f); setUserSortOrder(o); }, 'right')}
-                {renderSortableHeader('Standing', 'accountStatus', userSortField, userSortOrder, (f, o) => { setUserSortField(f); setUserSortOrder(o); })}
-                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Registered At</th>
+      <Table>
+        <Thead>
+          <tr>
+            {renderSortableHeader('Name', 'name', userSortField, userSortOrder, (f, o) => { setUserSortField(f); setUserSortOrder(o); })}
+            {renderSortableHeader('Email Address', 'email', userSortField, userSortOrder, (f, o) => { setUserSortField(f); setUserSortOrder(o); })}
+            {renderSortableHeader('Wallet Value', 'walletBalance', userSortField, userSortOrder, (f, o) => { setUserSortField(f); setUserSortOrder(o); }, 'right')}
+            {renderSortableHeader('Standing', 'accountStatus', userSortField, userSortOrder, (f, o) => { setUserSortField(f); setUserSortOrder(o); })}
+            <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">Registered At</th>
+          </tr>
+        </Thead>
+        {localLoading ? (
+          <TableSkeleton cols={5} />
+        ) : (
+          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {paginatedUsers.map((u: any) => (
+              <tr key={u._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-xs">
+                <td 
+                  onClick={() => setSelectedUser(u)} 
+                  className="px-4 py-3 font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                >
+                  {u.firstName} {u.lastName}
+                </td>
+                <td className="px-4 py-3 text-zinc-550">{u.email}</td>
+                <td className="px-4 py-3 text-right font-mono font-bold text-zinc-800 dark:text-zinc-200">
+                  ${(u.walletBalance ?? 0).toFixed(2)}
+                </td>
+                <td className="px-4 py-3">{badge(statusColor(u.accountStatus), u.accountStatus || 'Active')}</td>
+                <td className="px-4 py-3 text-zinc-400">
+                  {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}
+                </td>
               </tr>
-            </Thead>
-            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {paginatedUsers.map((u: any) => (
-                <tr key={u._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-xs">
-                  <td 
-                    onClick={() => setSelectedUser(u)} 
-                    className="px-4 py-3 font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
-                  >
-                    {u.firstName} {u.lastName}
-                  </td>
-                  <td className="px-4 py-3 text-zinc-550">{u.email}</td>
-                  <td className="px-4 py-3 text-right font-mono font-bold text-zinc-800 dark:text-zinc-200">
-                    ${(u.walletBalance ?? 0).toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3">{badge(statusColor(u.accountStatus), u.accountStatus || 'Active')}</td>
-                  <td className="px-4 py-3 text-zinc-400">
-                    {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}
-                  </td>
-                </tr>
-              ))}
-              {paginatedUsers.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="text-center py-8 text-zinc-400">No customers found matching queries.</td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
-          <Pagination currentPage={userPage} totalPages={totalUserPages} onPageChange={setUserPage} />
-        </>
-      )}
+            ))}
+            {paginatedUsers.length === 0 && (
+              <tr>
+                <td colSpan={5} className="text-center py-8 text-zinc-400">No customers found matching queries.</td>
+              </tr>
+            )}
+          </tbody>
+        )}
+      </Table>
+      {!localLoading && <Pagination currentPage={userPage} totalPages={totalUserPages} onPageChange={setUserPage} />}
 
       {/* Selected Customer Details Drawer */}
       {selectedUser && (

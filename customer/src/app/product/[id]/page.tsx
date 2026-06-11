@@ -36,8 +36,68 @@ export default function ProductDetail({ params }: PageProps) {
 
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center py-24 text-center text-zinc-500">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 py-12 animate-pulse">
+        <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
+          {/* Breadcrumb Skeleton */}
+          <div className="h-4 w-64 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+
+          {/* Product Info Section Skeleton */}
+          <div className="grid lg:grid-cols-2 gap-12 bg-white p-8 rounded-2xl border border-zinc-200/80 dark:bg-zinc-900 dark:border-zinc-800 shadow-sm">
+            <div className="aspect-square w-full rounded-2xl bg-zinc-200 dark:bg-zinc-800" />
+            <div className="space-y-6 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="h-3.5 w-24 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                  <div className="h-3.5 w-32 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                </div>
+                <div className="h-8 w-3/4 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+                <div className="h-4 w-40 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                <div className="h-10 w-28 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+                <div className="space-y-2">
+                  <div className="h-3 w-full bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                  <div className="h-3 w-full bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                  <div className="h-3 w-2/3 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                </div>
+              </div>
+              <div className="space-y-4 pt-6 border-t border-zinc-100 dark:border-zinc-800">
+                <div className="flex gap-4">
+                  <div className="flex-1 h-12 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+                  <div className="w-12 h-12 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+                </div>
+                <div className="h-8 w-full bg-zinc-200/50 dark:bg-zinc-800/50 rounded-lg" />
+              </div>
+            </div>
+          </div>
+
+          {/* Specs & Reviews Skeleton */}
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-white p-6 rounded-2xl border border-zinc-200/80 dark:bg-zinc-900 dark:border-zinc-800 shadow-sm space-y-4">
+              <div className="h-6 w-48 bg-zinc-200 dark:bg-zinc-800 rounded-lg border-b pb-2" />
+              <div className="space-y-3">
+                {Array(4).fill(0).map((_, i) => (
+                  <div key={i} className="flex justify-between py-2 border-b last:border-0 border-zinc-100 dark:border-zinc-800">
+                    <div className="h-4 w-24 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                    <div className="h-4 w-32 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-2xl border border-zinc-200/80 dark:bg-zinc-900 dark:border-zinc-800 shadow-sm space-y-4">
+              <div className="h-6 w-40 bg-zinc-200 dark:bg-zinc-800 rounded-lg border-b pb-2" />
+              <div className="space-y-4">
+                {Array(2).fill(0).map((_, i) => (
+                  <div key={i} className="space-y-2 pb-4 border-b last:border-0 border-zinc-100 dark:border-zinc-800">
+                    <div className="flex justify-between items-center">
+                      <div className="h-4 w-28 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                      <div className="h-4 w-20 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                    </div>
+                    <div className="h-3 w-full bg-zinc-100 dark:bg-zinc-900 rounded-lg" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }

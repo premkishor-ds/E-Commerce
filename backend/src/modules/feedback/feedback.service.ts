@@ -108,18 +108,23 @@ export class FeedbackService {
       newValue: 'New feedback ticket generated successfully.'
     });
 
-    // Notify Admins
-    await this.notificationRepo.create({
-      userId: null, // Broadcast to admins
-      title: `New Feedback Submitted: ${ticketId}`,
-      message: `A new ${payload.type} was submitted by ${name} (${userRole}).`,
-      type: 'feedback',
-    });
+    // Notify Admins (Find an admin to send this notification to)
+    const adminUser = await this.userRepo.findOne({ roles: 'Admin' });
+    const adminUserId = adminUser ? adminUser._id : (userId ? new Types.ObjectId(userId) : null);
+    
+    if (adminUserId) {
+      await this.notificationRepo.create({
+        userId: new Types.ObjectId(adminUserId),
+        title: `New Feedback Submitted: ${ticketId}`,
+        message: `A new ${payload.type} was submitted by ${name} (${userRole}).`,
+        type: 'feedback',
+      });
+    }
 
     // Notify user if email exists
-    if (email) {
+    if (email && userId) {
       await this.notificationRepo.create({
-        userId: userId ? new Types.ObjectId(userId) : null,
+        userId: new Types.ObjectId(userId),
         title: `Feedback Ticket Created: ${ticketId}`,
         message: `Your feedback ticket ${ticketId} has been successfully created.`,
         type: 'feedback',
@@ -128,6 +133,7 @@ export class FeedbackService {
 
     return created;
   }
+
 
   // Duplicate detection - Find similar tickets
   async detectDuplicates(type: string, subject: string): Promise<any[]> {

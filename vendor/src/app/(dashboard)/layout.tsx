@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useStore } from '../../store/store';
+import FeedbackWidget from '../../components/FeedbackWidget';
 import {
   LayoutDashboard, Wallet, LogOut, Sun, Moon, ShieldCheck,
   Coins, Box, Package, ClipboardList, FileText, BarChart3, Bell, HelpCircle, Store
@@ -45,9 +46,9 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
     }
   }, [mounted, user, router]);
 
-  if (!mounted || !user) {
+  if (!user) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-955 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
       </div>
     );
@@ -69,7 +70,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col transition-colors duration-300">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-955 flex flex-col transition-colors duration-300">
       {/* Topbar */}
       <header className="sticky top-0 z-40 w-full border-b border-zinc-200/80 bg-white/80 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/80 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between">
@@ -98,7 +99,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
 
       <div className="flex-1 max-w-7xl w-full mx-auto flex">
         {/* Sidebar */}
-        <aside className="w-64 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 flex flex-col justify-between hidden lg:flex">
+        <aside className="w-64 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-905 p-6 flex flex-col justify-between hidden lg:flex">
           <div className="space-y-6">
             <div className="flex items-center gap-2 font-bold text-sm text-zinc-400 uppercase tracking-wider">
               <LayoutDashboard className="h-4 w-4 text-indigo-500" /><span>Accounting Console</span>
@@ -122,9 +123,17 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
         </aside>
 
         <main className="flex-1 p-6 sm:p-8 space-y-8 overflow-y-auto">
-          {children}
+          {!mounted ? (
+            <div className="space-y-8 animate-pulse">
+              <div className="space-y-2">
+                <div className="h-9 w-64 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+                <div className="h-4 w-96 bg-zinc-200/80 dark:bg-zinc-800/80 rounded-lg" />
+              </div>
+            </div>
+          ) : children}
         </main>
       </div>
+      <FeedbackWidget />
     </div>
   );
 }
