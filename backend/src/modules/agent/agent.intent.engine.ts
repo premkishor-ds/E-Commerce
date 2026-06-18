@@ -673,7 +673,7 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
     'remove payment method',
     'delete payment',
   ],
-  HELP: ['help', 'what can you do', 'commands', 'guide', 'how to', 'assist'],
+  HELP: ['help', 'what can you do', 'commands', 'guide', 'how to', 'assist', 'continue shopping'],
   THANKS: [
     'thank',
     'thanks',

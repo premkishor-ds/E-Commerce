@@ -15,7 +15,8 @@ export default function VendorsPage() {
     vendorType, setVendorType, vendorSortField, setVendorSortField, vendorSortOrder, setVendorSortOrder,
     vendorPage, setVendorPage, paginatedVendors, totalVendorPages, selectedSeller, setSelectedSeller,
     sellerCommission, setSellerCommission, editCompanyLegalName, setEditCompanyLegalName,
-    editBusinessPhone, setEditBusinessPhone, apiAction
+    editBusinessPhone, setEditBusinessPhone, apiAction,
+    vendorMinCommission, setVendorMinCommission, vendorStartDate, setVendorStartDate, vendorEndDate, setVendorEndDate
   } = useAdmin();
 
   const [localLoading, setLocalLoading] = useState(true);
@@ -99,6 +100,13 @@ export default function VendorsPage() {
 
       <FilterBar>
         <SearchBar value={vendorSearch} onChange={setVendorSearch} placeholder="Search shop, company..." />
+        <input 
+          type="number" 
+          value={vendorMinCommission} 
+          onChange={e => setVendorMinCommission(e.target.value)} 
+          placeholder="Min Commission %..." 
+          className="px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 w-[150px]"
+        />
         <Sel 
           value={vendorStatus} 
           onChange={setVendorStatus} 
@@ -109,6 +117,22 @@ export default function VendorsPage() {
             { value: 'Suspended', label: 'Suspended' }
           ]} 
         />
+        <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+          <span className="font-semibold text-zinc-400">Registered From:</span>
+          <input 
+            type="date" 
+            value={vendorStartDate} 
+            onChange={e => setVendorStartDate(e.target.value)} 
+            className="px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+          />
+          <span className="font-semibold text-zinc-400">To:</span>
+          <input 
+            type="date" 
+            value={vendorEndDate} 
+            onChange={e => setVendorEndDate(e.target.value)} 
+            className="px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+          />
+        </div>
         <ApplyBtn onClick={handleApply} />
       </FilterBar>
 

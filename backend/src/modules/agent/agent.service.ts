@@ -333,13 +333,33 @@ System Reply to enhance:
 ${contextPrompt ? `Context (User message/context): "${contextPrompt}"` : ''}
 
 Rules:
+- Do NOT explicitly list or repeat next step suggestions or options (e.g. "Checkout now", "Continue shopping", or next steps to type) in the text of your response, as these are already rendered as clickable buttons at the bottom of the chat.
 - Do NOT invent or add any mock numbers, order IDs, product names, or facts not present in the System Reply.
 - Preserve all existing links, markdown links (e.g. [Link Text](/path)), bold markers (**), and formatting.
 - Ensure the language matches the language used in the user's query/system reply.
 
 Enhanced AI Response:`;
     const gemmaResponse = await this.callLocalGemma(prompt);
-    return gemmaResponse ? gemmaResponse.trim() : reply;
+    const trimmed = gemmaResponse ? gemmaResponse.trim() : '';
+    return trimmed || reply;
+  }
+
+  private buildSmartFallbackReply(message: string): string {
+    const lower = message.toLowerCase().trim();
+    if (/\b(your name|who are you|who r you|what are you|your identity|are you a bot|are you an ai|are you human|are you real|are you alive|are you chatbot|are you robot)\b/i.test(lower)) {
+      return `👋 I'm the **ApexStore AI Assistant** — your smart shopping companion!\n\nI'm an AI chatbot built specifically for ApexStore. I can help you:\n• 🔍 Search & compare products\n• 🛒 Manage your cart & wishlist\n• 📦 Track & manage orders\n• 🎫 Create support tickets\n• 🔐 Manage your account\n\nHow can I help you shop today?`;
+    }
+    if (/\b(what can you do|what do you do|your capabilities|your features|your function|your purpose|your role|introduce yourself|tell me about yourself)\b/i.test(lower)) {
+      return `🤖 I'm the **ApexStore AI Assistant**! Here's what I can do:\n\n🔍 **Search Products** — Show me laptops\n🛒 **Cart Management** — Add, remove, or update cart items\n📦 **Order Tracking** — Where is my order?\n🔄 **Returns and Refunds** — Cancel my order\n🎫 **Support Tickets** — I have an issue\n💳 **Checkout Help** — Guided payment process\n👤 **Account Management** — Profile, addresses, password\n\nJust type naturally!`;
+    }
+    if (/\b(how are you|how r you|how do you do|you doing)\b/i.test(lower)) {
+      return `😊 I'm doing great and ready to help you shop! What can I help you find today?`;
+    }
+    const offTopicPatterns = /\b(joke|space|bake|cake|python|javascript|coding|code|write|math|philosophy|weather|news|prime minister|history|geography|science|sing|song|cricket|football|movie|politics|stock market|covid|election|capital of|president of|who invented|when was)\b/i;
+    if (offTopicPatterns.test(lower)) {
+      return `😊 I'm the **ApexStore AI Assistant** — specialized in shopping tasks only!\n\nI'm not able to help with that topic. How about I help you:\n• 🔍 Find products\n• 📦 Track your orders\n• 🛒 Manage your cart`;
+    }
+    return `👋 I'm the **ApexStore AI Assistant**! Type **"help"** to see everything I can do for you!`;
   }
 
   private async handleGeneralQuery(
@@ -352,24 +372,26 @@ Enhanced AI Response:`;
   ): Promise<AgentResponse> {
     const startTime = Date.now();
     const prompt = GENERAL_ASSISTANT_PROMPT.replace('{{USER_QUERY}}', resolvedWorkMessage);
-    const fallbackMessage = "I'm unable to process that request right now. Please try again in a few moments.";
-    
     let reply = '';
     let errorMsg: string | null = null;
     const modelUsed = process.env.AI_FALLBACK_MODEL || 'gemma3:1b';
 
     try {
       reply = await this.ollamaService.generate(prompt);
-      
       // Run response validator guardrails
       const validation = this.responseValidator.validateResponse(reply);
       if (!validation.isValid) {
         errorMsg = `Response validation failed: ${validation.reason}`;
-        reply = fallbackMessage;
+        reply = this.buildSmartFallbackReply(resolvedWorkMessage);
       }
     } catch (e: any) {
       errorMsg = e.message;
-      reply = fallbackMessage;
+      // Build smart inline fallback — never return blank
+      reply = this.buildSmartFallbackReply(resolvedWorkMessage);
+    }
+    // Safety net: ensure reply is never empty
+    if (!reply || reply.trim().length === 0) {
+      reply = this.buildSmartFallbackReply(resolvedWorkMessage);
     }
 
     const responseTimeMs = Date.now() - startTime;
@@ -692,8 +714,21 @@ Enhanced AI Response:`;
         'VENDOR_UPDATE_DESC',
         'VENDOR_UPDATE_SELECT',
       ].includes(activeStep);
+
+      const cleanMsg = resolvedWorkMessage.toLowerCase().trim();
+      const explicitCommands = [
+        'my orders', 'show my orders', 'view orders', 'get my orders',
+        'my cart', 'show my cart', 'view cart', 'get my cart', 'shopping cart',
+        'checkout', 'checkout now', 'go to checkout',
+        'support ticket', 'create ticket', 'raise ticket', 'create support ticket',
+        'login', 'sign in', 'register', 'sign up', 'logout', 'sign out',
+        'search headphones', 'search products', 'help'
+      ];
+      const isExplicitCommand = explicitCommands.includes(cleanMsg) || 
+        (tempRuleMatch.score >= 8 && tempRuleMatch.intent !== 'UNKNOWN' && tempRuleMatch.intent !== state.activeIntent);
+
       const isStrongTopicSwitch =
-        !isFreeFormStep &&
+        (!isFreeFormStep || isExplicitCommand) &&
         tempRuleMatch.score >= 5 &&
         tempRuleMatch.intent !== 'UNKNOWN' &&
         tempRuleMatch.intent !== state.activeIntent &&
@@ -879,8 +914,17 @@ Enhanced AI Response:`;
     const isActuallyFallback = intelResult.isFallback && (ruleMatch.intent === 'UNKNOWN' || ruleMatch.score < 4);
     const isActuallyClarifying = intelResult.needsClarification && (ruleMatch.intent === 'UNKNOWN' || ruleMatch.score < 4);
 
+    // ── Pre-check: Identity / conversational questions should bypass fallback and go to general route
+    const identityConversationalRegex = /\b(your name|what.?s your name|who are you|who r you|what are you|your identity|are you a bot|are you an ai|are you human|are you real|are you alive|are you chatbot|are you robot|tell me about yourself|introduce yourself|what can you do|what do you do|how are you|how r you|your capabilities|your features|your purpose|your role|your function|can you help me|what are your features)\b/i;
+    if (identityConversationalRegex.test(resolvedWorkMessage)) {
+      await this.memory.appendMessage(sessionId, 'user', message, 'GENERAL');
+      return this.handleGeneralQuery(message, 'GENERAL', resolvedWorkMessage, sessionId, state, lang);
+    }
+
     if (isActuallyFallback) {
-      const reply = intelResult.fallbackQuestion ?? '';
+      // Build reply — use smart fallback if fallbackQuestion is empty to avoid blank responses
+      const rawFallback = intelResult.fallbackQuestion ?? '';
+      const reply = rawFallback.trim().length > 0 ? rawFallback : this.buildSmartFallbackReply(resolvedWorkMessage);
       const translatedReply = this.translateReply('HELP', reply, lang);
       await this.memory.appendMessage(sessionId, 'bot', translatedReply, 'FALLBACK');
       state.previousMessages.push({ role: 'bot', text: translatedReply, timestamp: new Date() });
@@ -890,7 +934,7 @@ Enhanced AI Response:`;
         intent: 'FALLBACK',
         confidence: intelResult.confidence,
         actions: [],
-        suggestions: intelResult.fallbackSuggestions,
+        suggestions: intelResult.fallbackSuggestions?.length ? intelResult.fallbackSuggestions : ['Search products', 'My orders', 'Help'],
       };
     }
 
@@ -5784,6 +5828,7 @@ Enhanced AI Response:`;
       // PHASE 1: GET_PRODUCT
       // ═══════════════════════════════════════════════════════════════════════
       case 'GET_PRODUCT': {
+        const state = (ctx as any).state || {};
         const intelContext = this.chatbotIntelligenceService.getContext(sessionId);
         
         // Clean query helper
@@ -5875,6 +5920,7 @@ Enhanced AI Response:`;
 
           if (product) {
             intelContext.selectedProduct = product;
+            state.selectedProduct = product;
           }
           if (!product)
             return this.buildReply(
@@ -7158,6 +7204,18 @@ Enhanced AI Response:`;
       }
 
       case 'HELP':
+        if (message.toLowerCase().trim() === 'continue shopping') {
+          return this.buildReply(
+            `🛒 **Let's continue shopping!**\n\nYou can search for products (e.g., *"gaming laptops"* or *"headphones"*), browse by category, or check your cart. What are you looking for today?`,
+            intent,
+            10,
+            [],
+            undefined,
+            undefined,
+            false,
+            ['Browse Products', 'My orders', 'My cart'],
+          );
+        }
         return this.buildReply(
           `🤖 **ApexStore AI Assistant — What I Can Do:**\n\n🔍 **Search**: "Show gaming laptops", "Find headphones under $200"\n🛒 **Cart**: "Add headphones to cart", "View my cart"\n📦 **Orders**: "My orders", "Track my order", "Cancel order"\n💜 **Wishlist**: "Add to wishlist", "View my wishlist"\n🎫 **Support**: "Create ticket", "View tickets"\n🏷️ **Coupons**: "Apply coupon SAVE20"\n⭐ **Reviews**: "Rate headphones"\n🔐 **Account**: "Login", "Register", "My profile", "Logout"\n\nJust type naturally and I'll understand!`,
           intent,

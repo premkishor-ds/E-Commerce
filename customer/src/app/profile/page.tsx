@@ -66,11 +66,7 @@ export default function ProfilePage() {
   const [pointsConvert, setPointsConvert] = useState('');
   
   // Phase E States
-  const [notifications, setNotifications] = useState<any[]>([
-    { _id: 'notif-1', title: 'Order Shipped!', message: 'Your order #ORD-123 has been shipped and is on its way.', isRead: false, createdAt: new Date(Date.now() - 3600000).toISOString() },
-    { _id: 'notif-2', title: 'Points Converted Successfully', message: 'You converted 500 reward points into $5.00 wallet balance.', isRead: true, createdAt: new Date(Date.now() - 86400000).toISOString() },
-    { _id: 'notif-3', title: 'Security Alert', message: 'Your password was updated successfully.', isRead: true, createdAt: new Date(Date.now() - 172800000).toISOString() }
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [coupons, setCoupons] = useState<any[]>([
     { code: 'SAVE20', discount: '20% OFF', description: '20% off on all items', validUntil: '2026-12-31', claimed: false },
     { code: 'WELCOME10', discount: '10% OFF', description: '10% off for new signups', validUntil: '2026-08-30', claimed: true },
@@ -276,6 +272,22 @@ export default function ProfilePage() {
     } catch {
       setLogs([
         { _id: 'l-1', action: 'Console Authentication', details: 'User successfully logged into ApexStore identity console', type: 'Security', createdAt: new Date().toISOString() }
+      ]);
+    }
+
+    try {
+      // Notifications Fetch
+      const nResp = await fetch('http://localhost:5001/api/v1/notifications', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!nResp.ok) throw new Error();
+      const nData = await nResp.json();
+      setNotifications(nData);
+    } catch {
+      setNotifications([
+        { _id: 'notif-1', title: 'Order Shipped!', message: 'Your order #ORD-123 has been shipped and is on its way.', isRead: false, createdAt: new Date(Date.now() - 3600000).toISOString() },
+        { _id: 'notif-2', title: 'Points Converted Successfully', message: 'You converted 500 reward points into $5.00 wallet balance.', isRead: true, createdAt: new Date(Date.now() - 86400000).toISOString() },
+        { _id: 'notif-3', title: 'Security Alert', message: 'Your password was updated successfully.', isRead: true, createdAt: new Date(Date.now() - 172800000).toISOString() }
       ]);
     }
     
@@ -1750,7 +1762,14 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex gap-2">
                     <button 
-                      onClick={() => {
+                      onClick={async () => {
+                        const token = localStorage.getItem('apex_token');
+                        try {
+                          await fetch('http://localhost:5001/api/v1/notifications/read-all', {
+                            method: 'PUT',
+                            headers: { Authorization: `Bearer ${token}` }
+                          });
+                        } catch {}
                         setNotifications(notifications.map(n => ({ ...n, isRead: true })));
                         showToast('All notifications marked as read.', 'success');
                       }}
@@ -1759,7 +1778,14 @@ export default function ProfilePage() {
                       Mark all read
                     </button>
                     <button 
-                      onClick={() => {
+                      onClick={async () => {
+                        const token = localStorage.getItem('apex_token');
+                        try {
+                          await fetch('http://localhost:5001/api/v1/notifications/clear-all', {
+                            method: 'DELETE',
+                            headers: { Authorization: `Bearer ${token}` }
+                          });
+                        } catch {}
                         setNotifications([]);
                         showToast('Notifications inbox cleared.', 'success');
                       }}
@@ -1777,7 +1803,14 @@ export default function ProfilePage() {
                     notifications.map((notif) => (
                       <div 
                         key={notif._id} 
-                        onClick={() => {
+                        onClick={async () => {
+                          const token = localStorage.getItem('apex_token');
+                          try {
+                            await fetch(`http://localhost:5001/api/v1/notifications/${notif._id}/read`, {
+                              method: 'PUT',
+                              headers: { Authorization: `Bearer ${token}` }
+                            });
+                          } catch {}
                           setNotifications(notifications.map(n => n._id === notif._id ? { ...n, isRead: true } : n));
                         }}
                         className={`p-4 rounded-xl border flex gap-3 cursor-pointer transition-all ${

@@ -52,7 +52,7 @@ function SearchPageContent() {
     if (activeCategory && activeCategory !== 'All') params.set('category', activeCategory);
     if (activeBrand && activeBrand !== 'All') params.set('brand', activeBrand);
 
-    fetch(`http://127.0.0.1:5001/api/v1/catalog/products?${params.toString()}`)
+    fetch(`http://localhost:5001/api/v1/catalog/products?${params.toString()}`)
       .then((res) => res.json())
       .then((data) => {
         const list = Array.isArray(data)

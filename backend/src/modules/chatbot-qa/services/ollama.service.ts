@@ -5,7 +5,7 @@ import * as http from 'http';
 export class OllamaService {
   private readonly logger = new Logger(OllamaService.name);
   private readonly ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
-  private readonly defaultModel = process.env.QA_MODEL || 'gemma3:1b';
+  private readonly defaultModel = process.env.QA_MODEL || 'qwen2.5:14b';
   private readonly timeout = parseInt(process.env.QA_TIMEOUT || '30000', 10);
   private cache = new Map<string, string>();
 
@@ -144,6 +144,61 @@ export class OllamaService {
       req.on('timeout', () => {
         req.destroy();
         reject(new Error('Ollama request timed out'));
+      });
+      req.write(payload);
+      req.end();
+    });
+  }
+
+  async embed(input: string, modelOverride?: string): Promise<number[]> {
+    const model = modelOverride || process.env.EMBEDDING_MODEL || 'nomic-embed-text';
+    return new Promise((resolve, reject) => {
+      const url = new URL(`${this.ollamaUrl}/api/embed`);
+      const payload = JSON.stringify({
+        model,
+        input,
+      });
+
+      const req = http.request(
+        {
+          hostname: url.hostname,
+          port: url.port || 80,
+          path: '/api/embed',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(payload),
+          },
+          timeout: 10000,
+        },
+        (res) => {
+          let data = '';
+          res.on('data', (chunk) => (data += chunk));
+          res.on('end', () => {
+            try {
+              if (res.statusCode !== 200) {
+                reject(new Error(`Ollama returned status code ${res.statusCode}: ${data}`));
+                return;
+              }
+              const parsed = JSON.parse(data);
+              if (parsed.embedding) {
+                resolve(parsed.embedding);
+              } else if (parsed.embeddings && parsed.embeddings.length > 0) {
+                resolve(parsed.embeddings[0]);
+              } else {
+                reject(new Error('No embedding returned from Ollama'));
+              }
+            } catch (e) {
+              reject(e);
+            }
+          });
+        },
+      );
+
+      req.on('error', (e) => reject(e));
+      req.on('timeout', () => {
+        req.destroy();
+        reject(new Error('Ollama embedding request timed out'));
       });
       req.write(payload);
       req.end();

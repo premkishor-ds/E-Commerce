@@ -5,6 +5,7 @@ import {
 } from '../../repositories/concrete.repositories';
 import * as nodemailer from 'nodemailer';
 import twilio from 'twilio';
+import { Types } from 'mongoose';
 
 
 @Injectable()
@@ -215,5 +216,47 @@ export class NotificationService {
       productRecommendations: user.productRecommendations !== false,
       newsletterSubscriptions: user.newsletterSubscriptions !== false,
     };
+  }
+
+  async getUserNotifications(userId: string) {
+    return this.notificationRepository.find(
+      { userId: new Types.ObjectId(userId) },
+      { sort: { createdAt: -1 } },
+    );
+  }
+
+  async markAsRead(userId: string, notificationId: string) {
+    const notif = await this.notificationRepository.findOne({
+      _id: new Types.ObjectId(notificationId),
+      userId: new Types.ObjectId(userId),
+    });
+    if (!notif) throw new NotFoundException('Notification not found');
+    notif.isRead = true;
+    return notif.save();
+  }
+
+  async markAllAsRead(userId: string) {
+    await this.notificationRepository.updateMany(
+      { userId: new Types.ObjectId(userId) },
+      { isRead: true },
+    );
+    return { success: true };
+  }
+
+  async deleteNotification(userId: string, notificationId: string) {
+    const notif = await this.notificationRepository.findOne({
+      _id: new Types.ObjectId(notificationId),
+      userId: new Types.ObjectId(userId),
+    });
+    if (!notif) throw new NotFoundException('Notification not found');
+    await this.notificationRepository.delete(notificationId);
+    return { success: true };
+  }
+
+  async clearAllNotifications(userId: string) {
+    await this.notificationRepository.deleteMany({
+      userId: new Types.ObjectId(userId),
+    });
+    return { success: true };
   }
 }

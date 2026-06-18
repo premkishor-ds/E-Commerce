@@ -115,6 +115,12 @@ interface AdminContextType {
   setUserSortOrder: (o: 'asc' | 'desc') => void;
   userPage: number;
   setUserPage: (p: number) => void;
+  userMinWallet: string;
+  setUserMinWallet: (s: string) => void;
+  userStartDate: string;
+  setUserStartDate: (s: string) => void;
+  userEndDate: string;
+  setUserEndDate: (s: string) => void;
 
   orderSearch: string;
   setOrderSearch: (s: string) => void;
@@ -126,6 +132,12 @@ interface AdminContextType {
   setOrderSortOrder: (o: 'asc' | 'desc') => void;
   orderPage: number;
   setOrderPage: (p: number) => void;
+  orderUserFilter: string;
+  setOrderUserFilter: (s: string) => void;
+  orderStartDate: string;
+  setOrderStartDate: (s: string) => void;
+  orderEndDate: string;
+  setOrderEndDate: (s: string) => void;
 
   productSearch: string;
   setProductSearch: (s: string) => void;
@@ -135,6 +147,14 @@ interface AdminContextType {
   setProductSortOrder: (o: 'asc' | 'desc') => void;
   productPage: number;
   setProductPage: (p: number) => void;
+  productCategoryFilter: string;
+  setProductCategoryFilter: (s: string) => void;
+  productApprovalFilter: string;
+  setProductApprovalFilter: (s: string) => void;
+  productMinPrice: string;
+  setProductMinPrice: (s: string) => void;
+  productMaxPrice: string;
+  setProductMaxPrice: (s: string) => void;
 
   vendorSearch: string;
   setVendorSearch: (s: string) => void;
@@ -148,6 +168,12 @@ interface AdminContextType {
   setVendorSortOrder: (o: 'asc' | 'desc') => void;
   vendorPage: number;
   setVendorPage: (p: number) => void;
+  vendorMinCommission: string;
+  setVendorMinCommission: (s: string) => void;
+  vendorStartDate: string;
+  setVendorStartDate: (s: string) => void;
+  vendorEndDate: string;
+  setVendorEndDate: (s: string) => void;
 
   ticketSearch: string;
   setTicketSearch: (s: string) => void;
@@ -521,21 +547,34 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [userStatus, setUserStatus] = useState('');
   const [userSortField, setUserSortField] = useState('email');
   const [userSortOrder, setUserSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [userMinWallet, setUserMinWallet] = useState('');
+  const [userStartDate, setUserStartDate] = useState('');
+  const [userEndDate, setUserEndDate] = useState('');
 
   const [orderSearch, setOrderSearch] = useState('');
   const [orderStatus, setOrderStatus] = useState('');
   const [orderSortField, setOrderSortField] = useState('createdAt');
   const [orderSortOrder, setOrderSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [orderUserFilter, setOrderUserFilter] = useState('');
+  const [orderStartDate, setOrderStartDate] = useState('');
+  const [orderEndDate, setOrderEndDate] = useState('');
 
   const [productSearch, setProductSearch] = useState('');
   const [productSortField, setProductSortField] = useState('title');
   const [productSortOrder, setProductSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [productCategoryFilter, setProductCategoryFilter] = useState('');
+  const [productApprovalFilter, setProductApprovalFilter] = useState('');
+  const [productMinPrice, setProductMinPrice] = useState('');
+  const [productMaxPrice, setProductMaxPrice] = useState('');
 
   const [vendorSearch, setVendorSearch] = useState('');
   const [vendorStatus, setVendorStatus] = useState('');
   const [vendorType, setVendorType] = useState('all');
   const [vendorSortField, setVendorSortField] = useState('shopName');
   const [vendorSortOrder, setVendorSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [vendorMinCommission, setVendorMinCommission] = useState('');
+  const [vendorStartDate, setVendorStartDate] = useState('');
+  const [vendorEndDate, setVendorEndDate] = useState('');
 
   // Chatbot Filters & Sorting
   const [chatSearch, setChatSearch] = useState('');
@@ -1075,6 +1114,20 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       );
     }
     if (userStatus) result = result.filter(u => u.accountStatus === userStatus);
+    if (userMinWallet.trim()) {
+      const min = Number(userMinWallet);
+      result = result.filter(u => (u.walletBalance ?? 0) >= min);
+    }
+    if (userStartDate) {
+      const start = new Date(userStartDate);
+      start.setHours(0, 0, 0, 0);
+      result = result.filter(u => new Date(u.createdAt) >= start);
+    }
+    if (userEndDate) {
+      const end = new Date(userEndDate);
+      end.setHours(23, 59, 59, 999);
+      result = result.filter(u => new Date(u.createdAt) <= end);
+    }
     if (userSortField) {
       result.sort((a, b) => {
         let valA = a[userSortField];
@@ -1091,7 +1144,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       });
     }
     return result;
-  }, [users, userSearch, userStatus, userSortField, userSortOrder]);
+  }, [users, userSearch, userStatus, userSortField, userSortOrder, userMinWallet, userStartDate, userEndDate]);
 
   const filteredOrders = useMemo(() => {
     let result = Array.isArray(orders) ? [...orders] : [];
@@ -1103,6 +1156,24 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       );
     }
     if (orderStatus) result = result.filter(o => o.status === orderStatus);
+    if (orderUserFilter.trim()) {
+      const q = orderUserFilter.toLowerCase();
+      result = result.filter(o => 
+        (o.userId && String(o.userId).toLowerCase().includes(q)) ||
+        (o.shippingAddress?.fullName && o.shippingAddress.fullName.toLowerCase().includes(q)) ||
+        (o.shippingAddress?.phone && o.shippingAddress.phone.includes(q))
+      );
+    }
+    if (orderStartDate) {
+      const start = new Date(orderStartDate);
+      start.setHours(0, 0, 0, 0);
+      result = result.filter(o => new Date(o.createdAt) >= start);
+    }
+    if (orderEndDate) {
+      const end = new Date(orderEndDate);
+      end.setHours(23, 59, 59, 999);
+      result = result.filter(o => new Date(o.createdAt) <= end);
+    }
     if (orderSortField) {
       result.sort((a, b) => {
         let valA = a[orderSortField]; let valB = b[orderSortField];
@@ -1117,10 +1188,25 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       });
     }
     return result;
-  }, [orders, orderSearch, orderStatus, orderSortField, orderSortOrder]);
+  }, [orders, orderSearch, orderStatus, orderSortField, orderSortOrder, orderUserFilter, orderStartDate, orderEndDate]);
 
   const filteredProducts = useMemo(() => {
     let result = Array.isArray(products) ? products.filter((p: any) => p.title?.toLowerCase().includes(productSearch.toLowerCase())) : [];
+    if (productCategoryFilter) {
+      result = result.filter(p => p.category === productCategoryFilter || p.category?._id === productCategoryFilter || p.category?.name === productCategoryFilter);
+    }
+    if (productApprovalFilter) {
+      const approved = productApprovalFilter === 'Approved';
+      result = result.filter(p => p.isApproved === approved);
+    }
+    if (productMinPrice.trim()) {
+      const min = Number(productMinPrice);
+      result = result.filter(p => (p.price ?? 0) >= min);
+    }
+    if (productMaxPrice.trim()) {
+      const max = Number(productMaxPrice);
+      result = result.filter(p => (p.price ?? 0) <= max);
+    }
     if (productSortField) {
       result.sort((a, b) => {
         let valA = a[productSortField]; let valB = b[productSortField];
@@ -1135,7 +1221,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       });
     }
     return result;
-  }, [products, productSearch, productSortField, productSortOrder]);
+  }, [products, productSearch, productSortField, productSortOrder, productCategoryFilter, productApprovalFilter, productMinPrice, productMaxPrice]);
 
   const filteredVendors = useMemo(() => {
     let result = Array.isArray(vendors) ? vendors.filter((v: any) => {
@@ -1152,6 +1238,20 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       );
     }
     if (vendorStatus) result = result.filter(v => v.status === vendorStatus);
+    if (vendorMinCommission.trim()) {
+      const min = Number(vendorMinCommission);
+      result = result.filter(v => (v.commissionRate ?? 0) >= min);
+    }
+    if (vendorStartDate) {
+      const start = new Date(vendorStartDate);
+      start.setHours(0, 0, 0, 0);
+      result = result.filter(v => new Date(v.createdAt) >= start);
+    }
+    if (vendorEndDate) {
+      const end = new Date(vendorEndDate);
+      end.setHours(23, 59, 59, 999);
+      result = result.filter(v => new Date(v.createdAt) <= end);
+    }
     if (vendorSortField) {
       result.sort((a, b) => {
         let valA = a[vendorSortField]; let valB = b[vendorSortField];
@@ -1167,7 +1267,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       });
     }
     return result;
-  }, [vendors, vendorType, vendorSearch, vendorStatus, vendorSortField, vendorSortOrder]);
+  }, [vendors, vendorType, vendorSearch, vendorStatus, vendorSortField, vendorSortOrder, vendorMinCommission, vendorStartDate, vendorEndDate]);
 
   const filteredAudits = useMemo(() => {
     let result = Array.isArray(auditLogs) ? [...auditLogs] : [];
@@ -1394,9 +1494,13 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       selectedProduct, setSelectedProduct, selectedTicket, setSelectedTicket, selectedFeedback, setSelectedFeedback, selectedLogDetail, setSelectedLogDetail,
       selectedChatLog, setSelectedChatLog,
       userSearch, setUserSearch, userRole, setUserRole, userStatus, setUserStatus, userSortField, setUserSortField, userSortOrder, setUserSortOrder, userPage, setUserPage,
+      userMinWallet, setUserMinWallet, userStartDate, setUserStartDate, userEndDate, setUserEndDate,
       orderSearch, setOrderSearch, orderStatus, setOrderStatus, orderSortField, setOrderSortField, orderSortOrder, setOrderSortOrder, orderPage, setOrderPage,
+      orderUserFilter, setOrderUserFilter, orderStartDate, setOrderStartDate, orderEndDate, setOrderEndDate,
       productSearch, setProductSearch, productSortField, setProductSortField, productSortOrder, setProductSortOrder, productPage, setProductPage,
+      productCategoryFilter, setProductCategoryFilter, productApprovalFilter, setProductApprovalFilter, productMinPrice, setProductMinPrice, productMaxPrice, setProductMaxPrice,
       vendorSearch, setVendorSearch, vendorStatus, setVendorStatus, vendorType, setVendorType, vendorSortField, setVendorSortField, vendorSortOrder, setVendorSortOrder, vendorPage, setVendorPage,
+      vendorMinCommission, setVendorMinCommission, vendorStartDate, setVendorStartDate, vendorEndDate, setVendorEndDate,
       ticketSearch, setTicketSearch, ticketStatusFilter, setTicketStatusFilter, ticketPage, setTicketPage,
       logSubTab, setLogSubTab, auditLogs, searchLogs, activityLogs, chatbotLogs, apiLogs, securityLogs, importLogs, exportLogs, guestLogs, changeHistoryLogs, logAnalytics,
       retentionDays, setRetentionDays,

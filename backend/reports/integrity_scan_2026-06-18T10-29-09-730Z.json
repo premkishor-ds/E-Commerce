@@ -1,0 +1,19 @@
+{
+  "scanTime": "2026-06-18T10:29:12.703Z",
+  "summary": {
+    "totalReviewsScanned": 11411,
+    "totalProductsScanned": 1122,
+    "orphanReviewsCount": 0,
+    "reviewsWithoutPurchasesCount": 0,
+    "productsWithoutOwnerCount": 0,
+    "negativeInventoryCount": 0,
+    "missingInventoryCount": 0
+  },
+  "anomalies": {
+    "orphanReviews": [],
+    "reviewsWithoutPurchases": [],
+    "productsWithoutOwner": [],
+    "negativeInventory": [],
+    "missingInventory": []
+  }
+}

@@ -56,18 +56,36 @@ export class IntentRouter {
     'THANKS'
   ];
 
+  // Conversational intents that should always dispatch through ecommerce (they have specific handlers)
+  private readonly ecommerceConversationalIntents = ['GREET', 'HELP', 'BYE', 'THANKS'];
+
   /**
    * Classifies user query as 'ecommerce' or 'general' route.
    */
   classifyRoute(intent: string, message: string): 'ecommerce' | 'general' {
     const upperIntent = intent.toUpperCase();
     const lower = message.toLowerCase().trim();
-    const storeKeywords = /\b(buy|order|cart|checkout|price|discount|coupon|product|item|shipping|refund|return|wallet|pay|support|ticket|catalog|brand|headphones|laptop|phone)\b/i;
-    const generalKeywords = /\b(joke|space|bake|cake|python|javascript|coding|code|write|math|philosophy|weather|news|meaning of life|prime minister|2\+2|paris|france|history|geography|explain|sing|song|who are you|tell me)\b/i;
+
+    // Identity / self-introduction queries → always route to general LLM
+    // so the AI can introduce itself as ApexStore Assistant
+    const identityKeywords = /\b(your name|what.?s your name|who are you|who r you|who is you|your identity|are you a bot|are you an ai|what are you|tell me about yourself|introduce yourself|what can you do|what do you do|how are you|how r you|are you real|are you human|are you alive|are you chatbot|are you robot|you.?re a bot|you.?re an ai|what kind of|what type of|your purpose|your role|your function|your capabilities|can you help me|what are your features)\b/i;
+    if (identityKeywords.test(lower)) {
+      return 'general';
+    }
+
+    // E-commerce store keywords
+    const storeKeywords = /\b(buy|order|cart|checkout|price|discount|coupon|product|item|shipping|refund|return|wallet|pay|support|ticket|catalog|brand|headphones|laptop|phone|mobile|tablet|camera|watch|tv|speaker|electronics|fashion|clothes|shoes|appliance|furniture|book|game|toy|sport|beauty|grocery|invoice|wishlist|delivery|track|cancel|review|rating|reward|loyalty|address|profile|account|register|login|logout|otp|password|vendor|seller|admin)\b/i;
+
+    // General/off-topic keywords (things the bot should politely decline)
+    const generalKeywords = /\b(joke|space|bake|cake|python|javascript|coding|code|write|math|philosophy|weather|news|meaning of life|prime minister|paris|france|history|geography|explain science|sing|song|cricket|football|movie|politics|stock market|covid|election|capital of|president of|who invented|when was)\b/i;
+
+    // Conversational intents (GREET/HELP/BYE/THANKS) always go to ecommerce handlers
+    if (this.ecommerceConversationalIntents.includes(upperIntent)) {
+      return 'ecommerce';
+    }
 
     // If intent belongs to predefined list of e-commerce intents, route to existing services
     if (this.ecommerceIntents.includes(upperIntent)) {
-      // Small talk/general questions can be classified as FAQ or help; double check message keywords
       if (generalKeywords.test(lower) && !storeKeywords.test(lower)) {
         return 'general';
       }
@@ -82,7 +100,7 @@ export class IntentRouter {
       return 'general';
     }
 
-    // Default fallback to general AI routing for invalid / out-of-domain queries
+    // Default fallback to general AI routing for unrecognized queries
     return 'general';
   }
 }

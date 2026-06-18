@@ -13,7 +13,8 @@ export default function UsersPage() {
   const {
     loadUsers, userSearch, setUserSearch, userRole, setUserRole, userStatus, setUserStatus,
     userSortField, setUserSortField, userSortOrder, setUserSortOrder, userPage, setUserPage,
-    paginatedUsers, totalUserPages, selectedUser, setSelectedUser, handleExportCustomers, apiAction
+    paginatedUsers, totalUserPages, selectedUser, setSelectedUser, handleExportCustomers, apiAction,
+    userMinWallet, setUserMinWallet, userStartDate, setUserStartDate, userEndDate, setUserEndDate
   } = useAdmin();
 
 
@@ -81,6 +82,13 @@ export default function UsersPage() {
 
       <FilterBar>
         <SearchBar value={userSearch} onChange={setUserSearch} placeholder="Search customers name, email..." />
+        <input 
+          type="number" 
+          value={userMinWallet} 
+          onChange={e => setUserMinWallet(e.target.value)} 
+          placeholder="Min Wallet ($)..." 
+          className="px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-zinc-905 dark:text-white focus:outline-none focus:border-indigo-500 w-[130px]"
+        />
         <Sel 
           value={userStatus} 
           onChange={setUserStatus} 
@@ -91,6 +99,22 @@ export default function UsersPage() {
             { value: 'Inactive', label: 'Inactive' }
           ]} 
         />
+        <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+          <span className="font-semibold text-zinc-400">Registered From:</span>
+          <input 
+            type="date" 
+            value={userStartDate} 
+            onChange={e => setUserStartDate(e.target.value)} 
+            className="px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+          />
+          <span className="font-semibold text-zinc-400">To:</span>
+          <input 
+            type="date" 
+            value={userEndDate} 
+            onChange={e => setUserEndDate(e.target.value)} 
+            className="px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+          />
+        </div>
         <ApplyBtn onClick={handleApply} />
       </FilterBar>
 

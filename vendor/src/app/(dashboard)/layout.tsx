@@ -30,7 +30,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
         });
         if (profileRes.ok) {
           const prof = await profileRes.json();
-          setVendorStatus(prof.vendorStatus || 'Active');
+          setVendorStatus(prof.data?.vendorStatus || 'Active');
         }
       } catch (err) {
         console.error(err);

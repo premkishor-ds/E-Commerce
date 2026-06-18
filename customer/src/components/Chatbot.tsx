@@ -34,7 +34,7 @@ interface AgentResponse {
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
-const AGENT_URL = 'http://127.0.0.1:5001/api/v1/agent/message';
+const AGENT_URL = 'http://localhost:5001/api/v1/agent/message';
 
 const DEFAULT_SUGGESTIONS = [
   'Search headphones',
@@ -93,8 +93,12 @@ export default function Chatbot() {
 
   // Self-healing synchronization hook for legacy sessions
   useEffect(() => {
-    if (user && user.token && typeof window !== 'undefined' && !localStorage.getItem('apex_token')) {
-      localStorage.setItem('apex_token', user.token);
+    if (typeof window !== 'undefined') {
+      if (user && user.token) {
+        localStorage.setItem('apex_token', user.token);
+      } else {
+        localStorage.removeItem('apex_token');
+      }
     }
   }, [user]);
 
@@ -144,7 +148,7 @@ export default function Chatbot() {
     let active = true;
     const fetchGreeting = async () => {
       // Prompt backend with greet message to get dynamic response
-      const token = user ? (typeof window !== 'undefined' ? localStorage.getItem('apex_token') : null) : null;
+      const token = user?.token;
       try {
         const resp = await fetch(AGENT_URL, {
           method: 'POST',
@@ -159,7 +163,8 @@ export default function Chatbot() {
           }),
         });
         if (!resp.ok) throw new Error();
-        const data = await resp.json();
+        const result = await resp.json();
+        const data = result?.data || result;
         if (active) {
           setMessages([
             {
@@ -220,7 +225,7 @@ export default function Chatbot() {
   useEffect(() => {
     const checkOnline = async () => {
       try {
-        const resp = await fetch('http://127.0.0.1:5001/api/v1', { method: 'GET', signal: AbortSignal.timeout(2000) });
+        const resp = await fetch('http://localhost:5001/api/v1', { method: 'GET', signal: AbortSignal.timeout(2000) });
         setIsOnline(true);
       } catch {
         setIsOnline(false);
@@ -272,7 +277,7 @@ export default function Chatbot() {
             }
             // Merge guest data into account
             if (guestId) {
-              fetch('http://127.0.0.1:5001/api/v1/agent/merge', {
+              fetch('http://localhost:5001/api/v1/agent/merge', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ guestId }),
@@ -301,7 +306,7 @@ export default function Chatbot() {
   // ─── AGENT API CALL ───────────────────────────────────────────────────────
 
   const callAgent = useCallback(async (message: string): Promise<AgentResponse | null> => {
-    const token = user ? (typeof window !== 'undefined' ? localStorage.getItem('apex_token') : null) : null;
+    const token = user?.token;
     try {
       const resp = await fetch(AGENT_URL, {
         method: 'POST',
@@ -322,10 +327,11 @@ export default function Chatbot() {
             userId: user?.id,
           },
         }),
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(45000),
       });
       if (!resp.ok) throw new Error('Backend error');
-      return resp.json();
+      const result = await resp.json();
+      return result?.data || result;
     } catch {
       return null;
     }

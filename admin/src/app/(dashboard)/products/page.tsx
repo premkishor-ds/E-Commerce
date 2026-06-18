@@ -15,10 +15,25 @@ export default function ProductsPage() {
     productSortField, setProductSortField, productSortOrder, setProductSortOrder,
     productPage, setProductPage, paginatedProducts, totalProductPages,
     selectedProduct, setSelectedProduct, apiAction, vendors, setSelectedSeller, setActiveTab,
-    activeProductImageIndex, setActiveProductImageIndex
+    activeProductImageIndex, setActiveProductImageIndex,
+    productCategoryFilter, setProductCategoryFilter, productApprovalFilter, setProductApprovalFilter,
+    productMinPrice, setProductMinPrice, productMaxPrice, setProductMaxPrice, products
   } = useAdmin();
 
   const [localLoading, setLocalLoading] = useState(true);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    if (Array.isArray(products)) {
+      products.forEach((p: any) => {
+        const cat = p.category?.name || p.category;
+        if (cat && typeof cat === 'string') {
+          set.add(cat);
+        }
+      });
+    }
+    return Array.from(set);
+  }, [products]);
 
   useEffect(() => {
     let active = true;
@@ -51,6 +66,47 @@ export default function ProductsPage() {
 
       <FilterBar>
         <SearchBar value={productSearch} onChange={setProductSearch} placeholder="Search product title..." />
+        
+        <select 
+          value={productCategoryFilter} 
+          onChange={e => setProductCategoryFilter(e.target.value)}
+          className="px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 min-w-[140px] cursor-pointer"
+        >
+          <option value="">All Categories</option>
+          {categories.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+
+        <select 
+          value={productApprovalFilter} 
+          onChange={e => setProductApprovalFilter(e.target.value)}
+          className="px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 min-w-[140px] cursor-pointer"
+        >
+          <option value="">All Standings</option>
+          <option value="Approved">Approved</option>
+          <option value="Pending">Pending</option>
+        </select>
+
+        <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+          <span className="font-semibold text-zinc-400">Price:</span>
+          <input 
+            type="number" 
+            value={productMinPrice} 
+            onChange={e => setProductMinPrice(e.target.value)} 
+            placeholder="Min" 
+            className="px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 w-[80px]"
+          />
+          <span className="font-semibold text-zinc-400">to</span>
+          <input 
+            type="number" 
+            value={productMaxPrice} 
+            onChange={e => setProductMaxPrice(e.target.value)} 
+            placeholder="Max" 
+            className="px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 w-[80px]"
+          />
+        </div>
+
         <ApplyBtn onClick={handleApply} />
       </FilterBar>
 

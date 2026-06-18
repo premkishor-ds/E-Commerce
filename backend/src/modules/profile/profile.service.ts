@@ -14,6 +14,7 @@ import {
   LogRepository,
   VendorRepository,
   ReviewRepository,
+  SellerRepository,
 } from '../../repositories/concrete.repositories';
 import * as bcrypt from 'bcrypt';
 import { Types } from 'mongoose';
@@ -31,6 +32,7 @@ export class ProfileService {
     private readonly logRepository: LogRepository,
     private readonly vendorRepository: VendorRepository,
     private readonly reviewRepository: ReviewRepository,
+    private readonly sellerRepository: SellerRepository,
   ) {}
 
   // AUDIT LOG HELPER
@@ -99,6 +101,26 @@ export class ProfileService {
         basicProfile.bankAccountDetails = vendorInfo.bankAccountDetails || null;
         basicProfile.commissionRate = vendorInfo.commissionRate;
         basicProfile.vendorStatus = vendorInfo.status || 'Verification In Progress';
+      } else if (user.roles.includes('Seller')) {
+        const sellerInfo = await this.sellerRepository.findOne({
+          userId: user._id,
+        });
+        if (sellerInfo) {
+          basicProfile.shopName = sellerInfo.storeName;
+          basicProfile.companyLegalName = '';
+          basicProfile.businessPhone = sellerInfo.businessPhone || '';
+          basicProfile.bankAccountDetails = sellerInfo.bankDetails || null;
+          basicProfile.commissionRate = sellerInfo.commissionRate || 10;
+          basicProfile.vendorStatus = sellerInfo.status || 'Verification In Progress';
+        } else {
+          basicProfile.vendorStatus = 'Active';
+        }
+      } else {
+        basicProfile.vendorStatus = 'Active';
+      }
+
+      if (basicProfile.vendorStatus === 'Approved') {
+        basicProfile.vendorStatus = 'Active';
       }
     }
 

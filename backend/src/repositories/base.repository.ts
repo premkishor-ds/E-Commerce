@@ -35,4 +35,8 @@ export abstract class BaseRepository<T extends mongoose.Document> {
   async deleteMany(filter: any = {}): Promise<any> {
     return this.model.deleteMany(filter).exec();
   }
+
+  async updateMany(filter: any = {}, update: any = {}): Promise<any> {
+    return this.model.updateMany(filter, update).exec();
+  }
 }

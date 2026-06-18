@@ -114,7 +114,7 @@ export default function ProductDetail({ params }: PageProps) {
 
   React.useEffect(() => {
     setLoading(true);
-    fetch(`http://127.0.0.1:5001/api/v1/catalog/products/${productId}`)
+    fetch(`http://localhost:5001/api/v1/catalog/products/${productId}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error('Product not found in database');

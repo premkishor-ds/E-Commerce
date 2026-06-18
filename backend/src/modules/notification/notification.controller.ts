@@ -4,6 +4,8 @@ import {
   Body,
   Get,
   Put,
+  Delete,
+  Param,
   UseGuards,
   Request,
 } from '@nestjs/common';
@@ -17,6 +19,36 @@ import { JwtAuthGuard } from '../auth/jwt.guard';
 @ApiBearerAuth('JWT-auth')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Get current user notifications' })
+  async getNotifications(@Request() req: any) {
+    return this.notificationService.getUserNotifications(req.user.id);
+  }
+
+  @Put('read-all')
+  @ApiOperation({ summary: 'Mark all notifications as read' })
+  async markAllRead(@Request() req: any) {
+    return this.notificationService.markAllAsRead(req.user.id);
+  }
+
+  @Put(':id/read')
+  @ApiOperation({ summary: 'Mark a notification as read' })
+  async markRead(@Request() req: any, @Param('id') id: string) {
+    return this.notificationService.markAsRead(req.user.id, id);
+  }
+
+  @Delete('clear-all')
+  @ApiOperation({ summary: 'Clear all notifications' })
+  async clearAll(@Request() req: any) {
+    return this.notificationService.clearAllNotifications(req.user.id);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a single notification' })
+  async deleteNotification(@Request() req: any, @Param('id') id: string) {
+    return this.notificationService.deleteNotification(req.user.id, id);
+  }
 
   @Post('send')
   @ApiOperation({ summary: 'Send transactional notification' })

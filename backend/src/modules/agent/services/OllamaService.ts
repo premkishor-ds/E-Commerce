@@ -46,11 +46,11 @@ export class OllamaService {
    */
   async generate(prompt: string, modelOverride?: string): Promise<string> {
     const url = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
-    const primaryModel = modelOverride || process.env.AI_FALLBACK_MODEL || 'gemma3:1b';
+    const primaryModel = modelOverride || process.env.AI_FALLBACK_MODEL || 'qwen2.5:14b';
     const timeout = parseInt(process.env.AI_TIMEOUT || '30000', 10);
 
     // List of local models to try sequentially in case of errors
-    const fallbackModels = [primaryModel, 'gemma3:1b', 'gemma3:270m', 'gemma:2b', 'gemma3n'];
+    const fallbackModels = [primaryModel, 'qwen2.5:14b', 'gemma3:1b', 'gemma3:270m', 'gemma:2b', 'gemma3n'];
     const uniqueModels = Array.from(new Set(fallbackModels));
 
     for (const model of uniqueModels) {
@@ -114,5 +114,43 @@ export class OllamaService {
     }
 
     throw new Error('All model attempts (local Ollama & cloud Gemini) failed.');
+  }
+
+  /**
+   * Generates embeddings for a given input text.
+   */
+  async embed(input: string, modelOverride?: string): Promise<number[]> {
+    const url = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
+    const model = modelOverride || process.env.EMBEDDING_MODEL || 'nomic-embed-text';
+    const timeout = parseInt(process.env.AI_TIMEOUT || '10000', 10);
+
+    try {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+
+      const response = await fetch(`${url}/api/embed`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model,
+          input,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(id);
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.embedding) {
+          return data.embedding;
+        } else if (data.embeddings && data.embeddings.length > 0) {
+          return data.embeddings[0];
+        }
+      }
+      throw new Error(`Failed to generate embedding: Status ${response.status}`);
+    } catch (e: any) {
+      this.logger.error(`Ollama embed attempt failed: ${e.message}`);
+      throw e;
+    }
   }
 }

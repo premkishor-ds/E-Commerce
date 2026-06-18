@@ -14,7 +14,8 @@ export default function OrdersPage() {
     loadOrders, orderSearch, setOrderSearch, orderStatus, setOrderStatus,
     orderSortField, setOrderSortField, orderSortOrder, setOrderSortOrder, orderPage, setOrderPage,
     paginatedOrders, totalOrderPages, selectedOrder, setSelectedOrder, apiAction,
-    orderTrackingCode, setOrderTrackingCode, orderStatusSelect, setOrderStatusSelect
+    orderTrackingCode, setOrderTrackingCode, orderStatusSelect, setOrderStatusSelect,
+    orderUserFilter, setOrderUserFilter, orderStartDate, setOrderStartDate, orderEndDate, setOrderEndDate
   } = useAdmin();
 
   const [localLoading, setLocalLoading] = useState(true);
@@ -66,7 +67,14 @@ export default function OrdersPage() {
       />
 
       <FilterBar>
-        <SearchBar value={orderSearch} onChange={setOrderSearch} placeholder="Search orders..." />
+        <SearchBar value={orderSearch} onChange={setOrderSearch} placeholder="Search order ID/status..." />
+        <input 
+          type="text" 
+          value={orderUserFilter} 
+          onChange={e => setOrderUserFilter(e.target.value)} 
+          placeholder="Customer Name/Email..." 
+          className="px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 min-w-[160px]"
+        />
         <Sel 
           value={orderStatus} 
           onChange={setOrderStatus} 
@@ -79,6 +87,22 @@ export default function OrdersPage() {
             { value: 'Cancelled', label: 'Cancelled' }
           ]} 
         />
+        <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+          <span className="font-semibold text-zinc-400">From:</span>
+          <input 
+            type="date" 
+            value={orderStartDate} 
+            onChange={e => setOrderStartDate(e.target.value)} 
+            className="px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+          />
+          <span className="font-semibold text-zinc-400">To:</span>
+          <input 
+            type="date" 
+            value={orderEndDate} 
+            onChange={e => setOrderEndDate(e.target.value)} 
+            className="px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+          />
+        </div>
         <ApplyBtn onClick={handleApply} />
       </FilterBar>
 
